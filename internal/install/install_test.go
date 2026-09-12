@@ -64,6 +64,97 @@ func TestInstall_newSkill(t *testing.T) {
 		"SKILL.md":         sha(claudeSkill),
 		"scripts/check.sh": sha([]byte("#!/bin/sh\n")),
 	}, lock.Files, "hashes of exactly the files the CLI wrote")
+	assert.Equal(t, map[string]bool{"SKILL.md": false, "scripts/check.sh": true}, lock.Executable, "one mode per tracked file")
+}
+
+func TestInstall_appliesExecutableChange(t *testing.T) {
+	t.Parallel()
+	dir := filepath.Join(t.TempDir(), "go-review")
+	script := []byte("#!/bin/sh\n")
+	_, err := newInstaller().Install([]install.Request{withScript(dir, script, 0o644)})
+	require.NoError(t, err)
+
+	results, err := newInstaller().Install([]install.Request{withScript(dir, script, 0o755)})
+
+	require.NoError(t, err)
+	assert.Equal(t, install.StateUpdate, results[0].State, "a mode-only upstream change is applied")
+	info, err := os.Stat(filepath.Join(dir, "scripts", "check.sh"))
+	require.NoError(t, err)
+	assert.NotZero(t, info.Mode()&0o100)
+	assert.Equal(t, map[string]bool{"SKILL.md": false, "scripts/check.sh": true}, readLock(t, dir).Executable)
+}
+
+func TestInstall_localModeEditIsConflict(t *testing.T) {
+	t.Parallel()
+	dir := filepath.Join(t.TempDir(), "go-review")
+	_, err := newInstaller().Install([]install.Request{oneTarget(dir)})
+	require.NoError(t, err)
+	require.NoError(t, os.Chmod(filepath.Join(dir, "SKILL.md"), 0o755))
+
+	results, err := newInstaller().Install([]install.Request{oneTarget(dir)})
+
+	require.NoError(t, err)
+	assert.Equal(t, install.StateConflict, results[0].State, "a changed executable bit is your edit")
+	assert.Equal(t, []string{filepath.Join(dir, "SKILL.md")}, results[0].Conflicts)
+}
+
+func TestInstall_legacyLock(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		want   []byte
+		force  bool
+		expect install.State
+	}{
+		"nothing to do stays unchanged":   {want: claudeSkill, expect: install.StateUnchanged},
+		"upstream change needs attention": {want: []byte("# v2\n"), expect: install.StateConflict},
+		"force updates after a backup":    {want: []byte("# v2\n"), force: true, expect: install.StateUpdate},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			dir := filepath.Join(t.TempDir(), "go-review")
+			legacyLock(t, dir, map[string][]byte{"SKILL.md": claudeSkill})
+			lockBefore := read(t, filepath.Join(dir, install.LockFile))
+			installer := newInstaller()
+			installer.Backups = filepath.Join(t.TempDir(), "backups")
+			installer.Force = tt.force
+			req := install.Request{Name: "go-review", Targets: []install.Desired{
+				{Dir: dir, Files: map[string]skill.File{"SKILL.md": {Data: tt.want}}},
+			}}
+
+			results, err := installer.Install([]install.Request{req})
+
+			require.NoError(t, err)
+			assert.Equal(t, tt.expect, results[0].State)
+			switch tt.expect {
+			case install.StateUnchanged:
+				assert.Equal(t, lockBefore, read(t, filepath.Join(dir, install.LockFile)), "a legacy lock is left alone when nothing changes")
+			case install.StateConflict:
+				assert.Equal(t, claudeSkill, read(t, filepath.Join(dir, "SKILL.md")), "an unknown base mode is not overwritten")
+				assert.NoDirExists(t, installer.Backups)
+			case install.StateUpdate:
+				assert.Equal(t, tt.want, read(t, filepath.Join(dir, "SKILL.md")))
+				assert.Len(t, results[0].Backups, 1)
+				assert.Equal(t, map[string]bool{"SKILL.md": false}, readLock(t, dir).Executable, "the new lock records complete modes")
+			}
+		})
+	}
+}
+
+func TestInstall_modesIgnoredWhenDisabled(t *testing.T) {
+	t.Parallel()
+	dir := filepath.Join(t.TempDir(), "go-review")
+	_, err := newInstaller().Install([]install.Request{oneTarget(dir)})
+	require.NoError(t, err)
+	require.NoError(t, os.Chmod(filepath.Join(dir, "SKILL.md"), 0o755))
+	installer := newInstaller()
+	installer.Modes = false
+
+	results, err := installer.Install([]install.Request{oneTarget(dir)})
+
+	require.NoError(t, err)
+	assert.Equal(t, install.StateUnchanged, results[0].State, "without POSIX enforcement only content counts")
 }
 
 func TestInstall_lockIsDeterministic(t *testing.T) {
@@ -228,8 +319,37 @@ func newInstaller() install.Installer {
 	return install.Installer{
 		Source: source,
 		Commit: commit,
+		Modes:  true,
 		Now:    func() time.Time { return installedAt },
 	}
+}
+
+func withScript(dir string, script []byte, mode os.FileMode) install.Request {
+	return install.Request{Name: "go-review", Targets: []install.Desired{
+		{Dir: dir, Files: map[string]skill.File{
+			"SKILL.md":         {Data: claudeSkill},
+			"scripts/check.sh": {Data: script, Mode: mode},
+		}},
+	}}
+}
+
+func legacyLock(t *testing.T, dir string, files map[string][]byte) {
+	t.Helper()
+	hashes := map[string]string{}
+	for p, data := range files {
+		write(t, filepath.Join(dir, p), data)
+		hashes[p] = sha(data)
+	}
+	lock := map[string]any{
+		"name":      filepath.Base(dir),
+		"source":    source,
+		"commit":    commit,
+		"installed": installedAt.Add(-24 * time.Hour),
+		"files":     hashes,
+	}
+	data, err := json.Marshal(lock)
+	require.NoError(t, err)
+	write(t, filepath.Join(dir, install.LockFile), data)
 }
 
 func oneTarget(dir string) install.Request {

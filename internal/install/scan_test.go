@@ -130,15 +130,17 @@ func installed(t *testing.T, dir string, files map[string][]byte) {
 func installedFrom(t *testing.T, dir, from string, files map[string][]byte) {
 	t.Helper()
 	lock := install.Lock{
-		Name:      filepath.Base(dir),
-		Source:    from,
-		Commit:    oldCommit,
-		Installed: installedAt.Add(-24 * time.Hour),
-		Files:     map[string]string{},
+		Name:       filepath.Base(dir),
+		Source:     from,
+		Commit:     oldCommit,
+		Installed:  installedAt.Add(-24 * time.Hour),
+		Files:      map[string]string{},
+		Executable: map[string]bool{},
 	}
 	for p, data := range files {
 		write(t, filepath.Join(dir, p), data)
 		lock.Files[p] = sha(data)
+		lock.Executable[p] = false
 	}
 	data, err := json.Marshal(lock)
 	require.NoError(t, err)

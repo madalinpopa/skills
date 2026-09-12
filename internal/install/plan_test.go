@@ -17,40 +17,69 @@ func TestPlanFiles(t *testing.T) {
 		expect           install.Action
 	}{
 		"absent on disk is added": {
-			want:   install.Files{"SKILL.md": "v2"},
+			want:   install.Files{"SKILL.md": {Hash: "v2"}},
 			expect: install.ActionAdd,
 		},
 		"have equal to want is unchanged": {
-			want:   install.Files{"SKILL.md": "v2"},
-			have:   install.Files{"SKILL.md": "v2"},
-			base:   install.Files{"SKILL.md": "v1"},
+			want:   install.Files{"SKILL.md": {Hash: "v2"}},
+			have:   install.Files{"SKILL.md": {Hash: "v2"}},
+			base:   install.Files{"SKILL.md": {Hash: "v1"}},
 			expect: install.ActionUnchanged,
 		},
 		"have equal to base is a safe update": {
-			want:   install.Files{"SKILL.md": "v2"},
-			have:   install.Files{"SKILL.md": "v1"},
-			base:   install.Files{"SKILL.md": "v1"},
+			want:   install.Files{"SKILL.md": {Hash: "v2"}},
+			have:   install.Files{"SKILL.md": {Hash: "v1"}},
+			base:   install.Files{"SKILL.md": {Hash: "v1"}},
 			expect: install.ActionUpdate,
 		},
 		"edited file is a conflict": {
-			want:   install.Files{"SKILL.md": "v2"},
-			have:   install.Files{"SKILL.md": "edited"},
-			base:   install.Files{"SKILL.md": "v1"},
+			want:   install.Files{"SKILL.md": {Hash: "v2"}},
+			have:   install.Files{"SKILL.md": {Hash: "edited"}},
+			base:   install.Files{"SKILL.md": {Hash: "v1"}},
 			expect: install.ActionConflict,
 		},
 		"upstream-removed file still at base is removed": {
-			have:   install.Files{"SKILL.md": "v1"},
-			base:   install.Files{"SKILL.md": "v1"},
+			have:   install.Files{"SKILL.md": {Hash: "v1"}},
+			base:   install.Files{"SKILL.md": {Hash: "v1"}},
 			expect: install.ActionRemove,
 		},
 		"upstream-removed file edited locally is a conflict": {
-			have:   install.Files{"SKILL.md": "edited"},
-			base:   install.Files{"SKILL.md": "v1"},
+			have:   install.Files{"SKILL.md": {Hash: "edited"}},
+			base:   install.Files{"SKILL.md": {Hash: "v1"}},
 			expect: install.ActionConflict,
 		},
 		"local-only file is kept as user data": {
-			have:   install.Files{"SKILL.md": "notes"},
+			have:   install.Files{"SKILL.md": {Hash: "notes"}},
 			expect: install.ActionKeep,
+		},
+		"mode-only upstream change is an update": {
+			want:   install.Files{"SKILL.md": {Hash: "v1", Mode: install.ModeExecutable}},
+			have:   install.Files{"SKILL.md": {Hash: "v1"}},
+			base:   install.Files{"SKILL.md": {Hash: "v1"}},
+			expect: install.ActionUpdate,
+		},
+		"local mode edit is a conflict": {
+			want:   install.Files{"SKILL.md": {Hash: "v1"}},
+			have:   install.Files{"SKILL.md": {Hash: "v1", Mode: install.ModeExecutable}},
+			base:   install.Files{"SKILL.md": {Hash: "v1"}},
+			expect: install.ActionConflict,
+		},
+		"unknown base mode blocks an update": {
+			want:   install.Files{"SKILL.md": {Hash: "v2"}},
+			have:   install.Files{"SKILL.md": {Hash: "v1"}},
+			base:   install.Files{"SKILL.md": {Hash: "v1", Mode: install.ModeUnknown}},
+			expect: install.ActionConflict,
+		},
+		"unknown base mode with nothing to do is unchanged": {
+			want:   install.Files{"SKILL.md": {Hash: "v1"}},
+			have:   install.Files{"SKILL.md": {Hash: "v1"}},
+			base:   install.Files{"SKILL.md": {Hash: "v1", Mode: install.ModeUnknown}},
+			expect: install.ActionUnchanged,
+		},
+		"unknown base mode blocks a removal": {
+			have:   install.Files{"SKILL.md": {Hash: "v1"}},
+			base:   install.Files{"SKILL.md": {Hash: "v1", Mode: install.ModeUnknown}},
+			expect: install.ActionConflict,
 		},
 	}
 	for name, tt := range tests {
@@ -74,7 +103,7 @@ func TestPlan_states(t *testing.T) {
 		"fresh install is add": {
 			target: install.Target{
 				Dir:  ".claude/skills/go-review",
-				Want: install.Files{"SKILL.md": "v1", "references/style.md": "s1"},
+				Want: install.Files{"SKILL.md": {Hash: "v1"}, "references/style.md": {Hash: "s1"}},
 			},
 			expect: install.StateAdd,
 		},
@@ -82,9 +111,9 @@ func TestPlan_states(t *testing.T) {
 			target: install.Target{
 				Dir:    ".claude/skills/go-review",
 				Source: "https://example.com/store",
-				Want:   install.Files{"SKILL.md": "v1"},
-				Have:   install.Files{"SKILL.md": "v1"},
-				Base:   install.Files{"SKILL.md": "v1"},
+				Want:   install.Files{"SKILL.md": {Hash: "v1"}},
+				Have:   install.Files{"SKILL.md": {Hash: "v1"}},
+				Base:   install.Files{"SKILL.md": {Hash: "v1"}},
 			},
 			expect: install.StateUnchanged,
 		},
@@ -92,9 +121,9 @@ func TestPlan_states(t *testing.T) {
 			target: install.Target{
 				Dir:    ".claude/skills/go-review",
 				Source: "https://example.com/store",
-				Want:   install.Files{"SKILL.md": "v2"},
-				Have:   install.Files{"SKILL.md": "v1"},
-				Base:   install.Files{"SKILL.md": "v1"},
+				Want:   install.Files{"SKILL.md": {Hash: "v2"}},
+				Have:   install.Files{"SKILL.md": {Hash: "v1"}},
+				Base:   install.Files{"SKILL.md": {Hash: "v1"}},
 			},
 			expect: install.StateUpdate,
 		},
@@ -102,9 +131,9 @@ func TestPlan_states(t *testing.T) {
 			target: install.Target{
 				Dir:    ".claude/skills/go-review",
 				Source: "https://example.com/store",
-				Want:   install.Files{"SKILL.md": "v1"},
-				Have:   install.Files{"SKILL.md": "v1", "references/old.md": "o1"},
-				Base:   install.Files{"SKILL.md": "v1", "references/old.md": "o1"},
+				Want:   install.Files{"SKILL.md": {Hash: "v1"}},
+				Have:   install.Files{"SKILL.md": {Hash: "v1"}, "references/old.md": {Hash: "o1"}},
+				Base:   install.Files{"SKILL.md": {Hash: "v1"}, "references/old.md": {Hash: "o1"}},
 			},
 			expect: install.StateUpdate,
 		},
@@ -137,14 +166,14 @@ func TestPlan_missingTargetLockIsWork(t *testing.T) {
 			{
 				Dir:    ".claude/skills/go-review",
 				Source: "https://example.com/store",
-				Want:   install.Files{"SKILL.md": "v1"},
-				Have:   install.Files{"SKILL.md": "v1"},
-				Base:   install.Files{"SKILL.md": "v1"},
+				Want:   install.Files{"SKILL.md": {Hash: "v1"}},
+				Have:   install.Files{"SKILL.md": {Hash: "v1"}},
+				Base:   install.Files{"SKILL.md": {Hash: "v1"}},
 			},
 			{
 				Dir:  ".agents/skills/go-review",
-				Want: install.Files{"SKILL.md": "v1"},
-				Have: install.Files{"SKILL.md": "v1"},
+				Want: install.Files{"SKILL.md": {Hash: "v1"}},
+				Have: install.Files{"SKILL.md": {Hash: "v1"}},
 			},
 		},
 	}
@@ -166,16 +195,16 @@ func TestPlan_conflictSkipsWholeSkill(t *testing.T) {
 			{
 				Dir:    ".claude/skills/go-review",
 				Source: "https://example.com/store",
-				Want:   install.Files{"SKILL.md": "v2"},
-				Have:   install.Files{"SKILL.md": "edited"},
-				Base:   install.Files{"SKILL.md": "v1"},
+				Want:   install.Files{"SKILL.md": {Hash: "v2"}},
+				Have:   install.Files{"SKILL.md": {Hash: "edited"}},
+				Base:   install.Files{"SKILL.md": {Hash: "v1"}},
 			},
 			{
 				Dir:    ".agents/skills/go-review",
 				Source: "https://example.com/store",
-				Want:   install.Files{"SKILL.md": "v2"},
-				Have:   install.Files{"SKILL.md": "v1"},
-				Base:   install.Files{"SKILL.md": "v1"},
+				Want:   install.Files{"SKILL.md": {Hash: "v2"}},
+				Have:   install.Files{"SKILL.md": {Hash: "v1"}},
+				Base:   install.Files{"SKILL.md": {Hash: "v1"}},
 			},
 		},
 	}
@@ -199,17 +228,17 @@ func TestPlan_unsupportedTargetSkipsWholeSkill(t *testing.T) {
 			{
 				Dir:    ".claude/skills/go-review",
 				Source: "https://example.com/store",
-				Want:   install.Files{"SKILL.md": "v2"},
-				Have:   install.Files{"SKILL.md": "v1"},
-				Base:   install.Files{"SKILL.md": "v1"},
+				Want:   install.Files{"SKILL.md": {Hash: "v2"}},
+				Have:   install.Files{"SKILL.md": {Hash: "v1"}},
+				Base:   install.Files{"SKILL.md": {Hash: "v1"}},
 				Issues: []install.Issue{issue},
 			},
 			{
 				Dir:    ".agents/skills/go-review",
 				Source: "https://example.com/store",
-				Want:   install.Files{"SKILL.md": "v2"},
-				Have:   install.Files{"SKILL.md": "edited"},
-				Base:   install.Files{"SKILL.md": "v1"},
+				Want:   install.Files{"SKILL.md": {Hash: "v2"}},
+				Have:   install.Files{"SKILL.md": {Hash: "edited"}},
+				Base:   install.Files{"SKILL.md": {Hash: "v1"}},
 			},
 		},
 	}
@@ -231,9 +260,9 @@ func TestPlan_conflictKeepsOtherSkills(t *testing.T) {
 			Targets: []install.Target{{
 				Dir:    ".claude/skills/sql-review",
 				Source: "https://example.com/store",
-				Want:   install.Files{"SKILL.md": "v2"},
-				Have:   install.Files{"SKILL.md": "edited"},
-				Base:   install.Files{"SKILL.md": "v1"},
+				Want:   install.Files{"SKILL.md": {Hash: "v2"}},
+				Have:   install.Files{"SKILL.md": {Hash: "edited"}},
+				Base:   install.Files{"SKILL.md": {Hash: "v1"}},
 			}},
 		},
 		{
@@ -242,7 +271,7 @@ func TestPlan_conflictKeepsOtherSkills(t *testing.T) {
 			Source:    "https://example.com/store",
 			Targets: []install.Target{{
 				Dir:  ".claude/skills/go-review",
-				Want: install.Files{"SKILL.md": "v1"},
+				Want: install.Files{"SKILL.md": {Hash: "v1"}},
 			}},
 		},
 	}
@@ -265,8 +294,8 @@ func TestPlan_unavailableIsNotRemoved(t *testing.T) {
 		Targets: []install.Target{{
 			Dir:    ".claude/skills/django-testing",
 			Source: "https://example.com/store",
-			Have:   install.Files{"SKILL.md": "v1"},
-			Base:   install.Files{"SKILL.md": "v1"},
+			Have:   install.Files{"SKILL.md": {Hash: "v1"}},
+			Base:   install.Files{"SKILL.md": {Hash: "v1"}},
 		}},
 	}
 
@@ -290,9 +319,9 @@ func TestPlan_foreignSourceNeedsAttention(t *testing.T) {
 		Targets: []install.Target{{
 			Dir:    ".claude/skills/go-review",
 			Source: "https://example.com/another-store",
-			Want:   install.Files{"SKILL.md": "v2"},
-			Have:   install.Files{"SKILL.md": "v1"},
-			Base:   install.Files{"SKILL.md": "v1"},
+			Want:   install.Files{"SKILL.md": {Hash: "v2"}},
+			Have:   install.Files{"SKILL.md": {Hash: "v1"}},
+			Base:   install.Files{"SKILL.md": {Hash: "v1"}},
 		}},
 	}
 
@@ -312,7 +341,7 @@ func TestPlan_isDeterministic(t *testing.T) {
 			Source:    "https://example.com/store",
 			Targets: []install.Target{{
 				Dir:  ".claude/skills/sql-review",
-				Want: install.Files{"scripts/run.sh": "r1", "SKILL.md": "v1", "references/a.md": "a1"},
+				Want: install.Files{"scripts/run.sh": {Hash: "r1"}, "SKILL.md": {Hash: "v1"}, "references/a.md": {Hash: "a1"}},
 			}},
 		},
 		{
@@ -321,7 +350,7 @@ func TestPlan_isDeterministic(t *testing.T) {
 			Source:    "https://example.com/store",
 			Targets: []install.Target{{
 				Dir:  ".claude/skills/go-review",
-				Want: install.Files{"SKILL.md": "v1"},
+				Want: install.Files{"SKILL.md": {Hash: "v1"}},
 			}},
 		},
 	}
