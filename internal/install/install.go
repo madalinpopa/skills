@@ -31,8 +31,9 @@ type Desired struct {
 }
 
 type Request struct {
-	Name    string
-	Targets []Desired
+	Name        string
+	Unavailable bool
+	Targets     []Desired
 }
 
 type Installer struct {
@@ -65,7 +66,7 @@ func (i Installer) Install(reqs []Request) ([]SkillPlan, error) {
 }
 
 func (i Installer) spec(req Request) (Spec, error) {
-	spec := Spec{Name: req.Name, Available: true, Source: i.Source}
+	spec := Spec{Name: req.Name, Available: !req.Unavailable, Source: i.Source}
 	for _, desired := range req.Targets {
 		have, err := hashDir(desired.Dir)
 		if err != nil {
@@ -265,15 +266,23 @@ func perm(mode fs.FileMode) fs.FileMode {
 func Requests(storeDir string, skills []skill.Skill, dests []Destination) ([]Request, error) {
 	reqs := make([]Request, 0, len(skills))
 	for _, s := range skills {
-		req := Request{Name: s.Name}
-		for _, dest := range dests {
-			files, err := skill.Render(os.DirFS(filepath.Join(storeDir, filepath.FromSlash(s.Dir))), string(dest.Variant))
-			if err != nil {
-				return nil, fmt.Errorf("%s: %w", s.Name, err)
-			}
-			req.Targets = append(req.Targets, Desired{Dir: filepath.Join(dest.Dir, s.Name), Files: files})
+		req, err := request(storeDir, s, dests)
+		if err != nil {
+			return nil, err
 		}
 		reqs = append(reqs, req)
 	}
 	return reqs, nil
+}
+
+func request(storeDir string, s skill.Skill, dests []Destination) (Request, error) {
+	req := Request{Name: s.Name}
+	for _, dest := range dests {
+		files, err := skill.Render(os.DirFS(filepath.Join(storeDir, filepath.FromSlash(s.Dir))), string(dest.Variant))
+		if err != nil {
+			return Request{}, fmt.Errorf("%s: %w", s.Name, err)
+		}
+		req.Targets = append(req.Targets, Desired{Dir: filepath.Join(dest.Dir, s.Name), Files: files})
+	}
+	return req, nil
 }

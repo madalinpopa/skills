@@ -72,7 +72,7 @@ func TestLs_installedScopes(t *testing.T) {
 			require.Len(t, lines, 1, "one line per installed skill")
 			assert.Contains(t, lines[0], tt.listed)
 			assert.Contains(t, lines[0], "Installed description.")
-			assert.Contains(t, lines[0], "claude, agents", "the physical targets, not one agent per copy")
+			assert.Contains(t, lines[0], "agents, claude", "the physical targets in directory order, not one agent per copy")
 			assert.NotContains(t, out.String(), tt.hidden, "no fallback to the other scope")
 			assert.NoDirExists(t, storeDir(home), "installed listings do not touch the store")
 		})

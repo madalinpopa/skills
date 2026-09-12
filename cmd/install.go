@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"os"
 	"strings"
@@ -44,25 +45,11 @@ func newInstallCmd() *cobra.Command {
 }
 
 func resolveInstall(c *cobra.Command, names, agents []string, global bool) (installRequest, error) {
-	a, err := openApp()
+	a, targets, err := openTargets(c, agents, global)
 	if err != nil {
 		return installRequest{}, err
 	}
-	root, err := scopeRoot(c, a.home, global)
-	if err != nil {
-		return installRequest{}, err
-	}
-	targets, err := install.Targets(a.cfg, root, global, agents)
-	if errors.Is(err, install.ErrUnknownAgent) {
-		return installRequest{}, usageError{err}
-	}
-	if err != nil {
-		return installRequest{}, err
-	}
-	if err = a.store.Init(c.Context()); err != nil {
-		return installRequest{}, err
-	}
-	catalog, err := skill.Catalog(os.DirFS(a.store.Dir))
+	catalog, installer, err := openStore(c.Context(), a)
 	if err != nil {
 		return installRequest{}, err
 	}
@@ -70,16 +57,45 @@ func resolveInstall(c *cobra.Command, names, agents []string, global bool) (inst
 	if err != nil {
 		return installRequest{}, err
 	}
-	commit, err := a.store.Commit(c.Context())
-	if err != nil {
-		return installRequest{}, err
-	}
 	requests, err := install.Requests(a.store.Dir, skills, targets)
 	if err != nil {
 		return installRequest{}, err
 	}
-	installer := install.Installer{Source: a.cfg.Store.Repo, Commit: commit, Now: utcNow}
 	return installRequest{installer: installer, requests: requests}, nil
+}
+
+func openTargets(c *cobra.Command, agents []string, global bool) (app, []install.Destination, error) {
+	a, err := openApp()
+	if err != nil {
+		return app{}, nil, err
+	}
+	root, err := scopeRoot(c, a.home, global)
+	if err != nil {
+		return app{}, nil, err
+	}
+	targets, err := install.Targets(a.cfg, root, global, agents)
+	if errors.Is(err, install.ErrUnknownAgent) {
+		return app{}, nil, usageError{err}
+	}
+	if err != nil {
+		return app{}, nil, err
+	}
+	return a, targets, nil
+}
+
+func openStore(ctx context.Context, a app) ([]skill.Skill, install.Installer, error) {
+	if err := a.store.Init(ctx); err != nil {
+		return nil, install.Installer{}, err
+	}
+	catalog, err := skill.Catalog(os.DirFS(a.store.Dir))
+	if err != nil {
+		return nil, install.Installer{}, err
+	}
+	commit, err := a.store.Commit(ctx)
+	if err != nil {
+		return nil, install.Installer{}, err
+	}
+	return catalog, install.Installer{Source: a.cfg.Store.Repo, Commit: commit, Now: utcNow}, nil
 }
 
 func printResults(c *cobra.Command, results []install.SkillPlan) {
