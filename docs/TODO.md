@@ -52,7 +52,7 @@ Proposed documentation commit:
 - [x] [Phase 2: Safe target trees](#phase-2-safe-target-trees)
 - [x] [Phase 3: Runtime failure and backup reporting](#phase-3-runtime-failure-and-backup-reporting)
 - [x] [Phase 4: Force and recovery commands](#phase-4-force-and-recovery-commands)
-- [ ] [Phase 5: Discovery independent of local metadata](#phase-5-discovery-independent-of-local-metadata)
+- [x] [Phase 5: Discovery independent of local metadata](#phase-5-discovery-independent-of-local-metadata)
 - [ ] [Phase 6: A lock for every target](#phase-6-a-lock-for-every-target)
 - [ ] [Phase 7: Content from the recorded commit](#phase-7-content-from-the-recorded-commit)
 - [ ] [Phase 8: Valid portable frontmatter](#phase-8-valid-portable-frontmatter)
@@ -214,10 +214,10 @@ forced removal, plus a named update of an unrelated healthy skill.
 3. `test(install): treat tracked deletions as removal conflicts`
 4. `fix(install): protect local deletions during removal`
 
-- [ ] Discovery/lock failing tests reviewed.
-- [ ] Discovery implementation and verification reviewed.
-- [ ] Removal failing tests reviewed.
-- [ ] Removal implementation and verification reviewed.
+- [x] Discovery/lock failing tests reviewed.
+- [x] Discovery implementation and verification reviewed.
+- [x] Removal failing tests reviewed.
+- [x] Removal implementation and verification reviewed.
 
 ## Phase 6: A lock for every target
 
