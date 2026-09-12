@@ -3,6 +3,7 @@ package install
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"maps"
 	"path/filepath"
 	"slices"
@@ -50,7 +51,48 @@ func Targets(cfg config.Config, root string, global bool, agents []string) ([]De
 	slices.SortFunc(dests, func(a, b Destination) int {
 		return strings.Compare(a.Dir, b.Dir)
 	})
+	for _, outer := range dests {
+		for _, inner := range dests {
+			if within(inner.Dir, outer.Dir) && inner.Dir != outer.Dir {
+				return nil, fmt.Errorf("target %s is inside target %s", inner.Dir, outer.Dir)
+			}
+		}
+	}
+	if global {
+		return dests, nil
+	}
+	realRoot, err := resolve(root)
+	if err != nil {
+		return nil, err
+	}
+	for _, dest := range dests {
+		real, err := resolve(dest.Dir)
+		if err != nil {
+			return nil, err
+		}
+		if !within(real, realRoot) {
+			return nil, fmt.Errorf("target %s resolves to %s, outside the project %s", dest.Dir, real, root)
+		}
+	}
 	return dests, nil
+}
+
+func within(dir, root string) bool {
+	return dir == root || strings.HasPrefix(dir, root+string(filepath.Separator))
+}
+
+func resolve(p string) (string, error) {
+	rest := ""
+	for dir := p; ; dir = filepath.Dir(dir) {
+		real, err := filepath.EvalSymlinks(dir)
+		if err == nil {
+			return filepath.Join(real, rest), nil
+		}
+		if !errors.Is(err, fs.ErrNotExist) || filepath.Dir(dir) == dir {
+			return "", err
+		}
+		rest = filepath.Join(filepath.Base(dir), rest)
+	}
 }
 
 func Select(catalog []skill.Skill, names []string) ([]skill.Skill, error) {

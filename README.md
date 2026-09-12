@@ -48,9 +48,11 @@ Skills land in the directory each agent reads:
 .agents/skills/go-review/   Codex and Gemini CLI
 ```
 
-Codex and Gemini share one directory, so their copy is written once. The
-default agents are `claude` and `codex`. Use `--agent` to narrow a command to
-some of them:
+Codex and Gemini share one directory, so their copy is written once. Two
+agents may share a directory only with the same format, and one agent's
+directory may not sit inside another's. In a project, a directory that is a
+link to somewhere outside the repository is refused. The default agents are
+`claude` and `codex`. Use `--agent` to narrow a command to some of them:
 
 ```sh
 skills install go-review --agent claude
