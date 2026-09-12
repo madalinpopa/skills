@@ -30,8 +30,8 @@ These are proposed logical commits and require review before creation.
 
 ## Slice 1: Installed discovery, local/global listing and update
 
-- [ ] Tests reviewed by the user.
-- [ ] Implementation and verification reviewed by the user.
+- [x] Tests reviewed by the user.
+- [x] Implementation and verification reviewed by the user.
 
 ### Test checkpoint
 
