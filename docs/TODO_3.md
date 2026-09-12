@@ -30,8 +30,8 @@ These are proposed logical commits and require review before creation.
 
 ## Slice 1: Published catalog and `skills ls`
 
-- [ ] Tests reviewed by the user.
-- [ ] Implementation and verification reviewed by the user.
+- [x] Tests reviewed by the user.
+- [x] Implementation and verification reviewed by the user.
 
 ### Test checkpoint
 
@@ -69,8 +69,8 @@ implementation commit message.
 
 ## Slice 2: Pure three-way and whole-skill planning
 
-- [ ] Tests reviewed by the user.
-- [ ] Implementation and verification reviewed by the user.
+- [x] Tests reviewed by the user.
+- [x] Implementation and verification reviewed by the user.
 
 ### Test checkpoint
 
@@ -122,16 +122,16 @@ commit message.
 
 ## Phase acceptance criteria
 
-- [ ] `skills ls` lists only published skills in stable order.
-- [ ] Draft and invalid metadata behavior is clear and tested once.
-- [ ] Every three-map state in `DESIGN.md` has direct readable coverage.
-- [ ] File removal and local-only files cannot lose user work.
-- [ ] Any file conflict skips the whole skill across selected targets.
-- [ ] Missing, draft and foreign-source installs are attention states, not
+- [x] `skills ls` lists only published skills in stable order.
+- [x] Draft and invalid metadata behavior is clear and tested once.
+- [x] Every three-map state in `DESIGN.md` has direct readable coverage.
+- [x] File removal and local-only files cannot lose user work.
+- [x] Any file conflict skips the whole skill across selected targets.
+- [x] Missing, draft and foreign-source installs are attention states, not
   automatic mutations.
-- [ ] Planning is pure and deterministic.
-- [ ] `go fix ./...`, formatting, `go test ./...` and `go vet ./...` pass.
-- [ ] The user has reviewed all changes and received proposed commit messages.
+- [x] Planning is pure and deterministic.
+- [x] `go fix ./...`, formatting, `go test ./...` and `go vet ./...` pass.
+- [x] The user has reviewed all changes and received proposed commit messages.
 
 ## Out of scope
 
