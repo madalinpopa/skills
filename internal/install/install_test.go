@@ -89,7 +89,7 @@ func TestInstall_localModeEditIsConflict(t *testing.T) {
 	dir := filepath.Join(t.TempDir(), "go-review")
 	_, err := newInstaller().Install([]install.Request{oneTarget(dir)})
 	require.NoError(t, err)
-	require.NoError(t, os.Chmod(filepath.Join(dir, "SKILL.md"), 0o755))
+	require.NoError(t, os.Chmod(filepath.Join(dir, "SKILL.md"), 0o755)) //nolint:gosec // the test needs the executable bit set
 
 	results, err := newInstaller().Install([]install.Request{oneTarget(dir)})
 
@@ -147,7 +147,7 @@ func TestInstall_modesIgnoredWhenDisabled(t *testing.T) {
 	dir := filepath.Join(t.TempDir(), "go-review")
 	_, err := newInstaller().Install([]install.Request{oneTarget(dir)})
 	require.NoError(t, err)
-	require.NoError(t, os.Chmod(filepath.Join(dir, "SKILL.md"), 0o755))
+	require.NoError(t, os.Chmod(filepath.Join(dir, "SKILL.md"), 0o755)) //nolint:gosec // the test needs the executable bit set
 	installer := newInstaller()
 	installer.Modes = false
 

@@ -128,7 +128,7 @@ func TestRemove_localModeEditIsConflict(t *testing.T) {
 	t.Parallel()
 	dir := filepath.Join(t.TempDir(), ".claude", "skills", "go-review")
 	installed(t, dir, map[string][]byte{"SKILL.md": claudeSkill, "scripts/check.sh": []byte("#!/bin/sh\n")})
-	require.NoError(t, os.Chmod(filepath.Join(dir, "scripts", "check.sh"), 0o755))
+	require.NoError(t, os.Chmod(filepath.Join(dir, "scripts", "check.sh"), 0o755)) //nolint:gosec // the test needs the executable bit set
 	remover := newInstaller()
 	remover.Backups = filepath.Join(t.TempDir(), "backups")
 
@@ -146,7 +146,7 @@ func TestRemove_forceBackupKeepsExecutableBit(t *testing.T) {
 	t.Parallel()
 	dir := filepath.Join(t.TempDir(), ".claude", "skills", "go-review")
 	installed(t, dir, map[string][]byte{"SKILL.md": claudeSkill, "scripts/check.sh": []byte("#!/bin/sh\n")})
-	require.NoError(t, os.Chmod(filepath.Join(dir, "scripts", "check.sh"), 0o755))
+	require.NoError(t, os.Chmod(filepath.Join(dir, "scripts", "check.sh"), 0o755)) //nolint:gosec // the test needs the executable bit set
 	remover := newInstaller()
 	remover.Backups = filepath.Join(t.TempDir(), "backups")
 	remover.Force = true
