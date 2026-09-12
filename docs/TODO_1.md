@@ -33,8 +33,8 @@ explicit permission before creating each one.
 
 ## Slice 1: Root command
 
-- [ ] Tests reviewed by the user.
-- [ ] Implementation and verification reviewed by the user.
+- [x] Tests reviewed by the user.
+- [x] Implementation and verification reviewed by the user.
 
 ### Test checkpoint
 
@@ -72,7 +72,7 @@ implementation commit message.
 
 ## Slice 2: Configuration and project scope
 
-- [ ] Tests reviewed by the user.
+- [x] Tests reviewed by the user.
 - [ ] Implementation and verification reviewed by the user.
 
 ### Test checkpoint

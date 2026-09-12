@@ -16,7 +16,7 @@ func TestDetect_insideRepository(t *testing.T) {
 	t.Parallel()
 	root := initRepo(t)
 	nested := filepath.Join(root, "internal", "deep")
-	require.NoError(t, os.MkdirAll(nested, 0o755))
+	require.NoError(t, os.MkdirAll(nested, 0o750))
 
 	tests := map[string]struct {
 		start string
