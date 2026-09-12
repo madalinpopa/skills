@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/madalinpopa/skills/internal/gittest"
+	"github.com/madalinpopa/skills/internal/skill"
 	"github.com/madalinpopa/skills/internal/store"
 )
 
@@ -274,7 +275,7 @@ func newStore(t *testing.T, repo, branch string) store.Store {
 	}
 }
 
-func TestFiles_atRecordedCommit(t *testing.T) {
+func TestTree_readsRecordedCommit(t *testing.T) {
 	t.Parallel()
 	source := gittest.Init(t)
 	dir := filepath.Join(source, "skills", "go-review")
@@ -290,36 +291,99 @@ func TestFiles_atRecordedCommit(t *testing.T) {
 	s := newStore(t, source, "main")
 	require.NoError(t, s.Init(t.Context()))
 
-	files, err := s.Files(t.Context(), old, "skills/go-review")
+	tree, err := s.Tree(t.Context(), old)
 
 	require.NoError(t, err)
-	require.Len(t, files, 2)
-	assert.Equal(t, []byte("# v1\n"), files["SKILL.md"].Data, "content comes from the recorded commit, not the tip")
-	assert.NotZero(t, files["scripts/check.sh"].Mode&0o100, "executable bits survive")
+	data, err := fs.ReadFile(tree, "skills/go-review/SKILL.md")
+	require.NoError(t, err)
+	assert.Equal(t, "# v1\n", string(data), "content comes from the recorded commit, not the tip")
+	info, err := fs.Stat(tree, "skills/go-review/scripts/check.sh")
+	require.NoError(t, err)
+	assert.NotZero(t, info.Mode()&0o100, "executable bits survive")
 }
 
-func TestFiles_failed(t *testing.T) {
+func TestTree_excludesUnpublishedContent(t *testing.T) {
 	t.Parallel()
 	source := gittest.Init(t)
-	head := gittest.Run(t, source, "rev-parse", "HEAD")
+	dir := filepath.Join(source, "skills", "go-review")
+	require.NoError(t, os.MkdirAll(dir, 0o750))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte("# v1\n"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(source, ".gitignore"), []byte("*.log\n"), 0o600))
+	gittest.Run(t, source, "add", ".")
+	head := gittest.Commit(t, source, "v1")
 	s := newStore(t, source, "main")
 	require.NoError(t, s.Init(t.Context()))
-	tests := map[string]struct {
-		commit string
-		dir    string
-		want   string
-	}{
-		"unknown commit": {commit: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef", dir: "skills/go-review", want: "deadbeef"},
-		"unknown path":   {commit: head, dir: "skills/missing", want: "skills/missing"},
-	}
-	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
+	local := filepath.Join(s.Dir, "skills", "go-review")
+	require.NoError(t, os.WriteFile(filepath.Join(local, "SKILL.md"), []byte("# edited\n"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(local, "notes.log"), []byte("ignored\n"), 0o600))
+	untracked := filepath.Join(s.Dir, "skills", "untracked")
+	require.NoError(t, os.MkdirAll(untracked, 0o750))
+	require.NoError(t, os.WriteFile(filepath.Join(untracked, "SKILL.md"), []byte("# untracked\n"), 0o600))
 
-			_, err := s.Files(t.Context(), tt.commit, tt.dir)
+	tree, err := s.Tree(t.Context(), head)
 
-			require.Error(t, err)
-			assert.Contains(t, err.Error(), tt.want)
-		})
-	}
+	require.NoError(t, err)
+	data, err := fs.ReadFile(tree, "skills/go-review/SKILL.md")
+	require.NoError(t, err)
+	assert.Equal(t, "# v1\n", string(data), "uncommitted edits are not published")
+	_, err = fs.Stat(tree, "skills/go-review/notes.log")
+	assert.ErrorIs(t, err, fs.ErrNotExist, "ignored files are not published")
+	_, err = fs.Stat(tree, "skills/untracked")
+	assert.ErrorIs(t, err, fs.ErrNotExist, "untracked skills are not published")
+}
+
+func TestTree_ignoresCheckoutConversion(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	dir := filepath.Join(source, "skills", "go-review")
+	require.NoError(t, os.MkdirAll(dir, 0o750))
+	require.NoError(t, os.WriteFile(filepath.Join(source, ".gitattributes"), []byte("*.md text eol=crlf\n"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte("# v1\n"), 0o600))
+	gittest.Run(t, source, "add", ".")
+	head := gittest.Commit(t, source, "v1")
+	s := newStore(t, source, "main")
+	require.NoError(t, s.Init(t.Context()))
+	checkedOut, err := os.ReadFile(filepath.Join(s.Dir, "skills", "go-review", "SKILL.md"))
+	require.NoError(t, err)
+	require.Equal(t, "# v1\r\n", string(checkedOut), "the working tree is converted on checkout")
+
+	tree, err := s.Tree(t.Context(), head)
+
+	require.NoError(t, err)
+	data, err := fs.ReadFile(tree, "skills/go-review/SKILL.md")
+	require.NoError(t, err)
+	assert.Equal(t, "# v1\n", string(data), "published bytes are the committed bytes")
+}
+
+func TestTree_rejectsSymlinks(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	dir := filepath.Join(source, "skills", "go-review")
+	require.NoError(t, os.MkdirAll(dir, 0o750))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte("---\nname: go-review\ndescription: d\nstatus: published\n---\n"), 0o600))
+	require.NoError(t, os.Symlink("SKILL.md", filepath.Join(dir, "link.md")))
+	gittest.Run(t, source, "add", ".")
+	head := gittest.Commit(t, source, "v1")
+	s := newStore(t, source, "main")
+	require.NoError(t, s.Init(t.Context()))
+	tree, err := s.Tree(t.Context(), head)
+	require.NoError(t, err)
+	sub, err := fs.Sub(tree, "skills/go-review")
+	require.NoError(t, err)
+
+	_, err = skill.Render(sub, "claude")
+
+	require.Error(t, err)
+	assert.ErrorContains(t, err, "link.md", "a source symlink is rejected, not silently dropped")
+}
+
+func TestTree_unknownCommit(t *testing.T) {
+	t.Parallel()
+	s := newStore(t, gittest.Init(t), "main")
+	require.NoError(t, s.Init(t.Context()))
+
+	_, err := s.Tree(t.Context(), "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef")
+
+	require.Error(t, err)
+	assert.ErrorContains(t, err, "deadbeef")
 }
