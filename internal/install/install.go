@@ -13,6 +13,7 @@ import (
 	"path"
 	"path/filepath"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/madalinpopa/skills/internal/skill"
@@ -129,10 +130,11 @@ func (i Installer) spec(req Request) (Spec, error) {
 			Issues: append(t.issues, collisions(desired.Dir, desired.Files, t)...),
 		}
 		lock, err := ReadLock(desired.Dir)
-		if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		if issue, damaged := lockIssue(err); damaged {
+			target.Issues = append(target.Issues, issue)
+		} else if err != nil && !errors.Is(err, fs.ErrNotExist) {
 			return Spec{}, err
-		}
-		if err == nil {
+		} else if err == nil {
 			target.Source = lock.Source
 			target.Base = lock.Files
 			if target.Base == nil {
@@ -162,16 +164,55 @@ func (i Installer) apply(req Request, plan SkillPlan) error {
 	return stage.publish()
 }
 
+var ErrDamagedLock = errors.New("damaged lock")
+
+type lockError struct {
+	path   string
+	reason string
+}
+
+func (e lockError) Error() string        { return e.path + ": " + e.reason }
+func (e lockError) Is(target error) bool { return target == ErrDamagedLock }
+
 func ReadLock(dir string) (Lock, error) {
-	data, err := os.ReadFile(filepath.Join(dir, LockFile))
+	file := filepath.Join(dir, LockFile)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return Lock{}, err
 	}
 	var lock Lock
 	if err := json.Unmarshal(data, &lock); err != nil {
-		return Lock{}, fmt.Errorf("%s: %w", filepath.Join(dir, LockFile), err)
+		return Lock{}, lockError{path: file, reason: "not valid JSON: " + err.Error()}
+	}
+	if reason := invalidLock(lock, filepath.Base(dir)); reason != "" {
+		return Lock{}, lockError{path: file, reason: reason}
 	}
 	return lock, nil
+}
+
+func invalidLock(lock Lock, name string) string {
+	switch {
+	case lock.Name != name:
+		return fmt.Sprintf("names %q, not %q", lock.Name, name)
+	case lock.Source == "":
+		return "has no source"
+	case lock.Commit == "":
+		return "has no commit"
+	}
+	for p := range lock.Files {
+		if p == "" || p == "." || path.IsAbs(p) || path.Clean(p) != p || p == ".." || strings.HasPrefix(p, "../") {
+			return fmt.Sprintf("tracks an invalid path %q", p)
+		}
+	}
+	return ""
+}
+
+func lockIssue(err error) (Issue, bool) {
+	damaged, ok := errors.AsType[lockError](err)
+	if !ok {
+		return Issue{}, false
+	}
+	return Issue{Path: damaged.path, Reason: damaged.reason}, true
 }
 
 type staged struct {

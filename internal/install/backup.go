@@ -73,6 +73,10 @@ func (i Installer) remove(inst Installation) (SkillPlan, error) {
 		}
 		plan.Issues = append(plan.Issues, t.issues...)
 		lock, err := ReadLock(dir)
+		if issue, damaged := lockIssue(err); damaged {
+			plan.Issues = append(plan.Issues, issue)
+			continue
+		}
 		if err != nil {
 			return fail(err)
 		}

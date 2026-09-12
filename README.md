@@ -152,6 +152,11 @@ Symlinks and special files inside an installed skill are not supported. The
 CLI reports the path and reason, leaves the whole skill untouched even with
 `--force`, and never follows a link to read or write outside the skill.
 
+A skill is found by its `.skill-lock.json`, not by its frontmatter, so a
+broken `SKILL.md` can still be diffed, updated or removed. A damaged lock is
+reported and never rewritten, even with `--force`. `ls --local` and
+`ls --global` mark such rows and exit 3.
+
 `--dry-run` prints the same plan without writing anything:
 
 ```sh
