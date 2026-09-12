@@ -59,7 +59,7 @@ Proposed documentation commit:
 - [x] [Phase 9: Executable state and legacy locks](#phase-9-executable-state-and-legacy-locks)
 - [x] [Phase 10: Dry-run and verbose output](#phase-10-dry-run-and-verbose-output)
 - [x] [Phase 11: Scope hints and first-run boundaries](#phase-11-scope-hints-and-first-run-boundaries)
-- [ ] [Phase 12: Config and target validation](#phase-12-config-and-target-validation)
+- [x] [Phase 12: Config and target validation](#phase-12-config-and-target-validation)
 
 ## Phase 1: Read-only sync planning
 
@@ -420,10 +420,10 @@ These checks prevent successful no-op installs and writes outside stated scope.
 3. `test(install): reject escaping and overlapping targets`
 4. `fix(install): validate resolved target boundaries`
 
-- [ ] Config failing tests reviewed.
-- [ ] Config implementation and verification reviewed.
-- [ ] Target failing tests reviewed.
-- [ ] Target implementation, README and verification reviewed.
+- [x] Config failing tests reviewed.
+- [x] Config implementation and verification reviewed.
+- [x] Target failing tests reviewed.
+- [x] Target implementation, README and verification reviewed.
 
 ## Completion check
 
