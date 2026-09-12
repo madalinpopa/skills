@@ -59,6 +59,8 @@ func TestInstall_forceDryRunWritesNothing(t *testing.T) {
 
 	require.NoError(t, err, errOut.String())
 	assert.Contains(t, out.String(), "go-review")
+	assert.Contains(t, out.String(), "would update")
+	assert.Contains(t, out.String(), "would back up first")
 	assert.NotContains(t, out.String(), "backed up to", "dry-run never claims a backup")
 	assert.NoDirExists(t, filepath.Join(home, ".config", "skills", "backups"))
 	data, err := os.ReadFile(skillFile)

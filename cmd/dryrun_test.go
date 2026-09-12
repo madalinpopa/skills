@@ -41,8 +41,8 @@ func TestDryRun_installWritesNothing(t *testing.T) {
 
 	require.NoError(t, err, errOut.String())
 	assert.Contains(t, out.String(), "+ go-review")
-	assert.Contains(t, out.String(), "added")
-	assert.Contains(t, out.String(), "1 skill, 1 changed")
+	assert.Contains(t, out.String(), "would add")
+	assert.Contains(t, out.String(), "1 skill, 1 would change")
 	assert.NoDirExists(t, filepath.Join(home, ".claude"))
 	assert.NoDirExists(t, filepath.Join(home, ".agents"))
 }
@@ -56,7 +56,8 @@ func TestDryRun_removeWritesNothing(t *testing.T) {
 
 	require.NoError(t, err, errOut.String())
 	assert.Contains(t, out.String(), "- go-review")
-	assert.Contains(t, out.String(), "removed")
+	assert.Contains(t, out.String(), "would remove")
+	assert.Contains(t, out.String(), "would back up first")
 	assert.FileExists(t, filepath.Join(home, ".claude", "skills", "go-review", "SKILL.md"))
 	assert.FileExists(t, filepath.Join(home, ".agents", "skills", "go-review", "SKILL.md"))
 	assert.NoDirExists(t, filepath.Join(home, ".config", "skills", "backups"), "dry-run creates no backup")
