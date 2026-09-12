@@ -18,7 +18,7 @@ func TestRemove_global(t *testing.T) {
 	installSkill(t, home, "go-review")
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"remove", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"remove", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
 	assert.Contains(t, out.String(), "go-review")
@@ -38,7 +38,7 @@ func TestRemove_globalOnlySuggestsGlobal(t *testing.T) {
 	t.Chdir(project)
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"remove", "go-review"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"remove", "go-review"}, strings.NewReader(""), &out, &errOut)
 
 	require.Error(t, err)
 	assert.NotErrorIs(t, err, cmd.ErrUsage)

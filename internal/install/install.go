@@ -41,6 +41,7 @@ type Installer struct {
 	Commit  string
 	Backups string
 	Force   bool
+	DryRun  bool
 	Now     func() time.Time
 }
 
@@ -67,7 +68,7 @@ func (i Installer) Install(reqs []Request) ([]SkillPlan, error) {
 			plans[idx] = forced
 			plan = forced
 		}
-		if plan.State != StateAdd && plan.State != StateUpdate {
+		if i.DryRun || (plan.State != StateAdd && plan.State != StateUpdate) {
 			continue
 		}
 		if err := i.apply(requests[plan.Name], plan); err != nil {
@@ -81,6 +82,10 @@ func (i Installer) force(spec Spec) (SkillPlan, error) {
 	var backups []string
 	for idx := range spec.Targets {
 		target := &spec.Targets[idx]
+		target.Base = target.Have
+		if i.DryRun {
+			continue
+		}
 		path, err := i.backup(target.Dir)
 		if err != nil {
 			return SkillPlan{}, err
@@ -88,7 +93,6 @@ func (i Installer) force(spec Spec) (SkillPlan, error) {
 		if path != "" {
 			backups = append(backups, path)
 		}
-		target.Base = target.Have
 	}
 	plan := planSkill(spec)
 	plan.Backups = backups

@@ -222,7 +222,7 @@ $ skills ls
   django-testing   Writes and structures Django tests            python, django
 
 $ skills ls --local
-  go-review        Reviews Go code for correctness and idiom     claude, agents
+  go-review        Reviews Go code for correctness and idiom     agents, claude
 ```
 
 `install` defaults to the detected repository root and writes a copy for every
@@ -346,7 +346,7 @@ $ skills update
   + go-review        added
   ! sql-review       skipped, you edited it
 
-  1 skill needs attention
+  2 skills, 1 changed, 1 needs attention
   Run 'skills diff sql-review' to see your changes,
   or 'skills update --force' to overwrite (backed up).
 ```
@@ -432,7 +432,8 @@ require the CI checks to pass, block force pushes and branch deletion on `main`.
 
 ### Two workflows
 
-**CI**, on every pull request: `gofmt -l .`, `go vet ./...`, `go test ./...`.
+**CI**, on every pull request: `gofmt -l .`, `go mod tidy -diff`,
+`go vet ./...`, `golangci-lint run` and `go test -race ./...`.
 
 **Release**, on `v*` tags: build with GoReleaser and publish binaries for macOS,
 Linux and Windows on amd64 and arm64, plus checksums and generated notes.
@@ -440,8 +441,8 @@ Linux and Windows on amd64 and arm64, plus checksums and generated notes.
 ### Version injection
 
 `debug.ReadBuildInfo()` reports the right version for
-`go install <module>@v0.3.0`, but `(devel)` for a binary built in CI from a
-checkout. The release build sets it explicitly:
+`go install <module>@v0.3.0`, but `(devel)` or a pseudo-version for a binary
+built from a checkout. The release build sets it explicitly:
 
 ```
 -ldflags "-X main.version={{.Version}}"

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -27,7 +26,7 @@ func newInstallCmd() *cobra.Command {
 		Short: "Install skills at the repository root",
 		Args:  usageArgs(cobra.MinimumNArgs(1)),
 		RunE: func(c *cobra.Command, names []string) error {
-			req, err := resolveInstall(c, names, agents, global)
+			a, req, err := resolveInstall(c, names, agents, global)
 			if err != nil {
 				return err
 			}
@@ -35,8 +34,10 @@ func newInstallCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			printResults(c, results)
-			return nil
+			if err = a.renderer(c).results("install", results); err != nil {
+				return err
+			}
+			return attention(results)
 		},
 	}
 	c.Flags().StringSliceVar(&agents, "agent", nil, "narrow to certain agents (default: config defaults)")
@@ -44,28 +45,28 @@ func newInstallCmd() *cobra.Command {
 	return c
 }
 
-func resolveInstall(c *cobra.Command, names, agents []string, global bool) (installRequest, error) {
+func resolveInstall(c *cobra.Command, names, agents []string, global bool) (app, installRequest, error) {
 	a, targets, err := openTargets(c, agents, global)
 	if err != nil {
-		return installRequest{}, err
+		return app{}, installRequest{}, err
 	}
 	catalog, installer, err := openStore(c.Context(), a, false)
 	if err != nil {
-		return installRequest{}, err
+		return app{}, installRequest{}, err
 	}
 	skills, err := install.Select(catalog, names)
 	if err != nil {
-		return installRequest{}, err
+		return app{}, installRequest{}, err
 	}
 	requests, err := install.Requests(a.store.Dir, skills, targets)
 	if err != nil {
-		return installRequest{}, err
+		return app{}, installRequest{}, err
 	}
-	return installRequest{installer: installer, requests: requests}, nil
+	return a, installRequest{installer: installer, requests: requests}, nil
 }
 
 func openTargets(c *cobra.Command, agents []string, global bool) (app, []install.Destination, error) {
-	a, err := openApp()
+	a, err := openApp(c)
 	if err != nil {
 		return app{}, nil, err
 	}
@@ -73,6 +74,7 @@ func openTargets(c *cobra.Command, agents []string, global bool) (app, []install
 	if err != nil {
 		return app{}, nil, err
 	}
+	a.root = root
 	targets, err := install.Targets(a.cfg, root, global, agents)
 	if errors.Is(err, install.ErrUnknownAgent) {
 		return app{}, nil, usageError{err}
@@ -84,7 +86,7 @@ func openTargets(c *cobra.Command, agents []string, global bool) (app, []install
 }
 
 func openStore(ctx context.Context, a app, force bool) ([]skill.Skill, install.Installer, error) {
-	if err := a.store.Init(ctx); err != nil {
+	if err := a.ready(ctx); err != nil {
 		return nil, install.Installer{}, err
 	}
 	catalog, err := skill.Catalog(os.DirFS(a.store.Dir))
@@ -96,30 +98,6 @@ func openStore(ctx context.Context, a app, force bool) ([]skill.Skill, install.I
 		return nil, install.Installer{}, err
 	}
 	return catalog, a.installer(commit, force), nil
-}
-
-func printResults(c *cobra.Command, results []install.SkillPlan) {
-	for _, r := range results {
-		switch r.State {
-		case install.StateAdd:
-			c.Printf("  + %s  added\n", r.Name)
-		case install.StateUpdate:
-			c.Printf("  ~ %s  updated\n", r.Name)
-		case install.StateUnchanged:
-			c.Printf("    %s  up to date\n", r.Name)
-		case install.StateConflict:
-			c.Printf("  ! %s  skipped, you edited %s\n", r.Name, strings.Join(r.Conflicts, ", "))
-		case install.StateForeign:
-			c.Printf("  ! %s  skipped, installed from %s\n", r.Name, r.Source)
-		case install.StateRemove:
-			c.Printf("  - %s  removed\n", r.Name)
-		case install.StateUnavailable:
-			c.Printf("  ! %s  unavailable in store, left installed\n", r.Name)
-		}
-		for _, backup := range r.Backups {
-			c.Printf("      backed up to %s\n", backup)
-		}
-	}
 }
 
 func scopeRoot(c *cobra.Command, home string, global bool) (string, error) {

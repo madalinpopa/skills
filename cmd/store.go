@@ -10,11 +10,11 @@ func newInitCmd() *cobra.Command {
 		Short: "Create the config and clone the store",
 		Args:  usageArgs(cobra.NoArgs),
 		RunE: func(c *cobra.Command, _ []string) error {
-			a, err := openApp()
+			a, err := openApp(c)
 			if err != nil {
 				return err
 			}
-			if err = a.store.Init(c.Context()); err != nil {
+			if err = a.ready(c.Context()); err != nil {
 				return err
 			}
 			commit, err := a.store.Commit(c.Context())
@@ -33,11 +33,11 @@ func newSyncCmd() *cobra.Command {
 		Short: "Fast-forward the configured store branch",
 		Args:  usageArgs(cobra.NoArgs),
 		RunE: func(c *cobra.Command, _ []string) error {
-			a, err := openApp()
+			a, err := openApp(c)
 			if err != nil {
 				return err
 			}
-			if err = a.store.Init(c.Context()); err != nil {
+			if err = a.ready(c.Context()); err != nil {
 				return err
 			}
 			result, err := a.store.Sync(c.Context())

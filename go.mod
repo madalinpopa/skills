@@ -3,6 +3,7 @@ module github.com/madalinpopa/skills
 go 1.27
 
 require (
+	github.com/aymanbagabas/go-udiff v0.4.1
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1

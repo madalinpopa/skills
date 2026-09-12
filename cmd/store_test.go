@@ -21,7 +21,7 @@ func TestInit_clonesStore(t *testing.T) {
 	head := gittest.Run(t, source, "rev-parse", "HEAD")
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"init"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"init"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
 	assert.DirExists(t, filepath.Join(storeDir(home), ".git"))
@@ -32,11 +32,11 @@ func TestSync_fastForwards(t *testing.T) {
 	source := gittest.Init(t)
 	configureStore(t, source)
 	old := gittest.Run(t, source, "rev-parse", "HEAD")
-	require.NoError(t, cmd.Execute(t.Context(), []string{"init"}, strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{}))
+	require.NoError(t, cmd.Execute(t.Context(), "", []string{"init"}, strings.NewReader(""), &bytes.Buffer{}, &bytes.Buffer{}))
 	next := gittest.Commit(t, source, "second")
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"sync"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"sync"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
 	assert.Contains(t, out.String(), fmt.Sprintf("pulled store  %s -> %s", old[:7], next[:7]))
@@ -47,7 +47,7 @@ func TestSync_initialisesMissingStore(t *testing.T) {
 	home := configureStore(t, source)
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"sync"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"sync"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
 	assert.DirExists(t, filepath.Join(storeDir(home), ".git"))
@@ -57,7 +57,7 @@ func TestInit_storeFailureIsRuntimeError(t *testing.T) {
 	configureStore(t, filepath.Join(t.TempDir(), "nowhere"))
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"init"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"init"}, strings.NewReader(""), &out, &errOut)
 
 	require.Error(t, err)
 	assert.NotErrorIs(t, err, cmd.ErrUsage)

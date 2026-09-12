@@ -1,6 +1,7 @@
 ---
 name: demo
-description: This is a demo skill to test. 
+description: This is a demo skill to test.
+status: published
 ---
 
 # Demo Skill

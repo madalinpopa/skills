@@ -27,7 +27,7 @@ func TestUpdate_appliesSyncedStore(t *testing.T) {
 	run(t, "sync")
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"update", "--global"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"update", "--global"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
 	assert.Contains(t, out.String(), "go-review")
@@ -42,5 +42,5 @@ func TestUpdate_appliesSyncedStore(t *testing.T) {
 func run(t *testing.T, args ...string) {
 	t.Helper()
 	var out, errOut bytes.Buffer
-	require.NoError(t, cmd.Execute(t.Context(), args, strings.NewReader(""), &out, &errOut), errOut.String())
+	require.NoError(t, cmd.Execute(t.Context(), "", args, strings.NewReader(""), &out, &errOut), errOut.String())
 }

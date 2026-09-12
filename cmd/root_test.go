@@ -18,7 +18,7 @@ func TestExecute_noArgsPrintsHelp(t *testing.T) {
 
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), nil, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", nil, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err)
 	help := out.String()
@@ -38,7 +38,7 @@ func TestExecute_helpWritesNothing(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"--help"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"--help"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err)
 	entries, err := os.ReadDir(home)
@@ -60,7 +60,7 @@ func TestExecute_usageErrors(t *testing.T) {
 			t.Parallel()
 			var out, errOut bytes.Buffer
 
-			err := cmd.Execute(t.Context(), tt.args, strings.NewReader(""), &out, &errOut)
+			err := cmd.Execute(t.Context(), "", tt.args, strings.NewReader(""), &out, &errOut)
 
 			require.Error(t, err)
 			assert.ErrorIs(t, err, cmd.ErrUsage, "callers map usage errors to exit code 2")

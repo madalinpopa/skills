@@ -80,6 +80,9 @@ func (i Installer) remove(inst Installation) (SkillPlan, error) {
 		plan.State = StateConflict
 		return plan, nil
 	}
+	if i.DryRun {
+		return plan, nil
+	}
 	for _, dir := range dirs {
 		path, err := i.backup(dir)
 		if err != nil {

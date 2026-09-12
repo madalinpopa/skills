@@ -170,3 +170,53 @@ func newStore(t *testing.T, repo, branch string) store.Store {
 		Branch: branch,
 	}
 }
+
+func TestFiles_atRecordedCommit(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	dir := filepath.Join(source, "skills", "go-review")
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "scripts"), 0o750))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte("# v1\n"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "scripts", "check.sh"), []byte("#!/bin/sh\n"), 0o600))
+	gittest.Run(t, source, "add", ".")
+	gittest.Run(t, source, "update-index", "--chmod=+x", "skills/go-review/scripts/check.sh")
+	old := gittest.Commit(t, source, "v1")
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte("# v2\n"), 0o600))
+	gittest.Run(t, source, "add", ".")
+	gittest.Commit(t, source, "v2")
+	s := newStore(t, source, "main")
+	require.NoError(t, s.Init(t.Context()))
+
+	files, err := s.Files(t.Context(), old, "skills/go-review")
+
+	require.NoError(t, err)
+	require.Len(t, files, 2)
+	assert.Equal(t, []byte("# v1\n"), files["SKILL.md"].Data, "content comes from the recorded commit, not the tip")
+	assert.NotZero(t, files["scripts/check.sh"].Mode&0o100, "executable bits survive")
+}
+
+func TestFiles_failed(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	head := gittest.Run(t, source, "rev-parse", "HEAD")
+	s := newStore(t, source, "main")
+	require.NoError(t, s.Init(t.Context()))
+	tests := map[string]struct {
+		commit string
+		dir    string
+		want   string
+	}{
+		"unknown commit": {commit: "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef", dir: "skills/go-review", want: "deadbeef"},
+		"unknown path":   {commit: head, dir: "skills/missing", want: "skills/missing"},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			_, err := s.Files(t.Context(), tt.commit, tt.dir)
+
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tt.want)
+		})
+	}
+}

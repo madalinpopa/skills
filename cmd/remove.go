@@ -36,8 +36,10 @@ func newRemoveCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			printResults(c, results)
-			return nil
+			if err = a.renderer(c).results("remove", results); err != nil {
+				return err
+			}
+			return attention(results)
 		},
 	}
 	c.Flags().StringSliceVar(&agents, "agent", nil, "narrow to certain agents (default: config defaults)")
