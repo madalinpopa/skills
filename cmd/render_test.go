@@ -85,6 +85,27 @@ func TestRender_unsupported(t *testing.T) {
 	assert.ErrorIs(t, attention(plans), ErrAttention)
 }
 
+func TestRender_failed(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	var out bytes.Buffer
+	r := renderer{out: &out, root: root}
+
+	require.NoError(t, r.results("remove", []install.SkillPlan{
+		{Name: "go-review", State: install.StateRemove, Backups: []string{filepath.Join(root, "backups", "go-review")}},
+		{Name: "sql-review", State: install.StateFailed, Backups: []string{filepath.Join(root, "backups", "sql-review")}},
+	}))
+
+	assert.Equal(t, []string{
+		"  - go-review    removed",
+		"      backed up to " + filepath.Join(root, "backups", "go-review"),
+		"  ! sql-review   failed, see the error below",
+		"      backed up to " + filepath.Join(root, "backups", "sql-review"),
+		"",
+		"  2 skills, 1 changed, 1 failed",
+	}, lines(out.String()), "a failed skill is never counted as changed")
+}
+
 func TestRender_verbose(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

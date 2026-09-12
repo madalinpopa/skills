@@ -157,9 +157,11 @@ func TestInstall_forceBackupFailurePreventsReplacement(t *testing.T) {
 		{Dir: dir, Files: map[string]skill.File{"SKILL.md": {Data: []byte("# v2\n")}}},
 	}}
 
-	_, err := installer.Install([]install.Request{req})
+	results, err := installer.Install([]install.Request{req})
 
 	require.Error(t, err)
+	require.Len(t, results, 1)
+	assert.Equal(t, install.StateFailed, results[0].State, "a failed backup is reported, not hidden")
 	assert.Equal(t, []byte("# mine\n"), read(t, filepath.Join(dir, "SKILL.md")))
 	entries, err := os.ReadDir(dir)
 	require.NoError(t, err)
