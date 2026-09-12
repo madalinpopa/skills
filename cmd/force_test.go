@@ -18,7 +18,7 @@ func TestInstall_forceOverwritesEditedSkill(t *testing.T) {
 	home := seedStore(t)
 	run(t, "install", "--global", "go-review")
 	skillFile := filepath.Join(home, ".claude", "skills", "go-review", "SKILL.md")
-	appendTo(t, skillFile, "my note\n")
+	appendTo(t, skillFile, "local edit\n")
 	var out, errOut bytes.Buffer
 
 	err := cmd.Execute(t.Context(), "", []string{"install", "--global", "--force", "go-review"}, strings.NewReader(""), &out, &errOut)
@@ -28,7 +28,7 @@ func TestInstall_forceOverwritesEditedSkill(t *testing.T) {
 	assert.Contains(t, out.String(), "backed up to")
 	data, err := os.ReadFile(skillFile)
 	require.NoError(t, err)
-	assert.NotContains(t, string(data), "my note", "the store version replaces the edit")
+	assert.NotContains(t, string(data), "local edit", "the store version replaces the edit")
 }
 
 func TestInstall_forceReplacesUnmanagedSkill(t *testing.T) {

@@ -83,10 +83,20 @@ func (a app) renderer(c *cobra.Command) renderer {
 		root:    a.root,
 		color:   colorEnabled(flag(c, "no-color"), os.Getenv("NO_COLOR"), isTerminal(out)),
 		verbose: flag(c, "verbose"),
+		global:  flag(c, "global"),
+		agents:  stringsFlag(c, "agent"),
 	}
 }
 
 func flag(c *cobra.Command, name string) bool {
 	value, err := c.Flags().GetBool(name)
 	return err == nil && value
+}
+
+func stringsFlag(c *cobra.Command, name string) []string {
+	values, err := c.Flags().GetStringSlice(name)
+	if err != nil {
+		return nil
+	}
+	return values
 }

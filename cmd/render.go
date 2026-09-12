@@ -24,6 +24,8 @@ type renderer struct {
 	root    string
 	color   bool
 	verbose bool
+	global  bool
+	agents  []string
 }
 
 func (r renderer) results(command string, results []install.SkillPlan) error {
@@ -35,7 +37,7 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 		}
 	}
 	changed, attention, failed := 0, 0, 0
-	var conflicts []string
+	var conflicts []install.SkillPlan
 	for _, res := range results {
 		var symbol, message, tint string
 		switch res.State {
@@ -51,7 +53,7 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 		case install.StateConflict:
 			symbol, message, tint = "!", "skipped, you edited it", yellow
 			attention++
-			conflicts = append(conflicts, res.Name)
+			conflicts = append(conflicts, res)
 		case install.StateForeign:
 			symbol, message, tint = "!", "skipped, installed from "+res.Source, yellow
 			attention++
@@ -93,15 +95,49 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 	}
 	fmt.Fprintf(&b, "\n  %s\n", summary)
 	if len(conflicts) > 0 {
-		name := "<skill>"
-		if len(conflicts) == 1 {
-			name = conflicts[0]
+		for _, hint := range r.hints(command, conflicts) {
+			fmt.Fprintf(&b, "  %s\n", hint)
 		}
-		fmt.Fprintf(&b, "  Run 'skills diff %s' to see your changes,\n", name)
-		fmt.Fprintf(&b, "  or 'skills %s --force' to overwrite (backed up).\n", command)
 	}
 	_, err := io.WriteString(r.out, b.String())
 	return err
+}
+
+func (r renderer) hints(command string, conflicts []install.SkillPlan) []string {
+	var hints, names, managed []string
+	for _, res := range conflicts {
+		names = append(names, res.Name)
+		if res.Managed {
+			managed = append(managed, res.Name)
+			continue
+		}
+		hints = append(hints, res.Name+" was not installed by skills, so there is nothing to diff.")
+	}
+	force := r.command(command, names...) + " --force"
+	if len(managed) == 0 {
+		return append(hints, fmt.Sprintf("Run '%s' to replace %s (backed up).", force, plural(len(names), "it", "them")))
+	}
+	target := "<skill>"
+	if len(managed) == 1 {
+		target = managed[0]
+	}
+	action := "to overwrite"
+	if command == "remove" {
+		action = "to remove anyway"
+	}
+	hints = append(hints, fmt.Sprintf("Run '%s' to see your changes,", r.command("diff", target)))
+	return append(hints, fmt.Sprintf("or '%s' %s (backed up).", force, action))
+}
+
+func (r renderer) command(name string, args ...string) string {
+	parts := append([]string{"skills", name}, args...)
+	if r.global {
+		parts = append(parts, "--global")
+	}
+	for _, agent := range r.agents {
+		parts = append(parts, "--agent", agent)
+	}
+	return strings.Join(parts, " ")
 }
 
 func (a app) report(c *cobra.Command, command string, results []install.SkillPlan, err error) error {

@@ -56,7 +56,7 @@ func (i Installer) Remove(installed []Installation) ([]SkillPlan, error) {
 }
 
 func (i Installer) remove(inst Installation) (SkillPlan, error) {
-	plan := SkillPlan{Name: inst.Name, State: StateRemove}
+	plan := SkillPlan{Name: inst.Name, State: StateRemove, Managed: true}
 	fail := func(err error) (SkillPlan, error) {
 		plan.State = StateFailed
 		return plan, err

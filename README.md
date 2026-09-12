@@ -126,13 +126,16 @@ $ skills update
 
   2 skills, 1 changed, 1 needs attention
   Run 'skills diff sql-review' to see your changes,
-  or 'skills update --force' to overwrite (backed up).
+  or 'skills update sql-review --force' to overwrite (backed up).
 ```
 
 `skills diff sql-review` shows your changes as a unified diff against the
 content the CLI installed. `skills update --force` overwrites, after copying
 the old content into a timestamped directory under `~/.config/skills/backups/`.
-The exact backup path is printed.
+The exact backup path is printed. `skills install --force` does the same, and
+also replaces a skill directory that `skills` did not install. Hints repeat the
+skill names, `--global` and `--agent` you passed, so they never widen the
+request.
 
 `skills remove` also backs up before deleting, and refuses an edited skill
 unless `--force` is present.

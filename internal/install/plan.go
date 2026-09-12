@@ -69,6 +69,7 @@ type SkillPlan struct {
 	Name      string
 	State     State
 	Source    string
+	Managed   bool
 	Conflicts []string
 	Backups   []string
 	Issues    []Issue
@@ -161,6 +162,7 @@ func planSkill(spec Spec) SkillPlan {
 		}
 		plan.Targets = append(plan.Targets, TargetPlan{Dir: target.Dir, Files: files})
 	}
+	plan.Managed = installed
 	switch {
 	case len(plan.Issues) > 0:
 		plan.State = StateUnsupported
