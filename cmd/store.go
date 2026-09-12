@@ -40,6 +40,9 @@ func newSyncCmd() *cobra.Command {
 			if err = a.ready(c.Context()); err != nil {
 				return err
 			}
+			if a.dryRun {
+				return previewSync(c, a)
+			}
 			result, err := a.store.Sync(c.Context())
 			if err != nil {
 				return err
@@ -52,6 +55,20 @@ func newSyncCmd() *cobra.Command {
 			return nil
 		},
 	}
+}
+
+func previewSync(c *cobra.Command, a app) error {
+	result, err := a.store.Preview(c.Context())
+	if err != nil {
+		return err
+	}
+	if result.Old == result.New {
+		c.Printf("  store up to date  %s\n", short(result.New))
+		return nil
+	}
+	c.Printf("  would pull store  %s -> %s\n", short(result.Old), short(result.New))
+	c.Println("  fast-forward eligibility is checked during sync")
+	return nil
 }
 
 func short(commit string) string {

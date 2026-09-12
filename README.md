@@ -61,6 +61,10 @@ skills update    # move installed skills to the synced content
 `sync` only moves the store forward, so it never rewrites a file in your
 project. `update` is the step that touches your project.
 
+`sync --dry-run` asks the remote for its branch head and prints the local and
+remote commits. It does not fetch, so it cannot promise a fast-forward; the
+real `sync` checks that.
+
 ## Scope
 
 Commands act on the current Git repository, from any subdirectory. Outside a
@@ -122,20 +126,36 @@ $ skills update
 
   2 skills, 1 changed, 1 needs attention
   Run 'skills diff sql-review' to see your changes,
-  or 'skills update --force' to overwrite (backed up).
+  or 'skills update sql-review --force' to overwrite (backed up).
 ```
 
 `skills diff sql-review` shows your changes as a unified diff against the
 content the CLI installed. `skills update --force` overwrites, after copying
 the old content into a timestamped directory under `~/.config/skills/backups/`.
-The exact backup path is printed.
+The exact backup path is printed. `skills install --force` does the same, and
+also replaces a skill directory that `skills` did not install. Hints repeat the
+skill names, `--global` and `--agent` you passed, so they never widen the
+request.
 
 `skills remove` also backs up before deleting, and refuses an edited skill
 unless `--force` is present.
 
+If a write or removal fails part way, the command stops, prints the skills it
+completed and every backup path it created, and exits 1. The failed skill is
+marked and never counted as changed. There is no automatic rollback.
+
 A skill that disappears from the store, or becomes a draft, is reported as
 unavailable and left installed. A skill installed from another store is
 reported and left alone.
+
+Symlinks and special files inside an installed skill are not supported. The
+CLI reports the path and reason, leaves the whole skill untouched even with
+`--force`, and never follows a link to read or write outside the skill.
+
+A skill is found by its `.skill-lock.json`, not by its frontmatter, so a
+broken `SKILL.md` can still be diffed, updated or removed. A damaged lock is
+reported and never rewritten, even with `--force`. `ls --local` and
+`ls --global` mark such rows and exit 3.
 
 `--dry-run` prints the same plan without writing anything:
 

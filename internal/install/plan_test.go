@@ -159,6 +159,39 @@ func TestPlan_conflictSkipsWholeSkill(t *testing.T) {
 		"only the edited file is reported, but the whole skill is skipped")
 }
 
+func TestPlan_unsupportedTargetSkipsWholeSkill(t *testing.T) {
+	t.Parallel()
+	issue := install.Issue{Path: ".claude/skills/go-review/references", Reason: "is a symlink"}
+	spec := install.Spec{
+		Name:      "go-review",
+		Available: true,
+		Source:    "https://example.com/store",
+		Targets: []install.Target{
+			{
+				Dir:    ".claude/skills/go-review",
+				Source: "https://example.com/store",
+				Want:   install.Files{"SKILL.md": "v2"},
+				Have:   install.Files{"SKILL.md": "v1"},
+				Base:   install.Files{"SKILL.md": "v1"},
+				Issues: []install.Issue{issue},
+			},
+			{
+				Dir:    ".agents/skills/go-review",
+				Source: "https://example.com/store",
+				Want:   install.Files{"SKILL.md": "v2"},
+				Have:   install.Files{"SKILL.md": "edited"},
+				Base:   install.Files{"SKILL.md": "v1"},
+			},
+		},
+	}
+
+	plans := install.Plan([]install.Spec{spec})
+
+	require.Len(t, plans, 1)
+	assert.Equal(t, install.StateUnsupported, plans[0].State, "an unsupported tree wins over a conflict, since force cannot resolve it")
+	assert.Equal(t, []install.Issue{issue}, plans[0].Issues)
+}
+
 func TestPlan_conflictKeepsOtherSkills(t *testing.T) {
 	t.Parallel()
 	specs := []install.Spec{

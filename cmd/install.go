@@ -20,37 +20,32 @@ type installRequest struct {
 
 func newInstallCmd() *cobra.Command {
 	var agents []string
-	var global bool
+	var global, force bool
 	c := &cobra.Command{
 		Use:   "install <skill>...",
 		Short: "Install skills at the repository root",
 		Args:  usageArgs(cobra.MinimumNArgs(1)),
 		RunE: func(c *cobra.Command, names []string) error {
-			a, req, err := resolveInstall(c, names, agents, global)
+			a, req, err := resolveInstall(c, names, agents, global, force)
 			if err != nil {
 				return err
 			}
 			results, err := req.installer.Install(req.requests)
-			if err != nil {
-				return err
-			}
-			if err = a.renderer(c).results("install", results); err != nil {
-				return err
-			}
-			return attention(results)
+			return a.report(c, "install", results, err)
 		},
 	}
 	c.Flags().StringSliceVar(&agents, "agent", nil, "narrow to certain agents (default: config defaults)")
 	c.Flags().BoolVar(&global, "global", false, "act on the home directories instead of the repository")
+	c.Flags().BoolVar(&force, "force", false, "overwrite skills you have edited or did not install (backed up first)")
 	return c
 }
 
-func resolveInstall(c *cobra.Command, names, agents []string, global bool) (app, installRequest, error) {
+func resolveInstall(c *cobra.Command, names, agents []string, global, force bool) (app, installRequest, error) {
 	a, targets, err := openTargets(c, agents, global)
 	if err != nil {
 		return app{}, installRequest{}, err
 	}
-	catalog, installer, err := openStore(c.Context(), a, false)
+	catalog, installer, err := openStore(c.Context(), a, force)
 	if err != nil {
 		return app{}, installRequest{}, err
 	}

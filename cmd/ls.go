@@ -64,14 +64,30 @@ func listInstalled(c *cobra.Command, global bool) error {
 		return err
 	}
 	rows := make([][]string, 0, len(installed))
+	attention := false
 	for _, inst := range installed {
 		variants := make([]string, 0, len(inst.Targets))
 		for _, target := range inst.Targets {
 			variants = append(variants, string(target.Variant))
 		}
-		rows = append(rows, []string{inst.Name, inst.Description, strings.Join(variants, ", ")})
+		description, err := install.Describe(inst)
+		switch {
+		case len(inst.Issues) > 0:
+			description = "! damaged lock: " + inst.Issues[0].Reason
+			attention = true
+		case err != nil:
+			description = "! description unavailable"
+			attention = true
+		}
+		rows = append(rows, []string{inst.Name, description, strings.Join(variants, ", ")})
 	}
-	return printRows(c, rows)
+	if err := printRows(c, rows); err != nil {
+		return err
+	}
+	if attention {
+		return ErrAttention
+	}
+	return nil
 }
 
 func printRows(c *cobra.Command, rows [][]string) error {

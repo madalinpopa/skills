@@ -14,9 +14,9 @@ import (
 )
 
 type Installation struct {
-	Name        string
-	Description string
-	Targets     []Destination
+	Name    string
+	Targets []Destination
+	Issues  []Issue
 }
 
 func Scan(dests []Destination) ([]Installation, error) {
@@ -30,26 +30,32 @@ func Scan(dests []Destination) ([]Installation, error) {
 			return nil, err
 		}
 		for _, entry := range entries {
-			if !entry.IsDir() {
-				continue
-			}
 			dir := filepath.Join(dest.Dir, entry.Name())
-			_, err = ReadLock(dir)
+			info, err := os.Stat(dir)
 			if errors.Is(err, fs.ErrNotExist) {
 				continue
 			}
 			if err != nil {
 				return nil, err
 			}
+			if !info.IsDir() {
+				continue
+			}
+			_, err = ReadLock(dir)
+			if errors.Is(err, fs.ErrNotExist) {
+				continue
+			}
+			issue, damaged := lockIssue(err)
+			if err != nil && !damaged {
+				return nil, err
+			}
 			found, ok := byName[entry.Name()]
 			if !ok {
-				var meta skill.Metadata
-				meta, err = describe(dir)
-				if err != nil {
-					return nil, err
-				}
-				found = &Installation{Name: entry.Name(), Description: meta.Description}
+				found = &Installation{Name: entry.Name()}
 				byName[entry.Name()] = found
+			}
+			if damaged {
+				found.Issues = append(found.Issues, issue)
 			}
 			found.Targets = append(found.Targets, dest)
 		}
@@ -61,17 +67,21 @@ func Scan(dests []Destination) ([]Installation, error) {
 	return installed, nil
 }
 
-func describe(dir string) (skill.Metadata, error) {
-	file := filepath.Join(dir, "SKILL.md")
-	data, err := os.ReadFile(file)
+func Describe(inst Installation) (string, error) {
+	dir := filepath.Join(inst.Targets[0].Dir, inst.Name)
+	root, err := os.OpenRoot(dir)
 	if err != nil {
-		return skill.Metadata{}, err
+		return "", err
+	}
+	data, err := root.ReadFile("SKILL.md")
+	if err = errors.Join(err, root.Close()); err != nil {
+		return "", err
 	}
 	meta, err := skill.Describe(data)
 	if err != nil {
-		return skill.Metadata{}, fmt.Errorf("%s: %w", file, err)
+		return "", fmt.Errorf("%s: %w", filepath.Join(dir, "SKILL.md"), err)
 	}
-	return meta, nil
+	return meta.Description, nil
 }
 
 func Find(installed []Installation, names []string) ([]Installation, error) {

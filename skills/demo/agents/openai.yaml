@@ -1,0 +1,20 @@
+# agents/openai.yaml
+# OpenAI Codex / ChatGPT specific configuration sidecar for the demo skill.
+# These settings are copied to the agent's target root on install and ignored by other agents.
+
+interface:
+  display_name: "Demo Skill"
+  short_description: "Demonstrates the standard structure, metadata, and files for agent skills."
+  default_prompt: "Use $demo to show the standard layout and best practices of agent skills."
+  brand_color: "#10B981" # Emerald green branding for visual appeal in the UI
+
+policy:
+  # When set to false, prevents automatic/implicit triggering on ambiguous prompts.
+  # Explicit trigger (e.g., $demo or @demo) will be required.
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "system"
+      description: "Standard system commands for file and path verification."

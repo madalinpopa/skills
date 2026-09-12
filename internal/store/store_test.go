@@ -1,6 +1,9 @@
 package store_test
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -158,6 +161,106 @@ func TestSync_keepsDirtyState(t *testing.T) {
 	content, readErr := os.ReadFile(readme)
 	require.NoError(t, readErr)
 	assert.Equal(t, "edited\n", string(content), "local edits are never reset")
+}
+
+func TestPreview_reportsRemoteHeadWithoutChangingStore(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	s := newStore(t, source, "main")
+	require.NoError(t, s.Init(t.Context()))
+	local, err := s.Commit(t.Context())
+	require.NoError(t, err)
+	remote := gittest.Commit(t, source, "upstream work")
+	before := snapshot(t, s.Dir)
+
+	result, err := s.Preview(t.Context())
+
+	require.NoError(t, err)
+	assert.Equal(t, store.Result{Old: local, New: remote}, result)
+	assert.Equal(t, before, snapshot(t, s.Dir), "the working tree, index, refs and objects are untouched")
+}
+
+func TestPreview_upToDate(t *testing.T) {
+	t.Parallel()
+	s := newStore(t, gittest.Init(t), "main")
+	require.NoError(t, s.Init(t.Context()))
+	head, err := s.Commit(t.Context())
+	require.NoError(t, err)
+
+	result, err := s.Preview(t.Context())
+
+	require.NoError(t, err)
+	assert.Equal(t, store.Result{Old: head, New: head}, result)
+}
+
+func TestPreview_failed(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		setup func(t *testing.T, source string, s store.Store)
+		want  string
+	}{
+		"dirty store": {
+			setup: func(t *testing.T, _ string, s store.Store) {
+				t.Helper()
+				require.NoError(t, os.WriteFile(filepath.Join(s.Dir, "README.md"), []byte("edited\n"), 0o600))
+			},
+			want: "local changes",
+		},
+		"wrong branch": {
+			setup: func(t *testing.T, _ string, s store.Store) {
+				t.Helper()
+				gittest.Run(t, s.Dir, "checkout", "-q", "-b", "other")
+			},
+			want: "branch other",
+		},
+		"unreachable remote": {
+			setup: func(t *testing.T, source string, _ store.Store) {
+				t.Helper()
+				require.NoError(t, os.RemoveAll(source))
+			},
+			want: "git ls-remote",
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			source := gittest.Init(t)
+			s := newStore(t, source, "main")
+			require.NoError(t, s.Init(t.Context()))
+			tt.setup(t, source, s)
+			before := snapshot(t, s.Dir)
+
+			_, err := s.Preview(t.Context())
+
+			require.Error(t, err)
+			assert.ErrorContains(t, err, tt.want)
+			assert.Equal(t, before, snapshot(t, s.Dir), "a failed preview writes nothing")
+		})
+	}
+}
+
+func snapshot(t *testing.T, dir string) map[string]string {
+	t.Helper()
+	root, err := os.OpenRoot(dir)
+	require.NoError(t, err)
+	fsys := root.FS()
+	files := map[string]string{}
+	walkErr := fs.WalkDir(fsys, ".", func(path string, entry fs.DirEntry, err error) error {
+		if err != nil || entry.IsDir() {
+			return err
+		}
+		data, err := fs.ReadFile(fsys, path)
+		if err != nil {
+			return err
+		}
+		sum := sha256.Sum256(data)
+		files[path] = hex.EncodeToString(sum[:])
+		return nil
+	})
+	require.NoError(t, root.Close())
+	require.NoError(t, walkErr)
+	return files
 }
 
 func newStore(t *testing.T, repo, branch string) store.Store {

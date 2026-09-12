@@ -48,11 +48,11 @@ Proposed documentation commit:
 
 ## Phases
 
-- [ ] [Phase 1: Read-only sync planning](#phase-1-read-only-sync-planning)
-- [ ] [Phase 2: Safe target trees](#phase-2-safe-target-trees)
-- [ ] [Phase 3: Runtime failure and backup reporting](#phase-3-runtime-failure-and-backup-reporting)
-- [ ] [Phase 4: Force and recovery commands](#phase-4-force-and-recovery-commands)
-- [ ] [Phase 5: Discovery independent of local metadata](#phase-5-discovery-independent-of-local-metadata)
+- [x] [Phase 1: Read-only sync planning](#phase-1-read-only-sync-planning)
+- [x] [Phase 2: Safe target trees](#phase-2-safe-target-trees)
+- [x] [Phase 3: Runtime failure and backup reporting](#phase-3-runtime-failure-and-backup-reporting)
+- [x] [Phase 4: Force and recovery commands](#phase-4-force-and-recovery-commands)
+- [x] [Phase 5: Discovery independent of local metadata](#phase-5-discovery-independent-of-local-metadata)
 - [ ] [Phase 6: A lock for every target](#phase-6-a-lock-for-every-target)
 - [ ] [Phase 7: Content from the recorded commit](#phase-7-content-from-the-recorded-commit)
 - [ ] [Phase 8: Valid portable frontmatter](#phase-8-valid-portable-frontmatter)
@@ -84,8 +84,8 @@ sync fetches and merges.
 1. `test(store): define read-only sync planning`
 2. `fix(store): make sync dry-run leave the clone unchanged`
 
-- [ ] Failing tests reviewed.
-- [ ] Implementation and verification reviewed.
+- [x] Failing tests reviewed.
+- [x] Implementation and verification reviewed.
 
 ## Phase 2: Safe target trees
 
@@ -114,8 +114,8 @@ other files and one target lock had changed.
 1. `test(install): define unsupported target and collision safety`
 2. `fix(install): reject unsafe target trees before mutation`
 
-- [ ] Failing tests reviewed.
-- [ ] Implementation and verification reviewed.
+- [x] Failing tests reviewed.
+- [x] Implementation and verification reviewed.
 
 ## Phase 3: Runtime failure and backup reporting
 
@@ -143,8 +143,8 @@ second backup and printed none of the first skill's backup paths.
 1. `test(install): define progress and lock state on runtime failure`
 2. `fix(install): preserve partial results and publish locks last`
 
-- [ ] Failing tests reviewed.
-- [ ] Implementation and verification reviewed.
+- [x] Failing tests reviewed.
+- [x] Implementation and verification reviewed.
 
 ## Phase 4: Force and recovery commands
 
@@ -180,10 +180,10 @@ requires preserving them.
 3. `test(install): preserve local-only files during forced updates`
 4. `fix(install): force conflicts without deleting local-only files`
 
-- [ ] CLI failing tests reviewed.
-- [ ] CLI implementation and verification reviewed.
-- [ ] Installer failing tests reviewed.
-- [ ] Installer implementation and verification reviewed.
+- [x] CLI failing tests reviewed.
+- [x] CLI implementation and verification reviewed.
+- [x] Installer failing tests reviewed.
+- [x] Installer implementation and verification reviewed.
 
 ## Phase 5: Discovery independent of local metadata
 
@@ -214,10 +214,10 @@ forced removal, plus a named update of an unrelated healthy skill.
 3. `test(install): treat tracked deletions as removal conflicts`
 4. `fix(install): protect local deletions during removal`
 
-- [ ] Discovery/lock failing tests reviewed.
-- [ ] Discovery implementation and verification reviewed.
-- [ ] Removal failing tests reviewed.
-- [ ] Removal implementation and verification reviewed.
+- [x] Discovery/lock failing tests reviewed.
+- [x] Discovery implementation and verification reviewed.
+- [x] Removal failing tests reviewed.
+- [x] Removal implementation and verification reviewed.
 
 ## Phase 6: A lock for every target
 

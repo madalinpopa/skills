@@ -8,8 +8,12 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"maps"
 	"os"
+	"path"
 	"path/filepath"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/madalinpopa/skills/internal/skill"
@@ -62,17 +66,18 @@ func (i Installer) Install(reqs []Request) ([]SkillPlan, error) {
 	for idx, plan := range plans {
 		if plan.State == StateConflict && i.Force {
 			forced, err := i.force(specByName[plan.Name])
-			if err != nil {
-				return nil, fmt.Errorf("install %s: %w", plan.Name, err)
-			}
 			plans[idx] = forced
+			if err != nil {
+				return plans[:idx+1], fmt.Errorf("install %s: %w", plan.Name, err)
+			}
 			plan = forced
 		}
 		if i.DryRun || (plan.State != StateAdd && plan.State != StateUpdate) {
 			continue
 		}
 		if err := i.apply(requests[plan.Name], plan); err != nil {
-			return nil, fmt.Errorf("install %s: %w", plan.Name, err)
+			plans[idx].State = StateFailed
+			return plans[:idx+1], fmt.Errorf("install %s: %w", plan.Name, err)
 		}
 	}
 	return plans, nil
@@ -82,13 +87,13 @@ func (i Installer) force(spec Spec) (SkillPlan, error) {
 	var backups []string
 	for idx := range spec.Targets {
 		target := &spec.Targets[idx]
-		target.Base = target.Have
+		target.Base = adopted(*target)
 		if i.DryRun {
 			continue
 		}
 		path, err := i.backup(target.Dir)
 		if err != nil {
-			return SkillPlan{}, err
+			return SkillPlan{Name: spec.Name, State: StateFailed, Backups: backups}, err
 		}
 		if path != "" {
 			backups = append(backups, path)
@@ -99,19 +104,37 @@ func (i Installer) force(spec Spec) (SkillPlan, error) {
 	return plan, nil
 }
 
+func adopted(target Target) Files {
+	base := Files{}
+	for p, have := range target.Have {
+		_, wanted := target.Want[p]
+		_, tracked := target.Base[p]
+		if wanted || tracked {
+			base[p] = have
+		}
+	}
+	return base
+}
+
 func (i Installer) spec(req Request) (Spec, error) {
 	spec := Spec{Name: req.Name, Available: !req.Unavailable, Source: i.Source}
 	for _, desired := range req.Targets {
-		have, err := hashDir(desired.Dir)
+		t, err := inspect(desired.Dir)
 		if err != nil {
 			return Spec{}, err
 		}
-		target := Target{Dir: desired.Dir, Want: hashFiles(desired.Files), Have: have}
-		lock, err := ReadLock(desired.Dir)
-		if err != nil && !errors.Is(err, fs.ErrNotExist) {
-			return Spec{}, err
+		target := Target{
+			Dir:    desired.Dir,
+			Want:   hashFiles(desired.Files),
+			Have:   t.files,
+			Issues: append(t.issues, collisions(desired.Dir, desired.Files, t)...),
 		}
-		if err == nil {
+		lock, err := ReadLock(desired.Dir)
+		if issue, damaged := lockIssue(err); damaged {
+			target.Issues = append(target.Issues, issue)
+		} else if err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return Spec{}, err
+		} else if err == nil {
 			target.Source = lock.Source
 			target.Base = lock.Files
 			if target.Base == nil {
@@ -141,16 +164,55 @@ func (i Installer) apply(req Request, plan SkillPlan) error {
 	return stage.publish()
 }
 
+var ErrDamagedLock = errors.New("damaged lock")
+
+type lockError struct {
+	path   string
+	reason string
+}
+
+func (e lockError) Error() string        { return e.path + ": " + e.reason }
+func (e lockError) Is(target error) bool { return target == ErrDamagedLock }
+
 func ReadLock(dir string) (Lock, error) {
-	data, err := os.ReadFile(filepath.Join(dir, LockFile))
+	file := filepath.Join(dir, LockFile)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		return Lock{}, err
 	}
 	var lock Lock
 	if err := json.Unmarshal(data, &lock); err != nil {
-		return Lock{}, fmt.Errorf("%s: %w", filepath.Join(dir, LockFile), err)
+		return Lock{}, lockError{path: file, reason: "not valid JSON: " + err.Error()}
+	}
+	if reason := invalidLock(lock, filepath.Base(dir)); reason != "" {
+		return Lock{}, lockError{path: file, reason: reason}
 	}
 	return lock, nil
+}
+
+func invalidLock(lock Lock, name string) string {
+	switch {
+	case lock.Name != name:
+		return fmt.Sprintf("names %q, not %q", lock.Name, name)
+	case lock.Source == "":
+		return "has no source"
+	case lock.Commit == "":
+		return "has no commit"
+	}
+	for p := range lock.Files {
+		if p == "" || p == "." || path.IsAbs(p) || path.Clean(p) != p || p == ".." || strings.HasPrefix(p, "../") {
+			return fmt.Sprintf("tracks an invalid path %q", p)
+		}
+	}
+	return ""
+}
+
+func lockIssue(err error) (Issue, bool) {
+	damaged, ok := errors.AsType[lockError](err)
+	if !ok {
+		return Issue{}, false
+	}
+	return Issue{Path: damaged.path, Reason: damaged.reason}, true
 }
 
 type staged struct {
@@ -158,46 +220,58 @@ type staged struct {
 	final string
 }
 
-type staging struct {
+type stagedTarget struct {
+	dir     string
 	files   []staged
 	removes []string
+	lock    staged
+}
+
+type staging struct {
+	targets []stagedTarget
 	dirs    []string
 }
 
 func (s *staging) target(desired Desired, plan TargetPlan, lock Lock) error {
+	target := stagedTarget{dir: desired.Dir}
 	for _, change := range plan.Files {
 		final := filepath.Join(desired.Dir, filepath.FromSlash(change.Path))
 		switch change.Action {
 		case ActionAdd, ActionUpdate:
 			file := desired.Files[change.Path]
-			if err := s.write(final, file.Data, perm(file.Mode)); err != nil {
+			written, err := s.write(final, file.Data, perm(file.Mode))
+			target.files = append(target.files, written)
+			if err != nil {
+				s.targets = append(s.targets, target)
 				return err
 			}
 		case ActionRemove:
-			s.removes = append(s.removes, final)
+			target.removes = append(target.removes, final)
 		}
 	}
 	data, err := json.Marshal(lock, json.Deterministic(true), jsontext.WithIndent("  "))
 	if err != nil {
 		return err
 	}
-	return s.write(filepath.Join(desired.Dir, LockFile), append(data, '\n'), 0o644)
+	target.lock, err = s.write(filepath.Join(desired.Dir, LockFile), append(data, '\n'), 0o644)
+	s.targets = append(s.targets, target)
+	return err
 }
 
-func (s *staging) write(final string, data []byte, mode fs.FileMode) error {
+func (s *staging) write(final string, data []byte, mode fs.FileMode) (staged, error) {
 	if err := s.mkdir(filepath.Dir(final)); err != nil {
-		return err
+		return staged{}, err
 	}
 	tmp, err := os.CreateTemp(filepath.Dir(final), "."+filepath.Base(final)+".*.tmp")
 	if err != nil {
-		return err
+		return staged{}, err
 	}
-	s.files = append(s.files, staged{tmp: tmp.Name(), final: final})
+	file := staged{tmp: tmp.Name(), final: final}
 	_, writeErr := tmp.Write(data)
 	if err := errors.Join(writeErr, tmp.Close()); err != nil {
-		return err
+		return file, err
 	}
-	return os.Chmod(tmp.Name(), mode)
+	return file, os.Chmod(tmp.Name(), mode)
 }
 
 func (s *staging) mkdir(dir string) error {
@@ -219,62 +293,120 @@ func (s *staging) mkdir(dir string) error {
 }
 
 func (s *staging) publish() error {
-	for _, f := range s.files {
-		if err := os.Rename(f.tmp, f.final); err != nil {
-			return err
-		}
-	}
-	s.files = nil
-	s.dirs = nil
-	for _, path := range s.removes {
-		if err := os.Remove(path); err != nil && !errors.Is(err, fs.ErrNotExist) {
-			return err
+	for _, target := range s.targets {
+		if err := target.publish(); err != nil {
+			return fmt.Errorf("publish %s: %w", target.dir, err)
 		}
 	}
 	return nil
 }
 
+func (t stagedTarget) publish() error {
+	for _, f := range t.files {
+		if err := os.Rename(f.tmp, f.final); err != nil {
+			return err
+		}
+	}
+	for _, path := range t.removes {
+		if err := os.Remove(path); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+	}
+	return os.Rename(t.lock.tmp, t.lock.final)
+}
+
 func (s *staging) discard() {
-	for _, f := range s.files {
-		_ = os.Remove(f.tmp)
+	for _, target := range s.targets {
+		for _, f := range target.files {
+			_ = os.Remove(f.tmp)
+		}
+		_ = os.Remove(target.lock.tmp)
 	}
 	for _, dir := range s.dirs {
 		_ = os.Remove(dir)
 	}
 }
 
-func hashDir(dir string) (Files, error) {
-	root, err := os.OpenRoot(dir)
-	if errors.Is(err, fs.ErrNotExist) {
-		return Files{}, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	files, err := hashTree(root.FS())
-	return files, errors.Join(err, root.Close())
+func Check(dir string) ([]Issue, error) {
+	t, err := inspect(dir)
+	return t.issues, err
 }
 
-func hashTree(fsys fs.FS) (Files, error) {
-	files := Files{}
-	err := fs.WalkDir(fsys, ".", func(p string, entry fs.DirEntry, err error) error {
-		if err != nil {
+type tree struct {
+	files  Files
+	dirs   map[string]bool
+	issues []Issue
+}
+
+func inspect(dir string) (tree, error) {
+	t := tree{files: Files{}, dirs: map[string]bool{}}
+	info, err := os.Lstat(dir)
+	if errors.Is(err, fs.ErrNotExist) {
+		return t, nil
+	}
+	if err != nil {
+		return tree{}, err
+	}
+	if info.Mode()&fs.ModeSymlink != 0 {
+		t.issues = []Issue{{Path: dir, Reason: "is a symlink"}}
+		return t, nil
+	}
+	if !info.IsDir() {
+		t.issues = []Issue{{Path: dir, Reason: "is a file where a directory is expected"}}
+		return t, nil
+	}
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		return tree{}, err
+	}
+	fsys := root.FS()
+	err = fs.WalkDir(fsys, ".", func(p string, entry fs.DirEntry, err error) error {
+		if err != nil || p == "." {
 			return err
 		}
-		if !entry.Type().IsRegular() || entry.Name() == LockFile {
-			return nil
+		full := filepath.Join(dir, filepath.FromSlash(p))
+		switch {
+		case entry.Type()&fs.ModeSymlink != 0:
+			t.issues = append(t.issues, Issue{Path: full, Reason: "is a symlink"})
+		case entry.IsDir():
+			t.dirs[p] = true
+		case !entry.Type().IsRegular():
+			t.issues = append(t.issues, Issue{Path: full, Reason: "is not a regular file"})
+		case entry.Name() != LockFile:
+			data, err := fs.ReadFile(fsys, p)
+			if err != nil {
+				return err
+			}
+			t.files[p] = hash(data)
 		}
-		data, err := fs.ReadFile(fsys, p)
-		if err != nil {
-			return err
-		}
-		files[p] = hash(data)
 		return nil
 	})
-	if err != nil {
-		return nil, err
+	if err = errors.Join(err, root.Close()); err != nil {
+		return tree{}, err
 	}
-	return files, nil
+	return t, nil
+}
+
+func collisions(dir string, want map[string]skill.File, t tree) []Issue {
+	var issues []Issue
+	seen := map[string]bool{}
+	for _, p := range slices.Sorted(maps.Keys(want)) {
+		if t.dirs[p] {
+			issues = append(issues, Issue{Path: filepath.Join(dir, filepath.FromSlash(p)), Reason: "is a directory where a file is expected"})
+		}
+		for parent := path.Dir(p); parent != "."; parent = path.Dir(parent) {
+			if _, ok := t.files[parent]; ok && !seen[parent] {
+				seen[parent] = true
+				issues = append(issues, Issue{Path: filepath.Join(dir, filepath.FromSlash(parent)), Reason: "is a file where a directory is expected"})
+			}
+		}
+	}
+	return issues
+}
+
+func hashDir(dir string) (Files, error) {
+	t, err := inspect(dir)
+	return t.files, err
 }
 
 func hashFiles(files map[string]skill.File) Files {

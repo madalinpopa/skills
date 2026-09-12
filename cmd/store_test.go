@@ -53,6 +53,51 @@ func TestSync_initialisesMissingStore(t *testing.T) {
 	assert.DirExists(t, filepath.Join(storeDir(home), ".git"))
 }
 
+func TestSync_dryRunLeavesStoreUnchanged(t *testing.T) {
+	source := gittest.Init(t)
+	home := configureStore(t, source)
+	old := gittest.Run(t, source, "rev-parse", "HEAD")
+	run(t, "init")
+	next := gittest.Commit(t, source, "second")
+	var out, errOut bytes.Buffer
+
+	err := cmd.Execute(t.Context(), "", []string{"sync", "--dry-run"}, strings.NewReader(""), &out, &errOut)
+
+	require.NoError(t, err, errOut.String())
+	assert.Contains(t, out.String(), fmt.Sprintf("would pull store  %s -> %s", old[:7], next[:7]))
+	assert.Contains(t, out.String(), "fast-forward")
+	assert.Equal(t, old, gittest.Run(t, storeDir(home), "rev-parse", "HEAD"), "dry-run does not move the store")
+	assert.NoFileExists(t, filepath.Join(storeDir(home), ".git", "FETCH_HEAD"), "dry-run does not fetch")
+}
+
+func TestSync_dryRunRemoteFailure(t *testing.T) {
+	source := gittest.Init(t)
+	configureStore(t, source)
+	run(t, "init")
+	require.NoError(t, os.RemoveAll(source))
+	var out, errOut bytes.Buffer
+
+	err := cmd.Execute(t.Context(), "", []string{"sync", "--dry-run"}, strings.NewReader(""), &out, &errOut)
+
+	require.Error(t, err)
+	assert.NotErrorIs(t, err, cmd.ErrUsage)
+	assert.NotContains(t, out.String(), "up to date", "a failed remote query is never reported as up to date")
+}
+
+func TestSync_dryRunUninitialisedStore(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
+	var out, errOut bytes.Buffer
+
+	err := cmd.Execute(t.Context(), "", []string{"sync", "--dry-run"}, strings.NewReader(""), &out, &errOut)
+
+	require.Error(t, err)
+	assert.NotErrorIs(t, err, cmd.ErrUsage)
+	assert.Contains(t, errOut.String(), "skills init")
+	assert.NoDirExists(t, filepath.Join(home, ".config"), "dry-run never creates the config or clones the store")
+}
+
 func TestInit_storeFailureIsRuntimeError(t *testing.T) {
 	configureStore(t, filepath.Join(t.TempDir(), "nowhere"))
 	var out, errOut bytes.Buffer
