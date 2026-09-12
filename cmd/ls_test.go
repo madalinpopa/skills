@@ -21,8 +21,8 @@ func TestLs_listsPublishedSkills(t *testing.T) {
 	addSkill(t, source, "wip", "draft", "Not ready yet.", "[]")
 	gittest.Run(t, source, "add", ".")
 	gittest.Commit(t, source, "add skills")
-	configureStore(t, source)
-	installGlobally(t, "installed-only")
+	home := configureStore(t, source)
+	installGlobally(t, home, "installed-only")
 	var out, errOut bytes.Buffer
 
 	err := cmd.Execute(t.Context(), []string{"ls"}, strings.NewReader(""), &out, &errOut)
@@ -47,9 +47,9 @@ func addSkill(t *testing.T, repo, name, status, description, tags string) {
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte(content), 0o600))
 }
 
-func installGlobally(t *testing.T, name string) {
+func installGlobally(t *testing.T, home, name string) {
 	t.Helper()
-	dir := filepath.Join(os.Getenv("HOME"), ".claude", "skills", name)
+	dir := filepath.Join(home, ".claude", "skills", name)
 	require.NoError(t, os.MkdirAll(dir, 0o750))
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte("---\nname: "+name+"\ndescription: d\n---\n"), 0o600))
 	require.NoError(t, os.WriteFile(filepath.Join(dir, ".skill-lock.json"), []byte("{}"), 0o600))

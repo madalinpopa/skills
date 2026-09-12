@@ -17,14 +17,14 @@ import (
 
 func TestInit_clonesStore(t *testing.T) {
 	source := gittest.Init(t)
-	configDir := configureStore(t, source)
+	home := configureStore(t, source)
 	head := gittest.Run(t, source, "rev-parse", "HEAD")
 	var out, errOut bytes.Buffer
 
 	err := cmd.Execute(t.Context(), []string{"init"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
-	assert.DirExists(t, filepath.Join(configDir, "store", ".git"))
+	assert.DirExists(t, filepath.Join(storeDir(home), ".git"))
 	assert.Contains(t, out.String(), head[:7])
 }
 
@@ -44,13 +44,13 @@ func TestSync_fastForwards(t *testing.T) {
 
 func TestSync_initialisesMissingStore(t *testing.T) {
 	source := gittest.Init(t)
-	configDir := configureStore(t, source)
+	home := configureStore(t, source)
 	var out, errOut bytes.Buffer
 
 	err := cmd.Execute(t.Context(), []string{"sync"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
-	assert.DirExists(t, filepath.Join(configDir, "store", ".git"))
+	assert.DirExists(t, filepath.Join(storeDir(home), ".git"))
 }
 
 func TestInit_storeFailureIsRuntimeError(t *testing.T) {
@@ -74,5 +74,9 @@ func configureStore(t *testing.T, repo string) string {
 	require.NoError(t, os.MkdirAll(configDir, 0o750))
 	toml := fmt.Sprintf("[store]\nrepo = %q\nbranch = \"main\"\n", repo)
 	require.NoError(t, os.WriteFile(filepath.Join(configDir, "config.toml"), []byte(toml), 0o600))
-	return configDir
+	return home
+}
+
+func storeDir(home string) string {
+	return filepath.Join(home, ".config", "skills", "store")
 }
