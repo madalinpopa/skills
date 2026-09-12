@@ -14,7 +14,7 @@ func newUpdateCmd() *cobra.Command {
 		Short: "Re-install installed skills from the store",
 		Args:  usageArgs(cobra.ArbitraryArgs),
 		RunE: func(c *cobra.Command, names []string) error {
-			req, err := resolveUpdate(c, names, agents, global, force)
+			a, req, err := resolveUpdate(c, names, agents, global, force)
 			if err != nil {
 				return err
 			}
@@ -22,8 +22,7 @@ func newUpdateCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			printResults(c, results)
-			return nil
+			return a.renderer(c).results("update", results)
 		},
 	}
 	c.Flags().StringSliceVar(&agents, "agent", nil, "narrow to certain agents (default: config defaults)")
@@ -32,26 +31,26 @@ func newUpdateCmd() *cobra.Command {
 	return c
 }
 
-func resolveUpdate(c *cobra.Command, names, agents []string, global, force bool) (installRequest, error) {
+func resolveUpdate(c *cobra.Command, names, agents []string, global, force bool) (app, installRequest, error) {
 	a, targets, err := openTargets(c, agents, global)
 	if err != nil {
-		return installRequest{}, err
+		return app{}, installRequest{}, err
 	}
 	installed, err := install.Scan(targets)
 	if err != nil {
-		return installRequest{}, err
+		return app{}, installRequest{}, err
 	}
 	chosen, err := install.Find(installed, names)
 	if err != nil {
-		return installRequest{}, err
+		return app{}, installRequest{}, err
 	}
 	catalog, installer, err := openStore(c.Context(), a, force)
 	if err != nil {
-		return installRequest{}, err
+		return app{}, installRequest{}, err
 	}
 	requests, err := install.UpdateRequests(a.store.Dir, catalog, chosen)
 	if err != nil {
-		return installRequest{}, err
+		return app{}, installRequest{}, err
 	}
-	return installRequest{installer: installer, requests: requests}, nil
+	return a, installRequest{installer: installer, requests: requests}, nil
 }

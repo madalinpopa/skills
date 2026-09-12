@@ -131,6 +131,32 @@ func Transform(data []byte, agent string) ([]byte, error) {
 }
 
 func Render(fsys fs.FS, agent string) (map[string]File, error) {
+	files, err := Load(fsys)
+	if err != nil {
+		return nil, err
+	}
+	return RenderFiles(files, agent)
+}
+
+func RenderFiles(files map[string]File, agent string) (map[string]File, error) {
+	rendered := make(map[string]File, len(files))
+	for p, file := range files {
+		if p == openAIFile && agent == claudeAgent {
+			continue
+		}
+		if p == fileName {
+			data, err := Transform(file.Data, agent)
+			if err != nil {
+				return nil, fmt.Errorf("%s: %w", p, err)
+			}
+			file.Data = data
+		}
+		rendered[p] = file
+	}
+	return rendered, nil
+}
+
+func Load(fsys fs.FS) (map[string]File, error) {
 	files := map[string]File{}
 	err := fs.WalkDir(fsys, ".", func(p string, entry fs.DirEntry, err error) error {
 		if err != nil {
@@ -142,9 +168,6 @@ func Render(fsys fs.FS, agent string) (map[string]File, error) {
 		if !entry.Type().IsRegular() {
 			return fmt.Errorf("%s: only regular files are supported", p)
 		}
-		if p == openAIFile && agent == claudeAgent {
-			return nil
-		}
 		info, err := entry.Info()
 		if err != nil {
 			return err
@@ -153,19 +176,11 @@ func Render(fsys fs.FS, agent string) (map[string]File, error) {
 		if err != nil {
 			return err
 		}
-		if p == fileName {
-			if data, err = Transform(data, agent); err != nil {
-				return fmt.Errorf("%s: %w", p, err)
-			}
-		}
 		files[p] = File{Data: data, Mode: info.Mode().Perm()}
 		return nil
 	})
 	if err != nil {
 		return nil, err
-	}
-	if _, ok := files[fileName]; !ok {
-		return nil, fmt.Errorf("%s is missing", fileName)
 	}
 	return files, nil
 }

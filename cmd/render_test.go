@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/madalinpopa/skills/internal/install"
 )
@@ -17,7 +18,7 @@ func TestRender_default(t *testing.T) {
 	var out bytes.Buffer
 	r := renderer{out: &out, root: root}
 
-	r.results("update", []install.SkillPlan{
+	require.NoError(t, r.results("update", []install.SkillPlan{
 		{Name: "django-testing", State: install.StateUnavailable},
 		{Name: "go-review", State: install.StateAdd, Targets: []install.TargetPlan{
 			{Dir: filepath.Join(root, ".agents", "skills", "go-review"), Files: []install.FileChange{{Path: "SKILL.md", Action: install.ActionAdd}}},
@@ -26,7 +27,7 @@ func TestRender_default(t *testing.T) {
 		{Name: "old-skill", State: install.StateRemove, Backups: []string{filepath.Join(root, "backups", "old-skill")}},
 		{Name: "sql-review", State: install.StateUpdate},
 		{Name: "unchanged", State: install.StateUnchanged},
-	})
+	}))
 
 	assert.Equal(t, []string{
 		"  ! django-testing   unavailable in store, left installed",
@@ -45,11 +46,11 @@ func TestRender_attention(t *testing.T) {
 	var out bytes.Buffer
 	r := renderer{out: &out, root: root}
 
-	r.results("update", []install.SkillPlan{
+	require.NoError(t, r.results("update", []install.SkillPlan{
 		{Name: "go-review", State: install.StateAdd},
 		{Name: "other", State: install.StateForeign, Source: "https://example.com/other"},
 		{Name: "sql-review", State: install.StateConflict, Conflicts: []string{filepath.Join(root, ".claude", "skills", "sql-review", "SKILL.md")}},
-	})
+	}))
 
 	assert.Equal(t, []string{
 		"  + go-review    added",
@@ -68,7 +69,7 @@ func TestRender_verbose(t *testing.T) {
 	var out bytes.Buffer
 	r := renderer{out: &out, root: root, verbose: true}
 
-	r.results("install", []install.SkillPlan{
+	require.NoError(t, r.results("install", []install.SkillPlan{
 		{Name: "go-review", State: install.StateAdd, Targets: []install.TargetPlan{
 			{Dir: filepath.Join(root, ".agents", "skills", "go-review"), Files: []install.FileChange{
 				{Path: "SKILL.md", Action: install.ActionAdd},
@@ -80,7 +81,7 @@ func TestRender_verbose(t *testing.T) {
 			}},
 		}},
 		{Name: "sql-review", State: install.StateConflict, Conflicts: []string{filepath.Join(root, ".claude", "skills", "sql-review", "SKILL.md")}},
-	})
+	}))
 
 	assert.Equal(t, []string{
 		"  + go-review    added",
@@ -101,8 +102,8 @@ func TestRender_color(t *testing.T) {
 	results := []install.SkillPlan{{Name: "go-review", State: install.StateAdd}}
 	var colored, plain bytes.Buffer
 
-	renderer{out: &colored, color: true}.results("install", results)
-	renderer{out: &plain, color: false}.results("install", results)
+	require.NoError(t, renderer{out: &colored, color: true}.results("install", results))
+	require.NoError(t, renderer{out: &plain, color: false}.results("install", results))
 
 	assert.Contains(t, colored.String(), "\x1b[")
 	assert.Contains(t, colored.String(), "+ go-review")

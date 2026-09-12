@@ -36,11 +36,11 @@ func newLsCmd() *cobra.Command {
 }
 
 func listStore(c *cobra.Command) error {
-	a, err := openApp()
+	a, err := openApp(c)
 	if err != nil {
 		return err
 	}
-	if err = a.store.Init(c.Context()); err != nil {
+	if err = a.ready(c.Context()); err != nil {
 		return err
 	}
 	skills, err := skill.Catalog(os.DirFS(a.store.Dir))

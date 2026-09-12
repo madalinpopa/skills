@@ -21,17 +21,14 @@ func TestDiff_showsOnlyYourEdits(t *testing.T) {
 	gittest.Commit(t, source, "add skills")
 	home := configureStore(t, source)
 	run(t, "install", "--global", "go-review")
-	installed := filepath.Join(home, ".claude", "skills", "go-review", "SKILL.md")
-	data, err := os.ReadFile(installed)
-	require.NoError(t, err)
-	require.NoError(t, os.WriteFile(installed, append(data, "my note\n"...), 0o600))
+	appendTo(t, filepath.Join(home, ".claude", "skills", "go-review", "SKILL.md"), "my note\n")
 	addSkill(t, source, "go-review", "published", "Reviews Go code carefully.", "[go]")
 	gittest.Run(t, source, "add", ".")
 	gittest.Commit(t, source, "improve go-review")
 	run(t, "sync")
 	var out, errOut bytes.Buffer
 
-	err = cmd.Execute(t.Context(), []string{"diff", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), []string{"diff", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
 	assert.Contains(t, out.String(), "+my note")
@@ -67,4 +64,13 @@ func TestDiff_failed(t *testing.T) {
 			assert.Empty(t, out.String(), "no diff against a substitute base")
 		})
 	}
+}
+
+func appendTo(t *testing.T, path, text string) {
+	t.Helper()
+	file, err := os.OpenFile(filepath.Clean(path), os.O_APPEND|os.O_WRONLY, 0o600)
+	require.NoError(t, err)
+	_, err = file.WriteString(text)
+	require.NoError(t, err)
+	require.NoError(t, file.Close())
 }

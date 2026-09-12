@@ -1,14 +1,18 @@
 package store
 
 import (
+	"archive/tar"
 	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/madalinpopa/skills/internal/skill"
 )
 
 type Store struct {
@@ -65,6 +69,33 @@ func (s Store) Commit(ctx context.Context) (string, error) {
 	return s.git(ctx, "rev-parse", "HEAD")
 }
 
+func (s Store) Files(ctx context.Context, commit, dir string) (map[string]skill.File, error) {
+	archive, err := output(ctx, s.Dir, "archive", "--format=tar", commit, dir)
+	if err != nil {
+		return nil, err
+	}
+	files := map[string]skill.File{}
+	reader := tar.NewReader(bytes.NewReader(archive))
+	for {
+		header, err := reader.Next()
+		if errors.Is(err, io.EOF) {
+			return files, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		rel, ok := strings.CutPrefix(header.Name, dir+"/")
+		if !ok || header.Typeflag != tar.TypeReg {
+			continue
+		}
+		data, err := io.ReadAll(reader)
+		if err != nil {
+			return nil, err
+		}
+		files[rel] = skill.File{Data: data, Mode: header.FileInfo().Mode().Perm()}
+	}
+}
+
 func (s Store) clone(ctx context.Context) error {
 	if err := os.MkdirAll(filepath.Dir(s.Dir), 0o750); err != nil {
 		return err
@@ -99,6 +130,11 @@ func (s Store) git(ctx context.Context, args ...string) (string, error) {
 }
 
 func run(ctx context.Context, dir string, args ...string) (string, error) {
+	out, err := output(ctx, dir, args...)
+	return strings.TrimSpace(string(out)), err
+}
+
+func output(ctx context.Context, dir string, args ...string) ([]byte, error) {
 	cmd := exec.CommandContext(ctx, "git", args...)
 	cmd.Dir = dir
 	var stdout, stderr bytes.Buffer
@@ -109,7 +145,7 @@ func run(ctx context.Context, dir string, args ...string) (string, error) {
 		if message == "" {
 			message = err.Error()
 		}
-		return "", fmt.Errorf("git %s: %s", args[0], message)
+		return nil, fmt.Errorf("git %s: %s", args[0], message)
 	}
-	return strings.TrimSpace(stdout.String()), nil
+	return stdout.Bytes(), nil
 }

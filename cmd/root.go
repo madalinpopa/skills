@@ -47,10 +47,13 @@ func newRoot(in io.Reader, out, errOut io.Writer) *cobra.Command {
 		SilenceUsage:  true,
 	}
 	root.CompletionOptions.DisableDefaultCmd = true
+	root.PersistentFlags().Bool("dry-run", false, "show the plan, write nothing")
+	root.PersistentFlags().BoolP("verbose", "v", false, "show individual files and their targets")
+	root.PersistentFlags().Bool("no-color", false, "disable color (NO_COLOR is honoured too)")
 	root.SetIn(in)
 	root.SetOut(out)
 	root.SetErr(errOut)
-	root.AddCommand(newInitCmd(), newSyncCmd(), newLsCmd(), newInstallCmd(), newUpdateCmd(), newRemoveCmd())
+	root.AddCommand(newInitCmd(), newSyncCmd(), newLsCmd(), newInstallCmd(), newUpdateCmd(), newRemoveCmd(), newDiffCmd())
 	root.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
 		return usageError{err}
 	})
