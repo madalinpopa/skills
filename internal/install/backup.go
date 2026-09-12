@@ -28,6 +28,9 @@ func (i Installer) backup(dir string) (string, error) {
 	}
 	identity := strings.TrimPrefix(strings.TrimPrefix(abs, filepath.VolumeName(abs)), string(filepath.Separator))
 	dest := filepath.Join(i.Backups, i.Now().UTC().Format("20060102-150405"), identity)
+	if _, err = os.Lstat(dest); err == nil {
+		return "", fmt.Errorf("backup %s: %s already exists", dir, dest)
+	}
 	if err = os.CopyFS(dest, os.DirFS(dir)); err != nil {
 		return "", fmt.Errorf("backup %s: %w", dir, err)
 	}

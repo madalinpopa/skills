@@ -86,7 +86,7 @@ func (i Installer) force(spec Spec) (SkillPlan, error) {
 	var backups []string
 	for idx := range spec.Targets {
 		target := &spec.Targets[idx]
-		target.Base = target.Have
+		target.Base = adopted(*target)
 		if i.DryRun {
 			continue
 		}
@@ -101,6 +101,18 @@ func (i Installer) force(spec Spec) (SkillPlan, error) {
 	plan := planSkill(spec)
 	plan.Backups = backups
 	return plan, nil
+}
+
+func adopted(target Target) Files {
+	base := Files{}
+	for p, have := range target.Have {
+		_, wanted := target.Want[p]
+		_, tracked := target.Base[p]
+		if wanted || tracked {
+			base[p] = have
+		}
+	}
+	return base
 }
 
 func (i Installer) spec(req Request) (Spec, error) {
