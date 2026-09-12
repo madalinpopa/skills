@@ -86,6 +86,7 @@ func (a app) renderer(c *cobra.Command) renderer {
 		color:   colorEnabled(flag(c, "no-color"), os.Getenv("NO_COLOR"), isTerminal(out)),
 		verbose: flag(c, "verbose"),
 		global:  flag(c, "global"),
+		dryRun:  a.dryRun,
 		agents:  stringsFlag(c, "agent"),
 	}
 }
