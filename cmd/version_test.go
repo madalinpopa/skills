@@ -2,6 +2,7 @@ package cmd_test
 
 import (
 	"bytes"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -29,7 +30,9 @@ func TestVersion_reportsStoreCommit(t *testing.T) {
 }
 
 func TestVersion_withoutStore(t *testing.T) {
-	home := configureStore(t, gittest.Init(t))
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	var out, errOut bytes.Buffer
 
 	err := cmd.Execute(t.Context(), "", []string{"version"}, strings.NewReader(""), &out, &errOut)
@@ -37,5 +40,5 @@ func TestVersion_withoutStore(t *testing.T) {
 	require.NoError(t, err, errOut.String())
 	assert.Contains(t, out.String(), "dev", "a development binary says so")
 	assert.Contains(t, out.String(), "not initialised")
-	assert.NoDirExists(t, storeDir(home), "version never clones the store")
+	assert.NoDirExists(t, filepath.Join(home, ".config"), "version never writes the config or clones the store")
 }

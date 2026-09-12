@@ -16,7 +16,7 @@ func newVersionCmd(version string) *cobra.Command {
 		Args:  usageArgs(cobra.NoArgs),
 		RunE: func(c *cobra.Command, _ []string) error {
 			c.Printf("  skills  %s\n", resolveVersion(version))
-			a, err := openApp(c)
+			a, err := newApp(true)
 			if err != nil {
 				return err
 			}

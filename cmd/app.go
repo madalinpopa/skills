@@ -24,11 +24,14 @@ type app struct {
 }
 
 func openApp(c *cobra.Command) (app, error) {
+	return newApp(flag(c, "dry-run"))
+}
+
+func newApp(dryRun bool) (app, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return app{}, err
 	}
-	dryRun := flag(c, "dry-run")
 	dir := config.Dir(os.Getenv("XDG_CONFIG_HOME"), home)
 	var cfg config.Config
 	if dryRun {

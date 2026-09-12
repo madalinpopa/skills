@@ -83,8 +83,8 @@ color, stop for review, and provide the proposed implementation commit message.
 
 ## Slice 2: Version reporting and exit codes
 
-- [ ] Tests reviewed by the user.
-- [ ] Implementation and verification reviewed by the user.
+- [x] Tests reviewed by the user.
+- [x] Implementation and verification reviewed by the user.
 
 ### Test checkpoint
 
