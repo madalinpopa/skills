@@ -1,0 +1,7 @@
+# ignore everything by default
+*
+
+# go files
+!*.go
+!go.mod
+!go.sum
