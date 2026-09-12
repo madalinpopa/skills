@@ -172,7 +172,7 @@ until it becomes large enough to justify a separate package. Remove the empty
   one PR
 - [x] [Phase 4: Safe installation and lock files](TODO_4.md) — four commits,
   one PR
-- [ ] [Phase 5: Installed-skill lifecycle](TODO_5.md) — four commits, one PR
+- [x] [Phase 5: Installed-skill lifecycle](TODO_5.md) — four commits, one PR
 - [ ] [Phase 6: Diff, dry-run, polished output and release](TODO_6.md) — five
   commits, one PR
 

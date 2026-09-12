@@ -79,8 +79,8 @@ implementation commit message.
 
 ## Slice 2: Explicit removal, `--force` and backups
 
-- [ ] Tests reviewed by the user.
-- [ ] Implementation and verification reviewed by the user.
+- [x] Tests reviewed by the user.
+- [x] Implementation and verification reviewed by the user.
 
 ### Test checkpoint
 
@@ -126,15 +126,15 @@ proposed implementation commit message.
 
 ## Phase acceptance criteria
 
-- [ ] Local and global listing are stable, explicit and deduplicated.
-- [ ] Clean installations update and edited installations remain untouched.
-- [ ] Missing, draft and foreign-source skills remain installed.
-- [ ] Removal never falls back from project to global scope.
-- [ ] Every removal and forced overwrite creates a backup first.
-- [ ] Backup failures cause no destructive change.
-- [ ] Mixed updates return enough information for exit code 3 in Phase 6.
-- [ ] `go fix ./...`, formatting, `go test ./...` and `go vet ./...` pass.
-- [ ] The user has reviewed all changes and received proposed commit messages.
+- [x] Local and global listing are stable, explicit and deduplicated.
+- [x] Clean installations update and edited installations remain untouched.
+- [x] Missing, draft and foreign-source skills remain installed.
+- [x] Removal never falls back from project to global scope.
+- [x] Every removal and forced overwrite creates a backup first.
+- [x] Backup failures cause no destructive change.
+- [x] Mixed updates return enough information for exit code 3 in Phase 6.
+- [x] `go fix ./...`, formatting, `go test ./...` and `go vet ./...` pass.
+- [x] The user has reviewed all changes and received proposed commit messages.
 
 ## Out of scope
 
