@@ -143,6 +143,15 @@ func (c Config) validate() error {
 		if agent.Project == "" || agent.Global == "" {
 			return fmt.Errorf("config: agent %q needs both project and global paths", name)
 		}
+		if !insideProject(agent.Project) {
+			return fmt.Errorf("config: agent %q project path %q must stay inside the project", name, agent.Project)
+		}
+		if !filepath.IsAbs(agent.Global) && !strings.HasPrefix(agent.Global, "~/") {
+			return fmt.Errorf("config: agent %q global path %q must be absolute or start with ~/", name, agent.Global)
+		}
+	}
+	if len(c.Defaults.Agents) == 0 {
+		return errors.New("config: defaults.agents is empty")
 	}
 	for _, name := range c.Defaults.Agents {
 		if _, ok := c.Agents[name]; !ok {
@@ -150,6 +159,14 @@ func (c Config) validate() error {
 		}
 	}
 	return nil
+}
+
+func insideProject(p string) bool {
+	if filepath.IsAbs(p) || strings.HasPrefix(p, "/") {
+		return false
+	}
+	clean := filepath.ToSlash(filepath.Clean(filepath.FromSlash(p)))
+	return clean != "." && clean != ".." && !strings.HasPrefix(clean, "../")
 }
 
 func writeAtomic(path string, data []byte) error {

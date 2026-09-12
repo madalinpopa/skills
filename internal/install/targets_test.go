@@ -1,6 +1,7 @@
 package install_test
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -82,6 +83,61 @@ func TestTargets_ambiguousConfig(t *testing.T) {
 
 	require.Error(t, err)
 	assert.ErrorContains(t, err, ".claude/skills", "two variants for one directory is refused, not guessed")
+}
+
+func TestTargets_nestedRootsAreRejected(t *testing.T) {
+	t.Parallel()
+	cfg := config.Default()
+	cfg.Agents["other"] = config.Agent{Project: ".claude/skills/other", Global: "~/.claude/skills/other"}
+
+	_, err := install.Targets(cfg, filepath.FromSlash("/repo"), false, []string{"claude", "other"})
+
+	require.Error(t, err)
+	assert.ErrorContains(t, err, filepath.FromSlash("/repo/.claude/skills/other"))
+	assert.ErrorContains(t, err, "inside", "one selected root inside another is refused")
+}
+
+func TestTargets_resolvedRootStaysInsideProject(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		link    func(t *testing.T, project string) string
+		wantErr bool
+	}{
+		"link outside the project is rejected": {
+			link:    func(t *testing.T, _ string) string { t.Helper(); return t.TempDir() },
+			wantErr: true,
+		},
+		"link inside the project is accepted": {
+			link: func(t *testing.T, project string) string {
+				t.Helper()
+				inside := filepath.Join(project, "tools", "claude")
+				require.NoError(t, os.MkdirAll(inside, 0o750))
+				return inside
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			project, err := filepath.EvalSymlinks(t.TempDir())
+			require.NoError(t, err)
+			target := tt.link(t, project)
+			require.NoError(t, os.Symlink(target, filepath.Join(project, ".claude")))
+
+			dests, err := install.Targets(config.Default(), project, false, []string{"claude"})
+
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.ErrorContains(t, err, filepath.Join(project, ".claude"))
+				assert.ErrorContains(t, err, "outside")
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, []install.Destination{{Dir: filepath.Join(project, ".claude", "skills"), Variant: install.VariantClaude}}, dests,
+				"the configured path is kept; only its resolved location is checked")
+		})
+	}
 }
 
 func TestSelect_success(t *testing.T) {
