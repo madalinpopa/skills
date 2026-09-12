@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/madalinpopa/skills/internal/install"
 )
 
@@ -32,7 +34,7 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 			width = max(width, len(res.Name))
 		}
 	}
-	changed, attention := 0, 0
+	changed, attention, failed := 0, 0, 0
 	var conflicts []string
 	for _, res := range results {
 		var symbol, message, tint string
@@ -59,6 +61,9 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 		case install.StateUnsupported:
 			symbol, message, tint = "!", "skipped, needs manual repair", yellow
 			attention++
+		case install.StateFailed:
+			symbol, message, tint = "!", "failed, see the error below", red
+			failed++
 		case install.StateUnchanged:
 			continue
 		}
@@ -83,6 +88,9 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 	if attention > 0 {
 		summary += fmt.Sprintf(", %d %s attention", attention, plural(attention, "needs", "need"))
 	}
+	if failed > 0 {
+		summary += fmt.Sprintf(", %d failed", failed)
+	}
 	fmt.Fprintf(&b, "\n  %s\n", summary)
 	if len(conflicts) > 0 {
 		name := "<skill>"
@@ -94,6 +102,19 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 	}
 	_, err := io.WriteString(r.out, b.String())
 	return err
+}
+
+func (a app) report(c *cobra.Command, command string, results []install.SkillPlan, err error) error {
+	if err != nil && len(results) == 0 {
+		return err
+	}
+	if renderErr := a.renderer(c).results(command, results); renderErr != nil {
+		return renderErr
+	}
+	if err != nil {
+		return err
+	}
+	return attention(results)
 }
 
 func attention(results []install.SkillPlan) error {
@@ -108,6 +129,9 @@ func attention(results []install.SkillPlan) error {
 
 func (r renderer) paths(res install.SkillPlan) []string {
 	var paths []string
+	if res.State == install.StateFailed {
+		return nil
+	}
 	if res.State == install.StateConflict {
 		for _, conflict := range res.Conflicts {
 			paths = append(paths, r.relative(conflict))

@@ -137,6 +137,10 @@ The exact backup path is printed.
 `skills remove` also backs up before deleting, and refuses an edited skill
 unless `--force` is present.
 
+If a write or removal fails part way, the command stops, prints the skills it
+completed and every backup path it created, and exits 1. The failed skill is
+marked and never counted as changed. There is no automatic rollback.
+
 A skill that disappears from the store, or becomes a draft, is reported as
 unavailable and left installed. A skill installed from another store is
 reported and left alone.

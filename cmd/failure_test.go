@@ -24,8 +24,8 @@ func TestRemove_laterFailureStillPrintsResults(t *testing.T) {
 	locked := filepath.Join(home, ".claude", "skills", "sql-review", "scripts")
 	require.NoError(t, os.MkdirAll(locked, 0o750))
 	require.NoError(t, os.WriteFile(filepath.Join(locked, "keep.sh"), []byte("#!/bin/sh\n"), 0o600))
-	require.NoError(t, os.Chmod(locked, 0o555))
-	t.Cleanup(func() { _ = os.Chmod(locked, 0o755) })
+	require.NoError(t, os.Chmod(locked, 0o555))       //nolint:gosec // a read-only directory keeps its execute bit
+	t.Cleanup(func() { _ = os.Chmod(locked, 0o755) }) //nolint:gosec // restore so the temp dir can be cleaned
 	var out, errOut bytes.Buffer
 
 	err := cmd.Execute(t.Context(), "", []string{"remove", "--global", "--force", "go-review", "sql-review"}, strings.NewReader(""), &out, &errOut)
@@ -34,7 +34,7 @@ func TestRemove_laterFailureStillPrintsResults(t *testing.T) {
 	assert.NotErrorIs(t, err, cmd.ErrUsage)
 	assert.Contains(t, out.String(), "- go-review")
 	assert.Contains(t, out.String(), "! sql-review")
-	assert.Equal(t, 2, strings.Count(out.String(), "backed up to"), "every completed backup path is printed")
+	assert.Equal(t, 4, strings.Count(out.String(), "backed up to"), "every completed backup path is printed, two targets per skill")
 	assert.Contains(t, errOut.String(), "sql-review", "the diagnostic names the failed skill")
 	assert.NoDirExists(t, filepath.Join(home, ".claude", "skills", "go-review"))
 }

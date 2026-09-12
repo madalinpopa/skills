@@ -45,30 +45,33 @@ func (i Installer) Remove(installed []Installation) ([]SkillPlan, error) {
 	plans := make([]SkillPlan, 0, len(installed))
 	for _, inst := range installed {
 		plan, err := i.remove(inst)
-		if err != nil {
-			return nil, fmt.Errorf("remove %s: %w", inst.Name, err)
-		}
 		plans = append(plans, plan)
+		if err != nil {
+			sortByName(plans)
+			return plans, fmt.Errorf("remove %s: %w", inst.Name, err)
+		}
 	}
-	slices.SortFunc(plans, func(a, b SkillPlan) int {
-		return strings.Compare(a.Name, b.Name)
-	})
+	sortByName(plans)
 	return plans, nil
 }
 
 func (i Installer) remove(inst Installation) (SkillPlan, error) {
 	plan := SkillPlan{Name: inst.Name, State: StateRemove}
+	fail := func(err error) (SkillPlan, error) {
+		plan.State = StateFailed
+		return plan, err
+	}
 	dirs := make([]string, 0, len(inst.Targets))
 	for _, target := range inst.Targets {
 		dir := filepath.Join(target.Dir, inst.Name)
 		t, err := inspect(dir)
 		if err != nil {
-			return SkillPlan{}, err
+			return fail(err)
 		}
 		plan.Issues = append(plan.Issues, t.issues...)
 		lock, err := ReadLock(dir)
 		if err != nil {
-			return SkillPlan{}, err
+			return fail(err)
 		}
 		for _, p := range slices.Sorted(maps.Keys(t.files)) {
 			if lock.Files[p] != t.files[p] {
@@ -92,13 +95,13 @@ func (i Installer) remove(inst Installation) (SkillPlan, error) {
 	for _, dir := range dirs {
 		path, err := i.backup(dir)
 		if err != nil {
-			return SkillPlan{}, err
+			return fail(err)
 		}
 		plan.Backups = append(plan.Backups, path)
 	}
 	for _, dir := range dirs {
 		if err := os.RemoveAll(dir); err != nil {
-			return SkillPlan{}, err
+			return fail(err)
 		}
 	}
 	return plan, nil

@@ -31,6 +31,7 @@ const (
 	StateUnavailable State = "unavailable"
 	StateForeign     State = "foreign"
 	StateUnsupported State = "unsupported"
+	StateFailed      State = "failed"
 )
 
 type Issue struct {
@@ -79,10 +80,14 @@ func Plan(specs []Spec) []SkillPlan {
 	for _, spec := range specs {
 		plans = append(plans, planSkill(spec))
 	}
+	sortByName(plans)
+	return plans
+}
+
+func sortByName(plans []SkillPlan) {
 	slices.SortFunc(plans, func(a, b SkillPlan) int {
 		return strings.Compare(a.Name, b.Name)
 	})
-	return plans
 }
 
 func PlanFiles(want, have, base Files) []FileChange {

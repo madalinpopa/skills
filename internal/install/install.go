@@ -65,17 +65,18 @@ func (i Installer) Install(reqs []Request) ([]SkillPlan, error) {
 	for idx, plan := range plans {
 		if plan.State == StateConflict && i.Force {
 			forced, err := i.force(specByName[plan.Name])
-			if err != nil {
-				return nil, fmt.Errorf("install %s: %w", plan.Name, err)
-			}
 			plans[idx] = forced
+			if err != nil {
+				return plans[:idx+1], fmt.Errorf("install %s: %w", plan.Name, err)
+			}
 			plan = forced
 		}
 		if i.DryRun || (plan.State != StateAdd && plan.State != StateUpdate) {
 			continue
 		}
 		if err := i.apply(requests[plan.Name], plan); err != nil {
-			return nil, fmt.Errorf("install %s: %w", plan.Name, err)
+			plans[idx].State = StateFailed
+			return plans[:idx+1], fmt.Errorf("install %s: %w", plan.Name, err)
 		}
 	}
 	return plans, nil
@@ -91,7 +92,7 @@ func (i Installer) force(spec Spec) (SkillPlan, error) {
 		}
 		path, err := i.backup(target.Dir)
 		if err != nil {
-			return SkillPlan{}, err
+			return SkillPlan{Name: spec.Name, State: StateFailed, Backups: backups}, err
 		}
 		if path != "" {
 			backups = append(backups, path)
@@ -166,46 +167,58 @@ type staged struct {
 	final string
 }
 
-type staging struct {
+type stagedTarget struct {
+	dir     string
 	files   []staged
 	removes []string
+	lock    staged
+}
+
+type staging struct {
+	targets []stagedTarget
 	dirs    []string
 }
 
 func (s *staging) target(desired Desired, plan TargetPlan, lock Lock) error {
+	target := stagedTarget{dir: desired.Dir}
 	for _, change := range plan.Files {
 		final := filepath.Join(desired.Dir, filepath.FromSlash(change.Path))
 		switch change.Action {
 		case ActionAdd, ActionUpdate:
 			file := desired.Files[change.Path]
-			if err := s.write(final, file.Data, perm(file.Mode)); err != nil {
+			written, err := s.write(final, file.Data, perm(file.Mode))
+			target.files = append(target.files, written)
+			if err != nil {
+				s.targets = append(s.targets, target)
 				return err
 			}
 		case ActionRemove:
-			s.removes = append(s.removes, final)
+			target.removes = append(target.removes, final)
 		}
 	}
 	data, err := json.Marshal(lock, json.Deterministic(true), jsontext.WithIndent("  "))
 	if err != nil {
 		return err
 	}
-	return s.write(filepath.Join(desired.Dir, LockFile), append(data, '\n'), 0o644)
+	target.lock, err = s.write(filepath.Join(desired.Dir, LockFile), append(data, '\n'), 0o644)
+	s.targets = append(s.targets, target)
+	return err
 }
 
-func (s *staging) write(final string, data []byte, mode fs.FileMode) error {
+func (s *staging) write(final string, data []byte, mode fs.FileMode) (staged, error) {
 	if err := s.mkdir(filepath.Dir(final)); err != nil {
-		return err
+		return staged{}, err
 	}
 	tmp, err := os.CreateTemp(filepath.Dir(final), "."+filepath.Base(final)+".*.tmp")
 	if err != nil {
-		return err
+		return staged{}, err
 	}
-	s.files = append(s.files, staged{tmp: tmp.Name(), final: final})
+	file := staged{tmp: tmp.Name(), final: final}
 	_, writeErr := tmp.Write(data)
 	if err := errors.Join(writeErr, tmp.Close()); err != nil {
-		return err
+		return file, err
 	}
-	return os.Chmod(tmp.Name(), mode)
+	return file, os.Chmod(tmp.Name(), mode)
 }
 
 func (s *staging) mkdir(dir string) error {
@@ -227,24 +240,34 @@ func (s *staging) mkdir(dir string) error {
 }
 
 func (s *staging) publish() error {
-	for _, f := range s.files {
-		if err := os.Rename(f.tmp, f.final); err != nil {
-			return err
-		}
-	}
-	s.files = nil
-	s.dirs = nil
-	for _, path := range s.removes {
-		if err := os.Remove(path); err != nil && !errors.Is(err, fs.ErrNotExist) {
-			return err
+	for _, target := range s.targets {
+		if err := target.publish(); err != nil {
+			return fmt.Errorf("publish %s: %w", target.dir, err)
 		}
 	}
 	return nil
 }
 
+func (t stagedTarget) publish() error {
+	for _, f := range t.files {
+		if err := os.Rename(f.tmp, f.final); err != nil {
+			return err
+		}
+	}
+	for _, path := range t.removes {
+		if err := os.Remove(path); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+	}
+	return os.Rename(t.lock.tmp, t.lock.final)
+}
+
 func (s *staging) discard() {
-	for _, f := range s.files {
-		_ = os.Remove(f.tmp)
+	for _, target := range s.targets {
+		for _, f := range target.files {
+			_ = os.Remove(f.tmp)
+		}
+		_ = os.Remove(target.lock.tmp)
 	}
 	for _, dir := range s.dirs {
 		_ = os.Remove(dir)

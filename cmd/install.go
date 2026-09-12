@@ -31,13 +31,7 @@ func newInstallCmd() *cobra.Command {
 				return err
 			}
 			results, err := req.installer.Install(req.requests)
-			if err != nil {
-				return err
-			}
-			if err = a.renderer(c).results("install", results); err != nil {
-				return err
-			}
-			return attention(results)
+			return a.report(c, "install", results, err)
 		},
 	}
 	c.Flags().StringSliceVar(&agents, "agent", nil, "narrow to certain agents (default: config defaults)")

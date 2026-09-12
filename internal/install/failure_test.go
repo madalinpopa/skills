@@ -87,8 +87,8 @@ func identity(t *testing.T, dir string) string {
 
 func readOnly(t *testing.T, dir string) {
 	t.Helper()
-	require.NoError(t, os.Chmod(dir, 0o555))
-	t.Cleanup(func() { _ = os.Chmod(dir, 0o755) })
+	require.NoError(t, os.Chmod(dir, 0o555))       //nolint:gosec // a read-only directory keeps its execute bit
+	t.Cleanup(func() { _ = os.Chmod(dir, 0o755) }) //nolint:gosec // restore so the temp dir can be cleaned
 }
 
 func skipAsRoot(t *testing.T) {
