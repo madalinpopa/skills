@@ -140,7 +140,8 @@ $ skills update
 ```
 
 `skills diff sql-review` shows your changes as a unified diff against the
-content the CLI installed. `skills update --force` overwrites, after copying
+content the CLI installed. A changed executable bit is shown as an old and
+new mode line, the way Git shows it. `skills update --force` overwrites, after copying
 the old content into a timestamped directory under `~/.config/skills/backups/`.
 The exact backup path is printed. `skills install --force` does the same, and
 also replaces a skill directory that `skills` did not install. Hints repeat the
