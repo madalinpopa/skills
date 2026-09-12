@@ -3,6 +3,8 @@ package cmd
 import (
 	"errors"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -12,8 +14,8 @@ import (
 )
 
 type installRequest struct {
-	targets []install.Destination
-	skills  []skill.Skill
+	installer install.Installer
+	requests  []install.Request
 }
 
 func newInstallCmd() *cobra.Command {
@@ -24,8 +26,16 @@ func newInstallCmd() *cobra.Command {
 		Short: "Install skills at the repository root",
 		Args:  usageArgs(cobra.MinimumNArgs(1)),
 		RunE: func(c *cobra.Command, names []string) error {
-			_, err := resolveInstall(c, names, agents, global)
-			return err
+			req, err := resolveInstall(c, names, agents, global)
+			if err != nil {
+				return err
+			}
+			results, err := req.installer.Install(req.requests)
+			if err != nil {
+				return err
+			}
+			printResults(c, results)
+			return nil
 		},
 	}
 	c.Flags().StringSliceVar(&agents, "agent", nil, "narrow to certain agents (default: config defaults)")
@@ -60,7 +70,35 @@ func resolveInstall(c *cobra.Command, names, agents []string, global bool) (inst
 	if err != nil {
 		return installRequest{}, err
 	}
-	return installRequest{targets: targets, skills: skills}, nil
+	commit, err := a.store.Commit(c.Context())
+	if err != nil {
+		return installRequest{}, err
+	}
+	requests, err := install.Requests(a.store.Dir, skills, targets)
+	if err != nil {
+		return installRequest{}, err
+	}
+	installer := install.Installer{Source: a.cfg.Store.Repo, Commit: commit, Now: utcNow}
+	return installRequest{installer: installer, requests: requests}, nil
+}
+
+func printResults(c *cobra.Command, results []install.SkillPlan) {
+	for _, r := range results {
+		switch r.State {
+		case install.StateAdd:
+			c.Printf("  + %s  added\n", r.Name)
+		case install.StateUpdate:
+			c.Printf("  ~ %s  updated\n", r.Name)
+		case install.StateUnchanged:
+			c.Printf("    %s  up to date\n", r.Name)
+		case install.StateConflict:
+			c.Printf("  ! %s  skipped, you edited %s\n", r.Name, strings.Join(r.Conflicts, ", "))
+		case install.StateForeign:
+			c.Printf("  ! %s  skipped, installed from %s\n", r.Name, r.Source)
+		case install.StateUnavailable:
+			c.Printf("  ! %s  unavailable in store, left installed\n", r.Name)
+		}
+	}
 }
 
 func scopeRoot(c *cobra.Command, home string, global bool) (string, error) {
@@ -79,4 +117,8 @@ func scopeRoot(c *cobra.Command, home string, global bool) (string, error) {
 		c.PrintErrln("warning:", scope.Warning)
 	}
 	return scope.Root, nil
+}
+
+func utcNow() time.Time {
+	return time.Now().UTC().Truncate(time.Second)
 }

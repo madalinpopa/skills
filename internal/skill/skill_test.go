@@ -174,8 +174,8 @@ func TestRender(t *testing.T) {
 
 			require.NoError(t, err)
 			assert.ElementsMatch(t, tt.paths, slices.Collect(maps.Keys(files)))
-			assert.Equal(t, "# Style\n", string(files["references/style.md"]), "ordinary files are copied unchanged")
-			assert.NotContains(t, string(files["SKILL.md"]), "status:", "SKILL.md is transformed")
+			assert.Equal(t, "# Style\n", string(files["references/style.md"].Data), "ordinary files are copied unchanged")
+			assert.NotContains(t, string(files["SKILL.md"].Data), "status:", "SKILL.md is transformed")
 		})
 	}
 }

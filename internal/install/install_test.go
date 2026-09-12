@@ -93,7 +93,7 @@ func TestInstall_adoptsIdenticalSkill(t *testing.T) {
 	assert.Equal(t, map[string]string{"SKILL.md": sha(claudeSkill)}, readLock(t, dir).Files)
 	info, err := os.Stat(filepath.Join(dir, "SKILL.md"))
 	require.NoError(t, err)
-	assert.Equal(t, past, info.ModTime(), "identical content is not rewritten")
+	assert.True(t, info.ModTime().Equal(past), "identical content is not rewritten")
 }
 
 func TestInstall_differentUnmanagedSkillIsConflict(t *testing.T) {
@@ -153,14 +153,10 @@ func TestInstall_otherSkillStillInstalls(t *testing.T) {
 
 func TestInstall_failureLeavesNothing(t *testing.T) {
 	t.Parallel()
-	if os.Geteuid() == 0 {
-		t.Skip("root ignores directory permissions")
-	}
 	root := t.TempDir()
 	claudeDir := filepath.Join(root, ".claude", "skills", "go-review")
 	agentsRoot := filepath.Join(root, ".agents", "skills")
-	require.NoError(t, os.MkdirAll(agentsRoot, 0o500))
-	t.Cleanup(func() { _ = os.Chmod(agentsRoot, 0o700) })
+	write(t, agentsRoot, []byte("a file where the skills directory should be\n"))
 	req := install.Request{Name: "go-review", Targets: []install.Desired{
 		{Dir: claudeDir, Files: map[string]skill.File{"SKILL.md": {Data: claudeSkill}}},
 		{Dir: filepath.Join(agentsRoot, "go-review"), Files: map[string]skill.File{"SKILL.md": {Data: agentsSkill}}},

@@ -29,6 +29,11 @@ type Skill struct {
 	Dir string
 }
 
+type File struct {
+	Data []byte
+	Mode fs.FileMode
+}
+
 const (
 	fileName    = "SKILL.md"
 	openAIFile  = "agents/openai.yaml"
@@ -115,8 +120,8 @@ func Transform(data []byte, agent string) ([]byte, error) {
 	return out.Bytes(), nil
 }
 
-func Render(fsys fs.FS, agent string) (map[string][]byte, error) {
-	files := map[string][]byte{}
+func Render(fsys fs.FS, agent string) (map[string]File, error) {
+	files := map[string]File{}
 	err := fs.WalkDir(fsys, ".", func(p string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -124,8 +129,15 @@ func Render(fsys fs.FS, agent string) (map[string][]byte, error) {
 		if entry.IsDir() {
 			return nil
 		}
+		if !entry.Type().IsRegular() {
+			return fmt.Errorf("%s: only regular files are supported", p)
+		}
 		if p == openAIFile && agent == claudeAgent {
 			return nil
+		}
+		info, err := entry.Info()
+		if err != nil {
+			return err
 		}
 		data, err := fs.ReadFile(fsys, p)
 		if err != nil {
@@ -136,13 +148,13 @@ func Render(fsys fs.FS, agent string) (map[string][]byte, error) {
 				return fmt.Errorf("%s: %w", p, err)
 			}
 		}
-		files[p] = data
+		files[p] = File{Data: data, Mode: info.Mode().Perm()}
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	if files[fileName] == nil {
+	if _, ok := files[fileName]; !ok {
 		return nil, fmt.Errorf("%s is missing", fileName)
 	}
 	return files, nil
