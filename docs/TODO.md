@@ -48,7 +48,7 @@ Proposed documentation commit:
 
 ## Phases
 
-- [ ] [Phase 1: Read-only sync planning](#phase-1-read-only-sync-planning)
+- [x] [Phase 1: Read-only sync planning](#phase-1-read-only-sync-planning)
 - [ ] [Phase 2: Safe target trees](#phase-2-safe-target-trees)
 - [ ] [Phase 3: Runtime failure and backup reporting](#phase-3-runtime-failure-and-backup-reporting)
 - [ ] [Phase 4: Force and recovery commands](#phase-4-force-and-recovery-commands)
@@ -84,8 +84,8 @@ sync fetches and merges.
 1. `test(store): define read-only sync planning`
 2. `fix(store): make sync dry-run leave the clone unchanged`
 
-- [ ] Failing tests reviewed.
-- [ ] Implementation and verification reviewed.
+- [x] Failing tests reviewed.
+- [x] Implementation and verification reviewed.
 
 ## Phase 2: Safe target trees
 
