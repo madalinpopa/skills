@@ -125,7 +125,7 @@ implementation commit message.
 
 ## Slice 3: CI, release and documentation
 
-- [ ] Configuration and documentation reviewed by the user.
+- [x] Configuration and documentation reviewed by the user.
 
 This slice does not require a synthetic failing unit test. Before editing,
 verify current official GitHub Actions, GoReleaser and Go documentation rather
@@ -149,17 +149,17 @@ than copying an old workflow.
 
 ## Phase acceptance criteria
 
-- [ ] `diff` shows edits against the recorded transformed base.
-- [ ] Dry-run and real execution share one planner, and dry-run writes nothing.
-- [ ] Default, verbose, colored and colorless output match `DESIGN.md`.
-- [ ] Exit codes 0, 1, 2 and 3 are stable and covered without redundant tests.
-- [ ] Version output separates CLI and store versions.
-- [ ] All documented commands and flags have consistent help and errors.
-- [ ] CI covers formatting, vet and the default test suite.
-- [ ] Tagged releases target every documented platform and architecture.
-- [ ] README and design match the final behavior.
-- [ ] `go fix ./...`, formatting, `go test ./...` and `go vet ./...` pass.
-- [ ] The user has reviewed all changes and received all proposed commit
+- [x] `diff` shows edits against the recorded transformed base.
+- [x] Dry-run and real execution share one planner, and dry-run writes nothing.
+- [x] Default, verbose, colored and colorless output match `DESIGN.md`.
+- [x] Exit codes 0, 1, 2 and 3 are stable and covered without redundant tests.
+- [x] Version output separates CLI and store versions.
+- [x] All documented commands and flags have consistent help and errors.
+- [x] CI covers formatting, vet and the default test suite.
+- [x] Tagged releases target every documented platform and architecture.
+- [x] README and design match the final behavior.
+- [x] `go fix ./...`, formatting, `go test ./...` and `go vet ./...` pass.
+- [x] The user has reviewed all changes and received all proposed commit
   messages.
 
 ## Out of scope
