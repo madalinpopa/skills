@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"errors"
+	"io/fs"
 	"os"
 	"time"
 
@@ -16,6 +17,11 @@ import (
 type installRequest struct {
 	installer install.Installer
 	requests  []install.Request
+}
+
+type revision struct {
+	commit string
+	tree   fs.FS
 }
 
 func newInstallCmd() *cobra.Command {
@@ -45,7 +51,7 @@ func resolveInstall(c *cobra.Command, names, agents []string, global, force bool
 	if err != nil {
 		return app{}, installRequest{}, err
 	}
-	catalog, installer, err := openStore(c.Context(), a, force)
+	rev, catalog, err := openStore(c.Context(), a)
 	if err != nil {
 		return app{}, installRequest{}, err
 	}
@@ -53,11 +59,11 @@ func resolveInstall(c *cobra.Command, names, agents []string, global, force bool
 	if err != nil {
 		return app{}, installRequest{}, err
 	}
-	requests, err := install.Requests(a.store.Dir, skills, targets)
+	requests, err := install.Requests(rev.tree, skills, targets)
 	if err != nil {
 		return app{}, installRequest{}, err
 	}
-	return a, installRequest{installer: installer, requests: requests}, nil
+	return a, installRequest{installer: a.installer(rev.commit, force), requests: requests}, nil
 }
 
 func openTargets(c *cobra.Command, agents []string, global bool) (app, []install.Destination, error) {
@@ -80,19 +86,23 @@ func openTargets(c *cobra.Command, agents []string, global bool) (app, []install
 	return a, targets, nil
 }
 
-func openStore(ctx context.Context, a app, force bool) ([]skill.Skill, install.Installer, error) {
+func openStore(ctx context.Context, a app) (revision, []skill.Skill, error) {
 	if err := a.ready(ctx); err != nil {
-		return nil, install.Installer{}, err
-	}
-	catalog, err := skill.Catalog(os.DirFS(a.store.Dir))
-	if err != nil {
-		return nil, install.Installer{}, err
+		return revision{}, nil, err
 	}
 	commit, err := a.store.Commit(ctx)
 	if err != nil {
-		return nil, install.Installer{}, err
+		return revision{}, nil, err
 	}
-	return catalog, a.installer(commit, force), nil
+	tree, err := a.store.Tree(ctx, commit)
+	if err != nil {
+		return revision{}, nil, err
+	}
+	catalog, err := skill.Catalog(tree)
+	if err != nil {
+		return revision{}, nil, err
+	}
+	return revision{commit: commit, tree: tree}, catalog, nil
 }
 
 func scopeRoot(c *cobra.Command, home string, global bool) (string, error) {

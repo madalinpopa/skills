@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/fs"
 	"maps"
 	"os"
 	"path"
@@ -74,13 +75,17 @@ func diffSkill(c *cobra.Command, a app, inst install.Installation) error {
 		if err = a.ready(c.Context()); err != nil {
 			return err
 		}
-		recorded, err := a.store.Files(c.Context(), lock.Commit, path.Join("skills", inst.Name))
+		tree, err := a.store.Tree(c.Context(), lock.Commit)
 		if err != nil {
 			return fmt.Errorf("%s: %w", inst.Name, err)
 		}
-		base, err := skill.RenderFiles(recorded, string(target.Variant))
+		source, err := fs.Sub(tree, path.Join("skills", inst.Name))
 		if err != nil {
-			return err
+			return fmt.Errorf("%s: %w", inst.Name, err)
+		}
+		base, err := skill.Render(source, string(target.Variant))
+		if err != nil {
+			return fmt.Errorf("%s: %w", inst.Name, err)
 		}
 		have, err := skill.Load(os.DirFS(dir))
 		if err != nil {

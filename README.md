@@ -65,6 +65,10 @@ project. `update` is the step that touches your project.
 remote commits. It does not fetch, so it cannot promise a fast-forward; the
 real `sync` checks that.
 
+Listing, install, update and diff read skills from the store's current commit,
+which is the commit recorded in each lock. Uncommitted edits, untracked
+directories and ignored files in the store clone are never installed.
+
 ## Scope
 
 Commands act on the current Git repository, from any subdirectory. Outside a

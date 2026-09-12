@@ -429,10 +429,10 @@ func perm(mode fs.FileMode) fs.FileMode {
 	return 0o644
 }
 
-func Requests(storeDir string, skills []skill.Skill, dests []Destination) ([]Request, error) {
+func Requests(store fs.FS, skills []skill.Skill, dests []Destination) ([]Request, error) {
 	reqs := make([]Request, 0, len(skills))
 	for _, s := range skills {
-		req, err := request(storeDir, s, dests)
+		req, err := request(store, s, dests)
 		if err != nil {
 			return nil, err
 		}
@@ -441,10 +441,14 @@ func Requests(storeDir string, skills []skill.Skill, dests []Destination) ([]Req
 	return reqs, nil
 }
 
-func request(storeDir string, s skill.Skill, dests []Destination) (Request, error) {
+func request(store fs.FS, s skill.Skill, dests []Destination) (Request, error) {
 	req := Request{Name: s.Name}
+	source, err := fs.Sub(store, s.Dir)
+	if err != nil {
+		return Request{}, fmt.Errorf("%s: %w", s.Name, err)
+	}
 	for _, dest := range dests {
-		files, err := skill.Render(os.DirFS(filepath.Join(storeDir, filepath.FromSlash(s.Dir))), string(dest.Variant))
+		files, err := skill.Render(source, string(dest.Variant))
 		if err != nil {
 			return Request{}, fmt.Errorf("%s: %w", s.Name, err)
 		}

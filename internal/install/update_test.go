@@ -58,7 +58,7 @@ func TestUpdateRequests(t *testing.T) {
 		{Name: "sql-review", Targets: []install.Destination{claude}},
 	}
 
-	reqs, err := install.UpdateRequests(store, catalog, installations)
+	reqs, err := install.UpdateRequests(os.DirFS(store), catalog, installations)
 
 	require.NoError(t, err)
 	require.Len(t, reqs, 2)
