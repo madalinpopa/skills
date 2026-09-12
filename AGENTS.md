@@ -3,7 +3,8 @@
 `skills` is a Go CLI. [docs/DESIGN.md](docs/DESIGN.md) is the source of truth
 for how it works. Read the relevant part of it before you change any behavior.
 
-## Review and commit workflow
+No AI LLM tool may append AI attribution (such as Co-Authored-By trailers or generated-by signatures)
+to commits or pull requests. Genuine human attribution must be preserved.
 
 Each change that adds or changes behavior has two commits:
 
