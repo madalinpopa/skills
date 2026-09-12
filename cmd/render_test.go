@@ -63,6 +63,28 @@ func TestRender_attention(t *testing.T) {
 	}, lines(out.String()))
 }
 
+func TestRender_unsupported(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	var out bytes.Buffer
+	r := renderer{out: &out, root: root}
+	plans := []install.SkillPlan{
+		{Name: "go-review", State: install.StateUnsupported, Issues: []install.Issue{
+			{Path: filepath.Join(root, ".claude", "skills", "go-review", "references"), Reason: "is a symlink"},
+		}},
+	}
+
+	require.NoError(t, r.results("update", plans))
+
+	assert.Equal(t, []string{
+		"  ! go-review   skipped, needs manual repair",
+		"      " + filepath.Join(".claude", "skills", "go-review", "references") + " is a symlink",
+		"",
+		"  1 skill, 0 changed, 1 needs attention",
+	}, lines(out.String()), "the path and reason are shown, and force is not suggested")
+	assert.ErrorIs(t, attention(plans), ErrAttention)
+}
+
 func TestRender_verbose(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

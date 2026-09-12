@@ -66,6 +66,28 @@ func TestDiff_failed(t *testing.T) {
 	}
 }
 
+func TestDiff_unsupportedEntryIsExplained(t *testing.T) {
+	source := gittest.Init(t)
+	addSkill(t, source, "go-review", "published", "Reviews Go code.", "[go]")
+	gittest.Run(t, source, "add", ".")
+	gittest.Commit(t, source, "add skills")
+	home := configureStore(t, source)
+	run(t, "install", "--global", "go-review")
+	outside := filepath.Join(t.TempDir(), "notes.md")
+	require.NoError(t, os.WriteFile(outside, []byte("external\n"), 0o600))
+	link := filepath.Join(home, ".claude", "skills", "go-review", "notes.md")
+	require.NoError(t, os.Symlink(outside, link))
+	var out, errOut bytes.Buffer
+
+	err := cmd.Execute(t.Context(), "", []string{"diff", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)
+
+	require.Error(t, err)
+	assert.NotErrorIs(t, err, cmd.ErrUsage)
+	assert.Contains(t, errOut.String(), link)
+	assert.Contains(t, errOut.String(), "symlink")
+	assert.Empty(t, out.String(), "the link is explained, not followed")
+}
+
 func appendTo(t *testing.T, path, text string) {
 	t.Helper()
 	file, err := os.OpenFile(filepath.Clean(path), os.O_APPEND|os.O_WRONLY, 0o600)
