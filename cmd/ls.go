@@ -15,16 +15,16 @@ func newLsCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "ls",
 		Short: "List published skills in the store",
-		Args:  noArgs,
+		Args:  usageArgs(cobra.NoArgs),
 		RunE: func(c *cobra.Command, _ []string) error {
-			s, err := openStore()
+			a, err := openApp()
 			if err != nil {
 				return err
 			}
-			if err = s.Init(c.Context()); err != nil {
+			if err = a.store.Init(c.Context()); err != nil {
 				return err
 			}
-			skills, err := skill.Catalog(os.DirFS(s.Dir))
+			skills, err := skill.Catalog(os.DirFS(a.store.Dir))
 			if err != nil {
 				return err
 			}

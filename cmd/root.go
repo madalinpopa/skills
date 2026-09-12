@@ -39,7 +39,7 @@ func newRoot(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	root := &cobra.Command{
 		Use:   "skills",
 		Short: "Install agent skills from a shared store",
-		Args:  noArgs,
+		Args:  usageArgs(cobra.NoArgs),
 		RunE: func(c *cobra.Command, _ []string) error {
 			return c.Help()
 		},
@@ -50,16 +50,18 @@ func newRoot(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	root.SetIn(in)
 	root.SetOut(out)
 	root.SetErr(errOut)
-	root.AddCommand(newInitCmd(), newSyncCmd(), newLsCmd())
+	root.AddCommand(newInitCmd(), newSyncCmd(), newLsCmd(), newInstallCmd())
 	root.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
 		return usageError{err}
 	})
 	return root
 }
 
-func noArgs(c *cobra.Command, args []string) error {
-	if err := cobra.NoArgs(c, args); err != nil {
-		return usageError{err}
+func usageArgs(check cobra.PositionalArgs) cobra.PositionalArgs {
+	return func(c *cobra.Command, args []string) error {
+		if err := check(c, args); err != nil {
+			return usageError{err}
+		}
+		return nil
 	}
-	return nil
 }

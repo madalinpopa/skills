@@ -1,29 +1,23 @@
 package cmd
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/spf13/cobra"
-
-	"github.com/madalinpopa/skills/internal/config"
-	"github.com/madalinpopa/skills/internal/store"
 )
 
 func newInitCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "init",
 		Short: "Create the config and clone the store",
-		Args:  noArgs,
+		Args:  usageArgs(cobra.NoArgs),
 		RunE: func(c *cobra.Command, _ []string) error {
-			s, err := openStore()
+			a, err := openApp()
 			if err != nil {
 				return err
 			}
-			if err = s.Init(c.Context()); err != nil {
+			if err = a.store.Init(c.Context()); err != nil {
 				return err
 			}
-			commit, err := s.Commit(c.Context())
+			commit, err := a.store.Commit(c.Context())
 			if err != nil {
 				return err
 			}
@@ -37,16 +31,16 @@ func newSyncCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "sync",
 		Short: "Fast-forward the configured store branch",
-		Args:  noArgs,
+		Args:  usageArgs(cobra.NoArgs),
 		RunE: func(c *cobra.Command, _ []string) error {
-			s, err := openStore()
+			a, err := openApp()
 			if err != nil {
 				return err
 			}
-			if err = s.Init(c.Context()); err != nil {
+			if err = a.store.Init(c.Context()); err != nil {
 				return err
 			}
-			result, err := s.Sync(c.Context())
+			result, err := a.store.Sync(c.Context())
 			if err != nil {
 				return err
 			}
@@ -58,23 +52,6 @@ func newSyncCmd() *cobra.Command {
 			return nil
 		},
 	}
-}
-
-func openStore() (store.Store, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return store.Store{}, err
-	}
-	dir := config.Dir(os.Getenv("XDG_CONFIG_HOME"), home)
-	cfg, err := config.Init(dir)
-	if err != nil {
-		return store.Store{}, err
-	}
-	return store.Store{
-		Dir:    filepath.Join(dir, "store"),
-		Repo:   cfg.Store.Repo,
-		Branch: cfg.Store.Branch,
-	}, nil
 }
 
 func short(commit string) string {
