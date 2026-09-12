@@ -1,0 +1,89 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+output: prefixed
+tasks:
+  default:
+    cmds:
+      - task: test
+      - task: lint
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  #   Test
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  test:
+    cmds:
+      - task: test:unit
+      - task: test:integration
+  test:unit:
+    cmd: go test ./... {{.CLI_ARGS}}
+  test:integration:
+    cmd: INTEGRATION=true go test ./... -count=1 {{.CLI_ARGS}}
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  #   Lint
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  lint:
+    cmds:
+      - task: lint:golangci
+      - task: lint:tidy
+  lint:golangci:
+    cmd: golangci-lint run ./...
+  lint:tidy:
+    desc: Verify go.mod is tidy
+    silent: true
+    cmd: go mod tidy -diff
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  #   Security
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  security:
+    cmds:
+      - task: security:vuln
+  security:vuln:
+    cmd: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+    dir: '{{.API_DIR}}'
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  #   Format
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  format:
+    cmds:
+      - task: format:fmt
+      - task: format:golangci
+  format:fmt:
+    cmd: go fmt ./...
+  format:golangci:
+    cmd: golangci-lint fmt ./...
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  #   Release
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  next:
+    desc: Create the next patch release tag
+    cmds:
+      - task: patch
+  patch:
+    desc: Create a new patch release tag
+    vars:
+      NEXT: {sh: 'LATEST=$(git tag --list "v[0-9]*.[0-9]*.[0-9]*" --sort=-v:refname | head -n 1); LATEST=${LATEST:-v0.0.0}; M=$(echo "$LATEST" | cut -d. -f1 | tr -d "v"); m=$(echo "$LATEST" | cut -d. -f2); p=$(echo "$LATEST" | cut -d. -f3); echo "v$M.$m.$((p + 1))"'}
+    cmds:
+      - task: _tag
+        vars: {TAG: "{{.NEXT}}"}
+  minor:
+    desc: Create a new minor release tag
+    vars:
+      NEXT: {sh: 'LATEST=$(git tag --list "v[0-9]*.[0-9]*.[0-9]*" --sort=-v:refname | head -n 1); LATEST=${LATEST:-v0.0.0}; M=$(echo "$LATEST" | cut -d. -f1 | tr -d "v"); m=$(echo "$LATEST" | cut -d. -f2); echo "v$M.$((m + 1)).0"'}
+    cmds:
+      - task: _tag
+        vars: {TAG: "{{.NEXT}}"}
+  major:
+    desc: Create a new major release tag
+    vars:
+      NEXT: {sh: 'LATEST=$(git tag --list "v[0-9]*.[0-9]*.[0-9]*" --sort=-v:refname | head -n 1); LATEST=${LATEST:-v0.0.0}; M=$(echo "$LATEST" | cut -d. -f1 | tr -d "v"); echo "v$((M + 1)).0.0"'}
+    cmds:
+      - task: _tag
+        vars: {TAG: "{{.NEXT}}"}
+  _tag:
+    internal: true
+    preconditions:
+      - sh: '! git rev-parse -q --verify "refs/tags/{{.TAG}}" >/dev/null'
+        msg: "Tag {{.TAG}} already exists."
+    cmds:
+      - git tag -a {{.TAG}} -m "Release {{.TAG}}"
+      - git push origin {{.TAG}}
+      - echo "Created and pushed new tag {{.TAG}}"

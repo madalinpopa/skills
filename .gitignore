@@ -14,6 +14,7 @@
 !.gitignore
 !.github/**
 !.golangci.yml
+!Taskfile.yml
 
 # build output
 /dist/
