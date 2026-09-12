@@ -90,16 +90,45 @@ func TestLoad_failed(t *testing.T) {
 
 	tests := map[string]struct {
 		toml string
+		want string
 	}{
-		"malformed toml": {toml: `[store\nrepo = `},
+		"malformed toml": {toml: `[store\nrepo = `, want: "parse"},
 		"unknown default agent": {toml: `
 [defaults]
 agents = ["nope"]
-`},
+`, want: "nope"},
 		"empty repo": {toml: `
 [store]
 repo = ""
-`},
+`, want: "store.repo"},
+		"empty default agents": {toml: `
+[defaults]
+agents = []
+`, want: "defaults.agents"},
+		"absolute project path": {toml: `
+[defaults]
+agents = ["claude"]
+
+[agents.claude]
+project = "/srv/skills"
+global = "~/.claude/skills"
+`, want: "claude"},
+		"escaping project path": {toml: `
+[defaults]
+agents = ["claude"]
+
+[agents.claude]
+project = "../skills"
+global = "~/.claude/skills"
+`, want: "claude"},
+		"relative global path": {toml: `
+[defaults]
+agents = ["claude"]
+
+[agents.claude]
+project = ".claude/skills"
+global = "skills"
+`, want: "claude"},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -109,9 +138,28 @@ repo = ""
 
 			_, err := config.Load(dir)
 
-			assert.Error(t, err)
+			require.Error(t, err)
+			assert.ErrorContains(t, err, tt.want)
 		})
 	}
+}
+
+func TestLoad_acceptsAbsoluteGlobalPath(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	writeConfig(t, dir, `
+[defaults]
+agents = ["claude"]
+
+[agents.claude]
+project = ".claude/skills"
+global = "/srv/skills"
+`)
+
+	cfg, err := config.Load(dir)
+
+	require.NoError(t, err)
+	assert.Equal(t, "/srv/skills", cfg.Agents["claude"].GlobalPath("/home/me"), "an absolute global path is used as is")
 }
 
 func TestInit_createsDefaultFile(t *testing.T) {
