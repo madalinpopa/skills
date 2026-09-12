@@ -127,6 +127,35 @@ func TestPlan_states(t *testing.T) {
 	}
 }
 
+func TestPlan_missingTargetLockIsWork(t *testing.T) {
+	t.Parallel()
+	spec := install.Spec{
+		Name:      "go-review",
+		Available: true,
+		Source:    "https://example.com/store",
+		Targets: []install.Target{
+			{
+				Dir:    ".claude/skills/go-review",
+				Source: "https://example.com/store",
+				Want:   install.Files{"SKILL.md": "v1"},
+				Have:   install.Files{"SKILL.md": "v1"},
+				Base:   install.Files{"SKILL.md": "v1"},
+			},
+			{
+				Dir:  ".agents/skills/go-review",
+				Want: install.Files{"SKILL.md": "v1"},
+				Have: install.Files{"SKILL.md": "v1"},
+			},
+		},
+	}
+
+	plans := install.Plan([]install.Spec{spec})
+
+	require.Len(t, plans, 1)
+	assert.Equal(t, install.StateAdd, plans[0].State, "identical unmanaged content still needs its lock")
+	assert.Empty(t, plans[0].Conflicts)
+}
+
 func TestPlan_conflictSkipsWholeSkill(t *testing.T) {
 	t.Parallel()
 	spec := install.Spec{

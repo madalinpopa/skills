@@ -53,7 +53,7 @@ Proposed documentation commit:
 - [x] [Phase 3: Runtime failure and backup reporting](#phase-3-runtime-failure-and-backup-reporting)
 - [x] [Phase 4: Force and recovery commands](#phase-4-force-and-recovery-commands)
 - [x] [Phase 5: Discovery independent of local metadata](#phase-5-discovery-independent-of-local-metadata)
-- [ ] [Phase 6: A lock for every target](#phase-6-a-lock-for-every-target)
+- [x] [Phase 6: A lock for every target](#phase-6-a-lock-for-every-target)
 - [ ] [Phase 7: Content from the recorded commit](#phase-7-content-from-the-recorded-commit)
 - [ ] [Phase 8: Valid portable frontmatter](#phase-8-valid-portable-frontmatter)
 - [ ] [Phase 9: Executable state and legacy locks](#phase-9-executable-state-and-legacy-locks)
@@ -239,8 +239,8 @@ reports zero changes and leaves the other unmanaged; listing omits it.
 1. `test(install): require a lock for each selected installation`
 2. `fix(install): adopt identical unmanaged targets independently`
 
-- [ ] Failing tests reviewed.
-- [ ] Implementation and verification reviewed.
+- [x] Failing tests reviewed.
+- [x] Implementation and verification reviewed.
 
 ## Phase 7: Content from the recorded commit
 

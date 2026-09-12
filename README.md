@@ -112,6 +112,9 @@ Flags:
 ## Your edits are never lost
 
 Each installed skill carries a `.skill-lock.json` recording what the CLI wrote.
+Every target directory gets its own lock. If a copy already sits in a target
+with no lock and matches the store, `install` adopts it by writing the lock and
+leaves the files as they are.
 An update compares three things per file: what the store holds, what is on disk,
 and what the CLI last wrote.
 

@@ -139,16 +139,17 @@ func planSkill(spec Spec) SkillPlan {
 		plan.State = StateUnavailable
 		return plan
 	}
-	installed := false
-	changed := false
+	managed, missing, changed := false, false, false
 	for _, target := range spec.Targets {
 		if target.Source != "" && target.Source != spec.Source {
 			plan.State = StateForeign
 			plan.Source = target.Source
 			return plan
 		}
-		if target.Base != nil {
-			installed = true
+		if target.Base == nil {
+			missing = true
+		} else {
+			managed = true
 		}
 		plan.Issues = append(plan.Issues, target.Issues...)
 		files := PlanFiles(target.Want, target.Have, target.Base)
@@ -162,7 +163,7 @@ func planSkill(spec Spec) SkillPlan {
 		}
 		plan.Targets = append(plan.Targets, TargetPlan{Dir: target.Dir, Files: files})
 	}
-	plan.Managed = installed
+	plan.Managed = managed
 	switch {
 	case len(plan.Issues) > 0:
 		plan.State = StateUnsupported
@@ -170,7 +171,7 @@ func planSkill(spec Spec) SkillPlan {
 		plan.Targets = nil
 	case len(plan.Conflicts) > 0:
 		plan.State = StateConflict
-	case !installed:
+	case missing:
 		plan.State = StateAdd
 	case changed:
 		plan.State = StateUpdate
