@@ -75,8 +75,8 @@ implementation commit message.
 
 ## Slice 2: Atomic installation and `.skill-lock.json`
 
-- [ ] Tests reviewed by the user.
-- [ ] Implementation and verification reviewed by the user.
+- [x] Tests reviewed by the user.
+- [x] Implementation and verification reviewed by the user.
 
 ### Test checkpoint
 
@@ -121,15 +121,15 @@ review. Provide the proposed implementation commit message.
 
 ## Phase acceptance criteria
 
-- [ ] Project and global targets follow configuration and scope exactly.
-- [ ] Shared physical targets are written once.
-- [ ] Each skill installs atomically across all selected targets.
-- [ ] Conflicts leave the entire skill untouched.
-- [ ] Locks contain full provenance and accurate base hashes.
-- [ ] Existing identical content can be safely adopted.
-- [ ] Default tests use temporary directories and run in parallel where safe.
-- [ ] `go fix ./...`, formatting, `go test ./...` and `go vet ./...` pass.
-- [ ] The user has reviewed all changes and received proposed commit messages.
+- [x] Project and global targets follow configuration and scope exactly.
+- [x] Shared physical targets are written once.
+- [x] Each skill installs atomically across all selected targets.
+- [x] Conflicts leave the entire skill untouched.
+- [x] Locks contain full provenance and accurate base hashes.
+- [x] Existing identical content can be safely adopted.
+- [x] Default tests use temporary directories and run in parallel where safe.
+- [x] `go fix ./...`, formatting, `go test ./...` and `go vet ./...` pass.
+- [x] The user has reviewed all changes and received proposed commit messages.
 
 ## Out of scope
 
