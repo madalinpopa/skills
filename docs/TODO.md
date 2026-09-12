@@ -50,7 +50,7 @@ Proposed documentation commit:
 
 - [x] [Phase 1: Read-only sync planning](#phase-1-read-only-sync-planning)
 - [x] [Phase 2: Safe target trees](#phase-2-safe-target-trees)
-- [ ] [Phase 3: Runtime failure and backup reporting](#phase-3-runtime-failure-and-backup-reporting)
+- [x] [Phase 3: Runtime failure and backup reporting](#phase-3-runtime-failure-and-backup-reporting)
 - [ ] [Phase 4: Force and recovery commands](#phase-4-force-and-recovery-commands)
 - [ ] [Phase 5: Discovery independent of local metadata](#phase-5-discovery-independent-of-local-metadata)
 - [ ] [Phase 6: A lock for every target](#phase-6-a-lock-for-every-target)
@@ -143,8 +143,8 @@ second backup and printed none of the first skill's backup paths.
 1. `test(install): define progress and lock state on runtime failure`
 2. `fix(install): preserve partial results and publish locks last`
 
-- [ ] Failing tests reviewed.
-- [ ] Implementation and verification reviewed.
+- [x] Failing tests reviewed.
+- [x] Implementation and verification reviewed.
 
 ## Phase 4: Force and recovery commands
 

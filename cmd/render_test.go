@@ -49,7 +49,7 @@ func TestRender_attention(t *testing.T) {
 	require.NoError(t, r.results("update", []install.SkillPlan{
 		{Name: "go-review", State: install.StateAdd},
 		{Name: "other", State: install.StateForeign, Source: "https://example.com/other"},
-		{Name: "sql-review", State: install.StateConflict, Conflicts: []string{filepath.Join(root, ".claude", "skills", "sql-review", "SKILL.md")}},
+		{Name: "sql-review", State: install.StateConflict, Managed: true, Conflicts: []string{filepath.Join(root, ".claude", "skills", "sql-review", "SKILL.md")}},
 	}))
 
 	assert.Equal(t, []string{
@@ -59,8 +59,67 @@ func TestRender_attention(t *testing.T) {
 		"",
 		"  3 skills, 1 changed, 2 need attention",
 		"  Run 'skills diff sql-review' to see your changes,",
-		"  or 'skills update --force' to overwrite (backed up).",
-	}, lines(out.String()))
+		"  or 'skills update sql-review --force' to overwrite (backed up).",
+	}, lines(out.String()), "the hint names the skill so it never broadens the request")
+}
+
+func TestRender_hints(t *testing.T) {
+	t.Parallel()
+	managed := install.SkillPlan{Name: "sql-review", State: install.StateConflict, Managed: true}
+	tests := map[string]struct {
+		command string
+		global  bool
+		agents  []string
+		plans   []install.SkillPlan
+		want    []string
+	}{
+		"scope is preserved": {
+			command: "update",
+			global:  true,
+			agents:  []string{"claude", "codex"},
+			plans:   []install.SkillPlan{managed},
+			want: []string{
+				"  Run 'skills diff sql-review --global --agent claude --agent codex' to see your changes,",
+				"  or 'skills update sql-review --global --agent claude --agent codex --force' to overwrite (backed up).",
+			},
+		},
+		"removal says remove": {
+			command: "remove",
+			plans:   []install.SkillPlan{managed},
+			want: []string{
+				"  Run 'skills diff sql-review' to see your changes,",
+				"  or 'skills remove sql-review --force' to remove anyway (backed up).",
+			},
+		},
+		"unmanaged conflict has nothing to diff": {
+			command: "install",
+			plans:   []install.SkillPlan{{Name: "sql-review", State: install.StateConflict}},
+			want: []string{
+				"  sql-review was not installed by skills, so there is nothing to diff.",
+				"  Run 'skills install sql-review --force' to replace it (backed up).",
+			},
+		},
+		"several conflicts list every name": {
+			command: "update",
+			plans:   []install.SkillPlan{{Name: "go-review", State: install.StateConflict, Managed: true}, managed},
+			want: []string{
+				"  Run 'skills diff <skill>' to see your changes,",
+				"  or 'skills update go-review sql-review --force' to overwrite (backed up).",
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			var out bytes.Buffer
+			r := renderer{out: &out, global: tt.global, agents: tt.agents}
+
+			require.NoError(t, r.results(tt.command, tt.plans))
+
+			got := lines(out.String())
+			assert.Equal(t, tt.want, got[len(got)-len(tt.want):])
+		})
+	}
 }
 
 func TestRender_unsupported(t *testing.T) {
@@ -123,7 +182,7 @@ func TestRender_verbose(t *testing.T) {
 				{Path: "notes.md", Action: install.ActionKeep},
 			}},
 		}},
-		{Name: "sql-review", State: install.StateConflict, Conflicts: []string{filepath.Join(root, ".claude", "skills", "sql-review", "SKILL.md")}},
+		{Name: "sql-review", State: install.StateConflict, Managed: true, Conflicts: []string{filepath.Join(root, ".claude", "skills", "sql-review", "SKILL.md")}},
 	}))
 
 	assert.Equal(t, []string{
@@ -136,7 +195,7 @@ func TestRender_verbose(t *testing.T) {
 		"",
 		"  2 skills, 1 changed, 1 needs attention",
 		"  Run 'skills diff sql-review' to see your changes,",
-		"  or 'skills install --force' to overwrite (backed up).",
+		"  or 'skills install sql-review --force' to overwrite (backed up).",
 	}, lines(out.String()), "paths appear beneath the skill; kept local files are not changes")
 }
 
