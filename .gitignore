@@ -1,10 +1,19 @@
-# ignore everything by default
+# ignore everything by default, then allowlist
 *
+!*/
 
-# go files
+# go
 !*.go
 !go.mod
 !go.sum
 
-# docs
-!README.md
+# skill + prompt content
+!*.md
+
+# tooling
+!.gitignore
+!.github/**
+
+# build output
+/dist/
+/skills-bin
