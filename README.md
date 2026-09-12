@@ -211,7 +211,12 @@ work in progress out of `ls` and out of everyone's projects until it is ready.
 No release is needed, just push it.
 
 Claude-only frontmatter goes under an `x-claude` key, which is lifted into place
-for Claude Code and dropped for the others. Most skills need none of it.
+for Claude Code and dropped for the others. Most skills need none of it. Its
+keys must be unique strings, must not repeat a top-level field, and must not
+be `name`, `description`, `status`, `tags` or `x-claude`. A skill that breaks
+this is a store error for every agent, not just Claude. The frontmatter may
+use LF or CRLF line endings; the installed copy always gets LF delimiters and
+keeps the body bytes as written.
 
 The `description` is what decides whether a skill fires, so say both what it
 does and when to use it.

@@ -78,6 +78,93 @@ func TestParse_failed(t *testing.T) {
 	}
 }
 
+const (
+	notMapping = "---\nname: x\ndescription: d\nstatus: published\nx-claude: [allowed-tools]\n---\n# x\n"
+	duplicate  = "---\nname: x\ndescription: d\nstatus: published\nx-claude:\n  allowed-tools: a\n  allowed-tools: b\n---\n# x\n"
+	reserved   = "---\nname: x\ndescription: d\nstatus: published\nx-claude:\n  name: other\n---\n# x\n"
+	collision  = "---\nname: x\ndescription: d\nstatus: published\nallowed-tools: a\nx-claude:\n  allowed-tools: b\n---\n# x\n"
+	numericKey = "---\nname: x\ndescription: d\nstatus: published\nx-claude:\n  1: a\n---\n# x\n"
+	twoNames   = "---\nname: x\nname: y\ndescription: d\nstatus: published\n---\n# x\n"
+)
+
+func TestParse_rejectsUnsafeExtensions(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		source string
+		want   string
+	}{
+		"x-claude is not a mapping":    {source: notMapping, want: "x-claude"},
+		"duplicate extension key":      {source: duplicate, want: "allowed-tools"},
+		"reserved extension key":       {source: reserved, want: "name"},
+		"extension collides top-level": {source: collision, want: "allowed-tools"},
+		"non-string extension key":     {source: numericKey, want: "x-claude"},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			_, err := skill.Parse([]byte(tt.source))
+
+			require.Error(t, err)
+			assert.ErrorContains(t, err, tt.want)
+		})
+	}
+}
+
+func TestTransform_failed(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		source string
+		agent  string
+		want   string
+	}{
+		"duplicate extension key for claude": {source: duplicate, agent: "claude", want: "allowed-tools"},
+		"duplicate extension key for codex":  {source: duplicate, agent: "codex", want: "allowed-tools"},
+		"collision for codex":                {source: collision, agent: "codex", want: "allowed-tools"},
+		"not a mapping for codex":            {source: notMapping, agent: "codex", want: "x-claude"},
+		"duplicate top-level key":            {source: twoNames, agent: "claude", want: "name"},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			_, err := skill.Transform([]byte(tt.source), tt.agent)
+
+			require.Error(t, err, "invalid extensions are rejected even when the output would drop them")
+			assert.ErrorContains(t, err, tt.want)
+		})
+	}
+}
+
+const crlf = "---\r\nname: x\r\ndescription: d\r\nstatus: published\r\n---\r\n# x\r\n\r\nWindows body.\r\n"
+
+func TestParse_acceptsCRLF(t *testing.T) {
+	t.Parallel()
+
+	meta, err := skill.Parse([]byte(crlf))
+
+	require.NoError(t, err)
+	assert.Equal(t, skill.Metadata{Name: "x", Description: "d", Status: skill.Published}, meta)
+}
+
+func TestTransform_normalisesDelimitersAndKeepsBody(t *testing.T) {
+	t.Parallel()
+	lf := strings.ReplaceAll(crlf, "\r\n", "\n")
+	fromLF, err := skill.Transform([]byte(lf), "claude")
+	require.NoError(t, err)
+
+	out, err := skill.Transform([]byte(crlf), "claude")
+
+	require.NoError(t, err)
+	front, body, found := strings.Cut(strings.TrimPrefix(string(out), "---\n"), "\n---\n")
+	require.True(t, found, "the emitted frontmatter uses LF delimiters")
+	assert.Equal(t, "name: x\ndescription: d", front, "the frontmatter is emitted the same way for both line endings")
+	assert.Equal(t, "# x\r\n\r\nWindows body.\r\n", body, "the body keeps its bytes")
+	assert.Equal(t, fromLF[:len(fromLF)-len("# x\n\nWindows body.\n")], out[:len(out)-len(body)])
+}
+
 func TestTransform(t *testing.T) {
 	t.Parallel()
 
