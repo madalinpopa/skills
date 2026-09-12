@@ -167,3 +167,44 @@ func TestInstall_forceBackupFailurePreventsReplacement(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, entries, 2, "only the skill file and its lock, no staged leftovers")
 }
+
+func TestRemove_deletedTrackedFileIsConflict(t *testing.T) {
+	t.Parallel()
+	dir := filepath.Join(t.TempDir(), ".claude", "skills", "go-review")
+	installed(t, dir, map[string][]byte{"SKILL.md": claudeSkill, "scripts/check.sh": []byte("#!/bin/sh\n")})
+	require.NoError(t, os.Remove(filepath.Join(dir, "scripts", "check.sh")))
+	remover := newInstaller()
+	remover.Backups = filepath.Join(t.TempDir(), "backups")
+
+	results, err := remover.Remove([]install.Installation{
+		{Name: "go-review", Targets: []install.Destination{{Dir: filepath.Dir(dir), Variant: install.VariantClaude}}},
+	})
+
+	require.NoError(t, err)
+	require.Len(t, results, 1)
+	assert.Equal(t, install.StateConflict, results[0].State, "a deleted tracked file is an edit")
+	assert.Equal(t, []string{filepath.Join(dir, "scripts", "check.sh")}, results[0].Conflicts)
+	assert.FileExists(t, filepath.Join(dir, "SKILL.md"), "the rest of the skill stays installed")
+	assert.NoDirExists(t, remover.Backups)
+}
+
+func TestRemove_forceBacksUpRemainingFiles(t *testing.T) {
+	t.Parallel()
+	dir := filepath.Join(t.TempDir(), ".claude", "skills", "go-review")
+	installed(t, dir, map[string][]byte{"SKILL.md": claudeSkill, "scripts/check.sh": []byte("#!/bin/sh\n")})
+	require.NoError(t, os.Remove(filepath.Join(dir, "scripts", "check.sh")))
+	remover := newInstaller()
+	remover.Backups = filepath.Join(t.TempDir(), "backups")
+	remover.Force = true
+
+	results, err := remover.Remove([]install.Installation{
+		{Name: "go-review", Targets: []install.Destination{{Dir: filepath.Dir(dir), Variant: install.VariantClaude}}},
+	})
+
+	require.NoError(t, err)
+	assert.Equal(t, install.StateRemove, results[0].State)
+	assert.NoDirExists(t, dir)
+	require.Len(t, results[0].Backups, 1)
+	assert.Equal(t, claudeSkill, read(t, filepath.Join(results[0].Backups[0], "SKILL.md")), "what remained is backed up")
+	assert.NoFileExists(t, filepath.Join(results[0].Backups[0], "scripts", "check.sh"), "a backup never invents deleted content")
+}
