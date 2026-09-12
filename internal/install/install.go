@@ -22,11 +22,24 @@ import (
 const LockFile = ".skill-lock.json"
 
 type Lock struct {
-	Name      string            `json:"name"`
-	Source    string            `json:"source"`
-	Commit    string            `json:"commit"`
-	Installed time.Time         `json:"installed"`
-	Files     map[string]string `json:"files"`
+	Name       string            `json:"name"`
+	Source     string            `json:"source"`
+	Commit     string            `json:"commit"`
+	Installed  time.Time         `json:"installed"`
+	Files      map[string]string `json:"files"`
+	Executable map[string]bool   `json:"executable"`
+}
+
+func (l Lock) entries() Files {
+	files := make(Files, len(l.Files))
+	for p, sum := range l.Files {
+		entry := Entry{Hash: sum, Mode: ModeUnknown}
+		if executable, ok := l.Executable[p]; ok {
+			entry.Mode = modeOf(executable)
+		}
+		files[p] = entry
+	}
+	return files
 }
 
 type Desired struct {
@@ -46,6 +59,7 @@ type Installer struct {
 	Backups string
 	Force   bool
 	DryRun  bool
+	Modes   bool
 	Now     func() time.Time
 }
 
@@ -136,10 +150,10 @@ func (i Installer) spec(req Request) (Spec, error) {
 			return Spec{}, err
 		} else if err == nil {
 			target.Source = lock.Source
-			target.Base = lock.Files
-			if target.Base == nil {
-				target.Base = Files{}
-			}
+			target.Base = lock.entries()
+		}
+		if !i.Modes {
+			target.Want, target.Have, target.Base = contentOnly(target.Want), contentOnly(target.Have), contentOnly(target.Base)
 		}
 		spec.Targets = append(spec.Targets, target)
 	}
@@ -151,11 +165,16 @@ func (i Installer) apply(req Request, plan SkillPlan) error {
 	defer stage.discard()
 	for idx, desired := range req.Targets {
 		lock := Lock{
-			Name:      req.Name,
-			Source:    i.Source,
-			Commit:    i.Commit,
-			Installed: i.Now(),
-			Files:     hashFiles(desired.Files),
+			Name:       req.Name,
+			Source:     i.Source,
+			Commit:     i.Commit,
+			Installed:  i.Now(),
+			Files:      map[string]string{},
+			Executable: map[string]bool{},
+		}
+		for p, entry := range hashFiles(desired.Files) {
+			lock.Files[p] = entry.Hash
+			lock.Executable[p] = entry.Mode == ModeExecutable
 		}
 		if err := stage.target(desired, plan.Targets[idx], lock); err != nil {
 			return err
@@ -373,11 +392,15 @@ func inspect(dir string) (tree, error) {
 		case !entry.Type().IsRegular():
 			t.issues = append(t.issues, Issue{Path: full, Reason: "is not a regular file"})
 		case entry.Name() != LockFile:
+			info, err := entry.Info()
+			if err != nil {
+				return err
+			}
 			data, err := fs.ReadFile(fsys, p)
 			if err != nil {
 				return err
 			}
-			t.files[p] = hash(data)
+			t.files[p] = Entry{Hash: hash(data), Mode: modeOf(info.Mode()&0o111 != 0)}
 		}
 		return nil
 	})
@@ -412,9 +435,27 @@ func hashDir(dir string) (Files, error) {
 func hashFiles(files map[string]skill.File) Files {
 	hashes := make(Files, len(files))
 	for path, file := range files {
-		hashes[path] = hash(file.Data)
+		hashes[path] = Entry{Hash: hash(file.Data), Mode: modeOf(file.Mode&0o111 != 0)}
 	}
 	return hashes
+}
+
+func modeOf(executable bool) Mode {
+	if executable {
+		return ModeExecutable
+	}
+	return ModeFile
+}
+
+func contentOnly(files Files) Files {
+	if files == nil {
+		return nil
+	}
+	plain := make(Files, len(files))
+	for p, entry := range files {
+		plain[p] = Entry{Hash: entry.Hash}
+	}
+	return plain
 }
 
 func hash(data []byte) string {

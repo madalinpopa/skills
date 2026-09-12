@@ -120,7 +120,10 @@ Every target directory gets its own lock. If a copy already sits in a target
 with no lock and matches the store, `install` adopts it by writing the lock and
 leaves the files as they are.
 An update compares three things per file: what the store holds, what is on disk,
-and what the CLI last wrote.
+and what the CLI last wrote. On Linux and macOS the executable bit is part of
+that comparison, so bundled scripts run after install and a local `chmod`
+counts as an edit. A lock written before executable bits were recorded needs
+`--force` the first time an update or removal would change that skill.
 
 If the file on disk still matches what the CLI wrote, you never touched it, so
 it is safe to overwrite. Anything else is your own edit. The update skips the

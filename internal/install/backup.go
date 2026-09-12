@@ -79,8 +79,12 @@ func (i Installer) remove(inst Installation) (SkillPlan, error) {
 		if err != nil {
 			return fail(err)
 		}
-		for _, p := range paths(t.files, lock.Files) {
-			if lock.Files[p] != t.files[p] {
+		base := lock.entries()
+		if !i.Modes {
+			base, t.files = contentOnly(base), contentOnly(t.files)
+		}
+		for _, p := range paths(t.files, base) {
+			if base[p] != t.files[p] {
 				plan.Conflicts = append(plan.Conflicts, filepath.Join(dir, filepath.FromSlash(p)))
 			}
 		}

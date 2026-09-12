@@ -7,7 +7,20 @@ import (
 	"strings"
 )
 
-type Files map[string]string
+type Mode int8
+
+const (
+	ModeFile Mode = iota
+	ModeExecutable
+	ModeUnknown
+)
+
+type Entry struct {
+	Hash string
+	Mode Mode
+}
+
+type Files map[string]Entry
 
 type Action string
 
