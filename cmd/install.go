@@ -49,7 +49,7 @@ func resolveInstall(c *cobra.Command, names, agents []string, global bool) (inst
 	if err != nil {
 		return installRequest{}, err
 	}
-	catalog, installer, err := openStore(c.Context(), a)
+	catalog, installer, err := openStore(c.Context(), a, false)
 	if err != nil {
 		return installRequest{}, err
 	}
@@ -83,7 +83,7 @@ func openTargets(c *cobra.Command, agents []string, global bool) (app, []install
 	return a, targets, nil
 }
 
-func openStore(ctx context.Context, a app) ([]skill.Skill, install.Installer, error) {
+func openStore(ctx context.Context, a app, force bool) ([]skill.Skill, install.Installer, error) {
 	if err := a.store.Init(ctx); err != nil {
 		return nil, install.Installer{}, err
 	}
@@ -95,7 +95,7 @@ func openStore(ctx context.Context, a app) ([]skill.Skill, install.Installer, er
 	if err != nil {
 		return nil, install.Installer{}, err
 	}
-	return catalog, install.Installer{Source: a.cfg.Store.Repo, Commit: commit, Now: utcNow}, nil
+	return catalog, a.installer(commit, force), nil
 }
 
 func printResults(c *cobra.Command, results []install.SkillPlan) {
@@ -111,8 +111,13 @@ func printResults(c *cobra.Command, results []install.SkillPlan) {
 			c.Printf("  ! %s  skipped, you edited %s\n", r.Name, strings.Join(r.Conflicts, ", "))
 		case install.StateForeign:
 			c.Printf("  ! %s  skipped, installed from %s\n", r.Name, r.Source)
+		case install.StateRemove:
+			c.Printf("  - %s  removed\n", r.Name)
 		case install.StateUnavailable:
 			c.Printf("  ! %s  unavailable in store, left installed\n", r.Name)
+		}
+		for _, backup := range r.Backups {
+			c.Printf("      backed up to %s\n", backup)
 		}
 	}
 }

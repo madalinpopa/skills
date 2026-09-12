@@ -2,6 +2,9 @@ package cmd_test
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -96,9 +99,10 @@ func installSkill(t *testing.T, root, name string) {
 	for _, agent := range []string{".claude", ".agents"} {
 		dir := filepath.Join(root, agent, "skills", name)
 		require.NoError(t, os.MkdirAll(dir, 0o750))
-		content := "---\nname: " + name + "\ndescription: Installed description.\n---\n"
-		require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte(content), 0o600))
-		lock := `{"name":"` + name + `","source":"https://example.com/store","commit":"abc","files":{}}`
+		content := []byte("---\nname: " + name + "\ndescription: Installed description.\n---\n")
+		require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), content, 0o600))
+		sum := sha256.Sum256(content)
+		lock := fmt.Sprintf(`{"name":%q,"source":"https://example.com/store","commit":"abc","files":{"SKILL.md":%q}}`, name, hex.EncodeToString(sum[:]))
 		require.NoError(t, os.WriteFile(filepath.Join(dir, ".skill-lock.json"), []byte(lock), 0o600))
 	}
 }

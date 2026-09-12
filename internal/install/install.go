@@ -37,32 +37,62 @@ type Request struct {
 }
 
 type Installer struct {
-	Source string
-	Commit string
-	Now    func() time.Time
+	Source  string
+	Commit  string
+	Backups string
+	Force   bool
+	Now     func() time.Time
 }
 
 func (i Installer) Install(reqs []Request) ([]SkillPlan, error) {
 	specs := make([]Spec, 0, len(reqs))
-	byName := map[string]Request{}
+	requests := map[string]Request{}
+	specByName := map[string]Spec{}
 	for _, req := range reqs {
 		spec, err := i.spec(req)
 		if err != nil {
 			return nil, err
 		}
 		specs = append(specs, spec)
-		byName[req.Name] = req
+		requests[req.Name] = req
+		specByName[req.Name] = spec
 	}
 	plans := Plan(specs)
-	for _, plan := range plans {
+	for idx, plan := range plans {
+		if plan.State == StateConflict && i.Force {
+			forced, err := i.force(specByName[plan.Name])
+			if err != nil {
+				return nil, fmt.Errorf("install %s: %w", plan.Name, err)
+			}
+			plans[idx] = forced
+			plan = forced
+		}
 		if plan.State != StateAdd && plan.State != StateUpdate {
 			continue
 		}
-		if err := i.apply(byName[plan.Name], plan); err != nil {
+		if err := i.apply(requests[plan.Name], plan); err != nil {
 			return nil, fmt.Errorf("install %s: %w", plan.Name, err)
 		}
 	}
 	return plans, nil
+}
+
+func (i Installer) force(spec Spec) (SkillPlan, error) {
+	var backups []string
+	for idx := range spec.Targets {
+		target := &spec.Targets[idx]
+		path, err := i.backup(target.Dir)
+		if err != nil {
+			return SkillPlan{}, err
+		}
+		if path != "" {
+			backups = append(backups, path)
+		}
+		target.Base = target.Have
+	}
+	plan := planSkill(spec)
+	plan.Backups = backups
+	return plan, nil
 }
 
 func (i Installer) spec(req Request) (Spec, error) {
