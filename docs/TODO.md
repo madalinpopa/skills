@@ -57,7 +57,7 @@ Proposed documentation commit:
 - [x] [Phase 7: Content from the recorded commit](#phase-7-content-from-the-recorded-commit)
 - [x] [Phase 8: Valid portable frontmatter](#phase-8-valid-portable-frontmatter)
 - [x] [Phase 9: Executable state and legacy locks](#phase-9-executable-state-and-legacy-locks)
-- [ ] [Phase 10: Dry-run and verbose output](#phase-10-dry-run-and-verbose-output)
+- [x] [Phase 10: Dry-run and verbose output](#phase-10-dry-run-and-verbose-output)
 - [ ] [Phase 11: Scope hints and first-run boundaries](#phase-11-scope-hints-and-first-run-boundaries)
 - [ ] [Phase 12: Config and target validation](#phase-12-config-and-target-validation)
 
@@ -356,10 +356,10 @@ skills as if writes happened; existing tests explicitly assert that wording.
 3. `test(cli): define dry-run result wording`
 4. `fix(cli): describe planned changes without claiming writes`
 
-- [ ] Removal-path failing tests reviewed.
-- [ ] Removal-path implementation and verification reviewed.
-- [ ] Renderer failing tests reviewed.
-- [ ] Renderer implementation, README and verification reviewed.
+- [x] Removal-path failing tests reviewed.
+- [x] Removal-path implementation and verification reviewed.
+- [x] Renderer failing tests reviewed.
+- [x] Renderer implementation, README and verification reviewed.
 
 ## Phase 11: Scope hints and first-run boundaries
 
