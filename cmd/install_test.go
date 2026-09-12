@@ -17,7 +17,7 @@ func TestInstall_noArgsIsUsageError(t *testing.T) {
 	t.Parallel()
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"install"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"install"}, strings.NewReader(""), &out, &errOut)
 
 	require.Error(t, err)
 	assert.ErrorIs(t, err, cmd.ErrUsage)
@@ -27,7 +27,7 @@ func TestInstall_unknownAgentIsUsageError(t *testing.T) {
 	home := configureStore(t, gittest.Init(t))
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"install", "--agent", "nope", "go-review"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"install", "--agent", "nope", "go-review"}, strings.NewReader(""), &out, &errOut)
 
 	require.Error(t, err)
 	assert.ErrorIs(t, err, cmd.ErrUsage)
@@ -43,7 +43,7 @@ func TestInstall_missingSkillIsReported(t *testing.T) {
 	home := configureStore(t, source)
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"install", "--global", "go-review", "nope"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"install", "--global", "go-review", "nope"}, strings.NewReader(""), &out, &errOut)
 
 	require.Error(t, err)
 	assert.NotErrorIs(t, err, cmd.ErrUsage)
@@ -60,7 +60,7 @@ func TestInstall_global(t *testing.T) {
 	home := configureStore(t, source)
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"install", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"install", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
 	assert.Contains(t, out.String(), "go-review")

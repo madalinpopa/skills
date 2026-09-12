@@ -28,7 +28,7 @@ func TestDiff_showsOnlyYourEdits(t *testing.T) {
 	run(t, "sync")
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"diff", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"diff", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
 	assert.Contains(t, out.String(), "+my note")
@@ -56,7 +56,7 @@ func TestDiff_failed(t *testing.T) {
 			writeInstalled(t, dir, "go-review", tt.source, tt.commit)
 			var out, errOut bytes.Buffer
 
-			err := cmd.Execute(t.Context(), []string{"diff", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)
+			err := cmd.Execute(t.Context(), "", []string{"diff", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)
 
 			require.Error(t, err)
 			assert.NotErrorIs(t, err, cmd.ErrUsage)

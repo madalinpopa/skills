@@ -28,7 +28,7 @@ func TestLs_listsPublishedSkills(t *testing.T) {
 	installSkill(t, home, "installed-only")
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"ls"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"ls"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
 	lines := strings.Split(strings.TrimSpace(out.String()), "\n")
@@ -68,7 +68,7 @@ func TestLs_installedScopes(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			var out, errOut bytes.Buffer
 
-			err := cmd.Execute(t.Context(), []string{"ls", tt.flag}, strings.NewReader(""), &out, &errOut)
+			err := cmd.Execute(t.Context(), "", []string{"ls", tt.flag}, strings.NewReader(""), &out, &errOut)
 
 			require.NoError(t, err, errOut.String())
 			lines := strings.Split(strings.TrimSpace(out.String()), "\n")
@@ -88,7 +88,7 @@ func TestLs_localAndGlobalIsUsageError(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"ls", "--local", "--global"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"ls", "--local", "--global"}, strings.NewReader(""), &out, &errOut)
 
 	require.Error(t, err)
 	assert.ErrorIs(t, err, cmd.ErrUsage)

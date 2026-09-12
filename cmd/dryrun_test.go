@@ -20,7 +20,7 @@ func TestDryRun_uninitialisedStore(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"install", "--global", "--dry-run", "go-review"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"install", "--global", "--dry-run", "go-review"}, strings.NewReader(""), &out, &errOut)
 
 	require.Error(t, err)
 	assert.NotErrorIs(t, err, cmd.ErrUsage)
@@ -37,7 +37,7 @@ func TestDryRun_installWritesNothing(t *testing.T) {
 	run(t, "init")
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"install", "--global", "--dry-run", "go-review"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"install", "--global", "--dry-run", "go-review"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
 	assert.Contains(t, out.String(), "+ go-review")
@@ -52,7 +52,7 @@ func TestDryRun_removeWritesNothing(t *testing.T) {
 	installSkill(t, home, "go-review")
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"remove", "--global", "--dry-run", "go-review"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"remove", "--global", "--dry-run", "go-review"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
 	assert.Contains(t, out.String(), "- go-review")
@@ -73,7 +73,7 @@ func TestExecute_warningsGoToStderr(t *testing.T) {
 	t.Chdir(outside)
 	var out, errOut bytes.Buffer
 
-	err := cmd.Execute(t.Context(), []string{"install", "--dry-run", "go-review"}, strings.NewReader(""), &out, &errOut)
+	err := cmd.Execute(t.Context(), "", []string{"install", "--dry-run", "go-review"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
 	assert.Contains(t, errOut.String(), "warning: not inside a Git repository")
