@@ -195,21 +195,17 @@ func TestDiscover(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []skill.Skill{
 		{
-			Metadata: skill.Metadata{
-				Name:        "go-review",
-				Description: "Reviews Go code for correctness and idiom.",
-				Status:      skill.Published,
-				Tags:        []string{"go", "review"},
-			},
-			Dir: "skills/go-review",
+			Name:        "go-review",
+			Description: "Reviews Go code for correctness and idiom.",
+			Status:      skill.Published,
+			Tags:        []string{"go", "review"},
+			Dir:         "skills/go-review",
 		},
 		{
-			Metadata: skill.Metadata{
-				Name:        "plain",
-				Description: "A skill with nothing agent specific.",
-				Status:      skill.Draft,
-			},
-			Dir: "skills/plain",
+			Name:        "plain",
+			Description: "A skill with nothing agent specific.",
+			Status:      skill.Draft,
+			Dir:         "skills/plain",
 		},
 	}, skills, "sorted by name, drafts included")
 }
