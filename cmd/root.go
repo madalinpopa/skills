@@ -8,7 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ErrUsage = errors.New("invalid usage")
+var (
+	ErrUsage     = errors.New("invalid usage")
+	ErrAttention = errors.New("attention required")
+)
 
 type usageError struct{ err error }
 
@@ -16,16 +19,16 @@ func (e usageError) Error() string        { return e.err.Error() }
 func (e usageError) Unwrap() error        { return e.err }
 func (e usageError) Is(target error) bool { return target == ErrUsage }
 
-func Execute(ctx context.Context, args []string, in io.Reader, out, errOut io.Writer) error {
-	root := newRoot(in, out, errOut)
+func Execute(ctx context.Context, version string, args []string, in io.Reader, out, errOut io.Writer) error {
+	root := newRoot(version, in, out, errOut)
 	if args == nil {
 		args = []string{}
 	}
 	root.SetArgs(args)
 
 	failed, err := root.ExecuteContextC(ctx)
-	if err == nil {
-		return nil
+	if err == nil || errors.Is(err, ErrAttention) {
+		return err
 	}
 
 	failed.PrintErrln(failed.ErrPrefix(), err.Error())
@@ -35,7 +38,20 @@ func Execute(ctx context.Context, args []string, in io.Reader, out, errOut io.Wr
 	return err
 }
 
-func newRoot(in io.Reader, out, errOut io.Writer) *cobra.Command {
+func ExitCode(err error) int {
+	switch {
+	case err == nil:
+		return 0
+	case errors.Is(err, ErrUsage):
+		return 2
+	case errors.Is(err, ErrAttention):
+		return 3
+	default:
+		return 1
+	}
+}
+
+func newRoot(version string, in io.Reader, out, errOut io.Writer) *cobra.Command {
 	root := &cobra.Command{
 		Use:   "skills",
 		Short: "Install agent skills from a shared store",
@@ -53,7 +69,7 @@ func newRoot(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	root.SetIn(in)
 	root.SetOut(out)
 	root.SetErr(errOut)
-	root.AddCommand(newInitCmd(), newSyncCmd(), newLsCmd(), newInstallCmd(), newUpdateCmd(), newRemoveCmd(), newDiffCmd())
+	root.AddCommand(newInitCmd(), newSyncCmd(), newLsCmd(), newInstallCmd(), newUpdateCmd(), newRemoveCmd(), newDiffCmd(), newVersionCmd(version))
 	root.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
 		return usageError{err}
 	})

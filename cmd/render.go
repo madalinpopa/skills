@@ -90,6 +90,16 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 	return err
 }
 
+func attention(results []install.SkillPlan) error {
+	for _, res := range results {
+		switch res.State {
+		case install.StateConflict, install.StateForeign, install.StateUnavailable:
+			return ErrAttention
+		}
+	}
+	return nil
+}
+
 func (r renderer) paths(res install.SkillPlan) []string {
 	var paths []string
 	if res.State == install.StateConflict {

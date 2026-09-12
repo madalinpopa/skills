@@ -22,7 +22,10 @@ func newUpdateCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return a.renderer(c).results("update", results)
+			if err = a.renderer(c).results("update", results); err != nil {
+				return err
+			}
+			return attention(results)
 		},
 	}
 	c.Flags().StringSliceVar(&agents, "agent", nil, "narrow to certain agents (default: config defaults)")
