@@ -25,7 +25,9 @@ func TestExecute_noArgsPrintsHelp(t *testing.T) {
 	assert.Contains(t, help, "Usage:")
 	assert.Contains(t, help, "skills")
 	assert.Contains(t, help, "Install agent skills from a shared store")
-	assert.NotContains(t, help, "Available Commands:", "no subcommands exist yet")
+	assert.Contains(t, help, "Available Commands:")
+	assert.Contains(t, help, "init")
+	assert.Contains(t, help, "sync")
 	assert.Empty(t, errOut.String(), "help goes to the output writer only")
 }
 

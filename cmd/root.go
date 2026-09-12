@@ -46,9 +46,11 @@ func newRoot(in io.Reader, out, errOut io.Writer) *cobra.Command {
 		SilenceErrors: true,
 		SilenceUsage:  true,
 	}
+	root.CompletionOptions.DisableDefaultCmd = true
 	root.SetIn(in)
 	root.SetOut(out)
 	root.SetErr(errOut)
+	root.AddCommand(newInitCmd(), newSyncCmd())
 	root.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
 		return usageError{err}
 	})

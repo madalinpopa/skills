@@ -32,8 +32,8 @@ These are proposed logical commits and require review before creation.
 
 ## Slice 1: Managed Git store
 
-- [ ] Tests reviewed by the user.
-- [ ] Implementation and verification reviewed by the user.
+- [x] Tests reviewed by the user.
+- [x] Implementation and verification reviewed by the user.
 
 ### Test checkpoint
 
@@ -85,8 +85,8 @@ implementation commit message.
 
 ## Slice 2: Skill metadata and agent transformation
 
-- [ ] Tests reviewed by the user.
-- [ ] Implementation and verification reviewed by the user.
+- [x] Tests reviewed by the user.
+- [x] Implementation and verification reviewed by the user.
 
 ### Test checkpoint
 
@@ -130,14 +130,14 @@ Stop for review and provide the proposed implementation commit message.
 
 ## Phase acceptance criteria
 
-- [ ] Store creation and synchronization use the configured branch only.
-- [ ] Synchronization is fast-forward only and preserves dirty/divergent state.
-- [ ] Full Git commit hashes are available to callers.
-- [ ] Valid skills parse and invalid store metadata fails clearly.
-- [ ] Claude and `.agents` outputs match `DESIGN.md` and are deterministic.
-- [ ] Tests use local repositories and require neither network nor Docker.
-- [ ] `go fix ./...`, formatting, `go test ./...` and `go vet ./...` pass.
-- [ ] The user has reviewed all changes and received proposed commit messages.
+- [x] Store creation and synchronization use the configured branch only.
+- [x] Synchronization is fast-forward only and preserves dirty/divergent state.
+- [x] Full Git commit hashes are available to callers.
+- [x] Valid skills parse and invalid store metadata fails clearly.
+- [x] Claude and `.agents` outputs match `DESIGN.md` and are deterministic.
+- [x] Tests use local repositories and require neither network nor Docker.
+- [x] `go fix ./...`, formatting, `go test ./...` and `go vet ./...` pass.
+- [x] The user has reviewed all changes and received proposed commit messages.
 
 ## Out of scope
 

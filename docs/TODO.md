@@ -166,7 +166,7 @@ until it becomes large enough to justify a separate package. Remove the empty
 
 - [x] [Phase 1: CLI foundation, configuration and project scope](TODO_1.md) —
   four commits, one PR
-- [ ] [Phase 2: Git store and portable skill metadata](TODO_2.md) — four
+- [x] [Phase 2: Git store and portable skill metadata](TODO_2.md) — four
   commits, one PR
 - [ ] [Phase 3: Catalog listing and change planning](TODO_3.md) — four commits,
   one PR
