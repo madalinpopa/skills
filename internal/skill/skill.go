@@ -53,6 +53,9 @@ func Parse(data []byte) (Metadata, error) {
 	case meta.Status != Published && meta.Status != Draft:
 		return Metadata{}, fmt.Errorf("status %q is not published or draft", meta.Status)
 	}
+	if _, _, err := frontmatter(data); err != nil {
+		return Metadata{}, err
+	}
 	return meta, nil
 }
 
@@ -81,16 +84,9 @@ func Describe(data []byte) (Metadata, error) {
 }
 
 func Transform(data []byte, agent string) ([]byte, error) {
-	front, body, err := split(data)
+	doc, body, err := frontmatter(data)
 	if err != nil {
 		return nil, err
-	}
-	var doc yaml.Node
-	if err := yaml.Unmarshal(front, &doc); err != nil {
-		return nil, err
-	}
-	if len(doc.Content) != 1 || doc.Content[0].Kind != yaml.MappingNode {
-		return nil, errors.New("frontmatter must be a mapping")
 	}
 	mapping := doc.Content[0]
 
@@ -108,9 +104,6 @@ func Transform(data []byte, agent string) ([]byte, error) {
 		kept = append(kept, key, value)
 	}
 	if agent == claudeAgent && claude != nil {
-		if claude.Kind != yaml.MappingNode {
-			return nil, fmt.Errorf("%s must be a mapping", claudeKey)
-		}
 		kept = append(kept, claude.Content...)
 	}
 	mapping.Content = kept
@@ -119,7 +112,7 @@ func Transform(data []byte, agent string) ([]byte, error) {
 	out.WriteString(delimiter)
 	enc := yaml.NewEncoder(&out)
 	enc.SetIndent(2)
-	if err := enc.Encode(&doc); err != nil {
+	if err := enc.Encode(doc); err != nil {
 		return nil, err
 	}
 	if err := enc.Close(); err != nil {
@@ -128,6 +121,69 @@ func Transform(data []byte, agent string) ([]byte, error) {
 	out.WriteString(delimiter)
 	out.Write(body)
 	return out.Bytes(), nil
+}
+
+func frontmatter(data []byte) (*yaml.Node, []byte, error) {
+	front, body, err := split(data)
+	if err != nil {
+		return nil, nil, err
+	}
+	var doc yaml.Node
+	if err := yaml.Unmarshal(front, &doc); err != nil {
+		return nil, nil, err
+	}
+	if len(doc.Content) != 1 || doc.Content[0].Kind != yaml.MappingNode {
+		return nil, nil, errors.New("frontmatter must be a mapping")
+	}
+	if err := validate(doc.Content[0]); err != nil {
+		return nil, nil, err
+	}
+	return &doc, body, nil
+}
+
+func validate(mapping *yaml.Node) error {
+	top, err := keys(mapping, "frontmatter")
+	if err != nil {
+		return err
+	}
+	for i := 0; i < len(mapping.Content); i += 2 {
+		if mapping.Content[i].Value != claudeKey {
+			continue
+		}
+		extension := mapping.Content[i+1]
+		if extension.Kind != yaml.MappingNode {
+			return fmt.Errorf("%s must be a mapping", claudeKey)
+		}
+		if _, err := keys(extension, claudeKey); err != nil {
+			return err
+		}
+		for j := 0; j < len(extension.Content); j += 2 {
+			key := extension.Content[j].Value
+			switch key {
+			case "name", "description", "status", "tags", claudeKey:
+				return fmt.Errorf("%s: %q is reserved", claudeKey, key)
+			}
+			if top[key] {
+				return fmt.Errorf("%s: %q collides with a top-level field", claudeKey, key)
+			}
+		}
+	}
+	return nil
+}
+
+func keys(mapping *yaml.Node, what string) (map[string]bool, error) {
+	seen := map[string]bool{}
+	for i := 0; i < len(mapping.Content); i += 2 {
+		key := mapping.Content[i]
+		if key.Kind != yaml.ScalarNode || key.Tag != "!!str" {
+			return nil, fmt.Errorf("%s: key %q is not a string", what, key.Value)
+		}
+		if seen[key.Value] {
+			return nil, fmt.Errorf("%s: duplicate key %q", what, key.Value)
+		}
+		seen[key.Value] = true
+	}
+	return seen, nil
 }
 
 func Render(fsys fs.FS, agent string) (map[string]File, error) {
