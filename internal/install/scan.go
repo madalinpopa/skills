@@ -113,7 +113,7 @@ func Find(installed []Installation, names []string) ([]Installation, error) {
 	return found, nil
 }
 
-func UpdateRequests(storeDir string, catalog []skill.Skill, installed []Installation) ([]Request, error) {
+func UpdateRequests(store fs.FS, catalog []skill.Skill, installed []Installation) ([]Request, error) {
 	byName := map[string]skill.Skill{}
 	for _, s := range catalog {
 		byName[s.Name] = s
@@ -125,7 +125,7 @@ func UpdateRequests(storeDir string, catalog []skill.Skill, installed []Installa
 			reqs = append(reqs, Request{Name: inst.Name, Unavailable: true})
 			continue
 		}
-		req, err := request(storeDir, s, inst.Targets)
+		req, err := request(store, s, inst.Targets)
 		if err != nil {
 			return nil, err
 		}

@@ -41,13 +41,13 @@ func resolveUpdate(c *cobra.Command, names, agents []string, global, force bool)
 	if err != nil {
 		return app{}, installRequest{}, err
 	}
-	catalog, installer, err := openStore(c.Context(), a, force)
+	rev, catalog, err := openStore(c.Context(), a)
 	if err != nil {
 		return app{}, installRequest{}, err
 	}
-	requests, err := install.UpdateRequests(a.store.Dir, catalog, chosen)
+	requests, err := install.UpdateRequests(rev.tree, catalog, chosen)
 	if err != nil {
 		return app{}, installRequest{}, err
 	}
-	return a, installRequest{installer: installer, requests: requests}, nil
+	return a, installRequest{installer: a.installer(rev.commit, force), requests: requests}, nil
 }

@@ -1,18 +1,18 @@
 package store
 
 import (
-	"archive/tar"
 	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
-
-	"github.com/madalinpopa/skills/internal/skill"
+	"testing/fstest"
 )
 
 type Store struct {
@@ -81,30 +81,60 @@ func (s Store) Commit(ctx context.Context) (string, error) {
 	return s.git(ctx, "rev-parse", "HEAD")
 }
 
-func (s Store) Files(ctx context.Context, commit, dir string) (map[string]skill.File, error) {
-	archive, err := output(ctx, s.Dir, "archive", "--format=tar", commit, dir)
+func (s Store) Tree(ctx context.Context, commit string) (fs.FS, error) {
+	listing, err := output(ctx, s.Dir, nil, "ls-tree", "-r", "-z", commit)
+	if err != nil {
+		return nil, fmt.Errorf("commit %s: %w", commit, err)
+	}
+	tree := fstest.MapFS{}
+	var oids []string
+	for entry := range bytes.SplitSeq(bytes.TrimSuffix(listing, []byte{0}), []byte{0}) {
+		meta, name, ok := bytes.Cut(entry, []byte{'\t'})
+		if !ok {
+			continue
+		}
+		fields := strings.Fields(string(meta))
+		if len(fields) != 3 || fields[1] != "blob" {
+			continue
+		}
+		tree[string(name)] = &fstest.MapFile{Mode: blobMode(fields[0])}
+		oids = append(oids, fields[2]+" "+string(name))
+	}
+	if len(oids) == 0 {
+		return tree, nil
+	}
+	stdin := strings.NewReader(strings.Join(oids, "\n") + "\n")
+	blobs, err := output(ctx, s.Dir, stdin, "cat-file", "--batch=%(objectname) %(objectsize) %(rest)")
 	if err != nil {
 		return nil, err
 	}
-	files := map[string]skill.File{}
-	reader := tar.NewReader(bytes.NewReader(archive))
-	for {
-		header, err := reader.Next()
-		if errors.Is(err, io.EOF) {
-			return files, nil
+	for len(blobs) > 0 {
+		header, rest, ok := bytes.Cut(blobs, []byte{'\n'})
+		if !ok {
+			return nil, fmt.Errorf("git cat-file: unexpected output %q", header)
 		}
-		if err != nil {
-			return nil, err
+		fields := strings.SplitN(string(header), " ", 3)
+		if len(fields) != 3 {
+			return nil, fmt.Errorf("git cat-file: unexpected output %q", header)
 		}
-		rel, ok := strings.CutPrefix(header.Name, dir+"/")
-		if !ok || header.Typeflag != tar.TypeReg {
-			continue
+		size, err := strconv.Atoi(fields[1])
+		if err != nil || len(rest) < size+1 {
+			return nil, fmt.Errorf("git cat-file: unexpected output %q", header)
 		}
-		data, err := io.ReadAll(reader)
-		if err != nil {
-			return nil, err
-		}
-		files[rel] = skill.File{Data: data, Mode: header.FileInfo().Mode().Perm()}
+		tree[fields[2]].Data = bytes.Clone(rest[:size])
+		blobs = rest[size+1:]
+	}
+	return tree, nil
+}
+
+func blobMode(mode string) fs.FileMode {
+	switch mode {
+	case "100755":
+		return 0o755
+	case "120000":
+		return fs.ModeSymlink | 0o777
+	default:
+		return 0o644
 	}
 }
 
@@ -156,13 +186,14 @@ func (s Store) git(ctx context.Context, args ...string) (string, error) {
 }
 
 func run(ctx context.Context, dir string, args ...string) (string, error) {
-	out, err := output(ctx, dir, args...)
+	out, err := output(ctx, dir, nil, args...)
 	return strings.TrimSpace(string(out)), err
 }
 
-func output(ctx context.Context, dir string, args ...string) ([]byte, error) {
+func output(ctx context.Context, dir string, stdin io.Reader, args ...string) ([]byte, error) {
 	cmd := exec.CommandContext(ctx, "git", args...)
 	cmd.Dir = dir
+	cmd.Stdin = stdin
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr

@@ -54,7 +54,7 @@ Proposed documentation commit:
 - [x] [Phase 4: Force and recovery commands](#phase-4-force-and-recovery-commands)
 - [x] [Phase 5: Discovery independent of local metadata](#phase-5-discovery-independent-of-local-metadata)
 - [x] [Phase 6: A lock for every target](#phase-6-a-lock-for-every-target)
-- [ ] [Phase 7: Content from the recorded commit](#phase-7-content-from-the-recorded-commit)
+- [x] [Phase 7: Content from the recorded commit](#phase-7-content-from-the-recorded-commit)
 - [ ] [Phase 8: Valid portable frontmatter](#phase-8-valid-portable-frontmatter)
 - [ ] [Phase 9: Executable state and legacy locks](#phase-9-executable-state-and-legacy-locks)
 - [ ] [Phase 10: Dry-run and verbose output](#phase-10-dry-run-and-verbose-output)
@@ -266,8 +266,8 @@ immediate diff reported the store edit as a local installation edit.
 1. `test(store): tie catalog and install bytes to the recorded revision`
 2. `fix(store): read published skill content from one commit`
 
-- [ ] Failing tests reviewed.
-- [ ] Implementation and verification reviewed.
+- [x] Failing tests reviewed.
+- [x] Implementation and verification reviewed.
 
 ## Phase 8: Valid portable frontmatter
 

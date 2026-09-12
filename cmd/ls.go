@@ -3,14 +3,12 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 
 	"github.com/madalinpopa/skills/internal/install"
-	"github.com/madalinpopa/skills/internal/skill"
 )
 
 func newLsCmd() *cobra.Command {
@@ -40,10 +38,7 @@ func listStore(c *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-	if err = a.ready(c.Context()); err != nil {
-		return err
-	}
-	skills, err := skill.Catalog(os.DirFS(a.store.Dir))
+	_, skills, err := openStore(c.Context(), a)
 	if err != nil {
 		return err
 	}
