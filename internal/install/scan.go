@@ -108,9 +108,17 @@ func Find(installed []Installation, names []string) ([]Installation, error) {
 		found = append(found, inst)
 	}
 	if len(missing) > 0 {
-		return nil, fmt.Errorf("not installed: %s", strings.Join(missing, ", "))
+		return nil, NotInstalledError{Names: missing}
 	}
 	return found, nil
+}
+
+type NotInstalledError struct {
+	Names []string
+}
+
+func (e NotInstalledError) Error() string {
+	return "not installed: " + strings.Join(e.Names, ", ")
 }
 
 func UpdateRequests(store fs.FS, catalog []skill.Skill, installed []Installation) ([]Request, error) {

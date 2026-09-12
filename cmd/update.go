@@ -37,7 +37,7 @@ func resolveUpdate(c *cobra.Command, names, agents []string, global, force bool)
 	if err != nil {
 		return app{}, installRequest{}, err
 	}
-	chosen, err := install.Find(installed, names)
+	chosen, err := a.find(installed, names, agents, global)
 	if err != nil {
 		return app{}, installRequest{}, err
 	}

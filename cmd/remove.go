@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/spf13/cobra"
 
 	"github.com/madalinpopa/skills/internal/install"
@@ -25,10 +22,7 @@ func newRemoveCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			chosen, err := install.Find(installed, names)
-			if err != nil && !global {
-				return suggestGlobal(a, agents, names, err)
-			}
+			chosen, err := a.find(installed, names, agents, global)
 			if err != nil {
 				return err
 			}
@@ -40,19 +34,4 @@ func newRemoveCmd() *cobra.Command {
 	c.Flags().BoolVar(&global, "global", false, "act on the home directories instead of the repository")
 	c.Flags().BoolVar(&force, "force", false, "remove skills you have edited (backed up first)")
 	return c
-}
-
-func suggestGlobal(a app, agents, names []string, notFound error) error {
-	targets, err := install.Targets(a.cfg, a.home, true, agents)
-	if err != nil {
-		return notFound
-	}
-	installed, err := install.Scan(targets)
-	if err != nil {
-		return notFound
-	}
-	if _, err = install.Find(installed, names); err != nil {
-		return notFound
-	}
-	return fmt.Errorf("%s: only installed globally, use --global", strings.Join(names, ", "))
 }

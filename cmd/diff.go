@@ -36,7 +36,7 @@ func newDiffCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			chosen, err := install.Find(installed, names)
+			chosen, err := a.find(installed, names, agents, global)
 			if err != nil {
 				return err
 			}

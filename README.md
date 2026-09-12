@@ -84,8 +84,10 @@ skills remove go-review --global
 ```
 
 Scope is explicit. A command never falls back from the project to your home
-directory. Removing a skill that is only installed globally tells you to add
-`--global`.
+directory. When `update`, `diff` or `remove` names a skill that is only
+installed globally for the selected agents, the error tells you to add
+`--global`. Only the missing names are checked, so a skill installed in the
+project is never reported as global only.
 
 ## Commands
 
