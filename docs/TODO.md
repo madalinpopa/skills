@@ -55,7 +55,7 @@ Proposed documentation commit:
 - [x] [Phase 5: Discovery independent of local metadata](#phase-5-discovery-independent-of-local-metadata)
 - [x] [Phase 6: A lock for every target](#phase-6-a-lock-for-every-target)
 - [x] [Phase 7: Content from the recorded commit](#phase-7-content-from-the-recorded-commit)
-- [ ] [Phase 8: Valid portable frontmatter](#phase-8-valid-portable-frontmatter)
+- [x] [Phase 8: Valid portable frontmatter](#phase-8-valid-portable-frontmatter)
 - [ ] [Phase 9: Executable state and legacy locks](#phase-9-executable-state-and-legacy-locks)
 - [ ] [Phase 10: Dry-run and verbose output](#phase-10-dry-run-and-verbose-output)
 - [ ] [Phase 11: Scope hints and first-run boundaries](#phase-11-scope-hints-and-first-run-boundaries)
@@ -293,10 +293,10 @@ appends `x-claude` keys without collision checks. Install accepted duplicate
 3. `test(skill): accept CRLF frontmatter delimiters`
 4. `fix(skill): parse portable frontmatter line endings`
 
-- [ ] Extension failing tests reviewed.
-- [ ] Extension implementation and verification reviewed.
-- [ ] Line-ending failing tests reviewed.
-- [ ] Line-ending implementation and verification reviewed.
+- [x] Extension failing tests reviewed.
+- [x] Extension implementation and verification reviewed.
+- [x] Line-ending failing tests reviewed.
+- [x] Line-ending implementation and verification reviewed.
 
 ## Phase 9: Executable state and legacy locks
 
