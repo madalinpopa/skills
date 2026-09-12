@@ -13,6 +13,7 @@
 # tooling
 !.gitignore
 !.github/**
+!.golangci.yml
 
 # build output
 /dist/
