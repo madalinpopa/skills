@@ -49,7 +49,10 @@ Write explicit, idiomatic code that is easy to read. Use small packages with
 clear jobs, descriptive names and direct control flow. Any complex abstraction
 needs a concrete reason. Trust internal invariants. Validate external input,
 config, filesystem state and Git results, but do not add extra defensive
-layers "just in case".
+layers "just in case". Avoid adding large doc comments. The code should explain
+itself. Add doc comments only if you feel they explain something that is not
+obvious from the code and will help the user. When you do write comments, keep
+them short and concise. Avoid long or large comment blocks.
 
 ## Package boundaries
 
