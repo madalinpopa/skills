@@ -49,7 +49,7 @@ Proposed documentation commit:
 ## Phases
 
 - [x] [Phase 1: Read-only sync planning](#phase-1-read-only-sync-planning)
-- [ ] [Phase 2: Safe target trees](#phase-2-safe-target-trees)
+- [x] [Phase 2: Safe target trees](#phase-2-safe-target-trees)
 - [ ] [Phase 3: Runtime failure and backup reporting](#phase-3-runtime-failure-and-backup-reporting)
 - [ ] [Phase 4: Force and recovery commands](#phase-4-force-and-recovery-commands)
 - [ ] [Phase 5: Discovery independent of local metadata](#phase-5-discovery-independent-of-local-metadata)
@@ -114,8 +114,8 @@ other files and one target lock had changed.
 1. `test(install): define unsupported target and collision safety`
 2. `fix(install): reject unsafe target trees before mutation`
 
-- [ ] Failing tests reviewed.
-- [ ] Implementation and verification reviewed.
+- [x] Failing tests reviewed.
+- [x] Implementation and verification reviewed.
 
 ## Phase 3: Runtime failure and backup reporting
 

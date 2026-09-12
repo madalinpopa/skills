@@ -242,12 +242,15 @@ func TestPreview_failed(t *testing.T) {
 
 func snapshot(t *testing.T, dir string) map[string]string {
 	t.Helper()
+	root, err := os.OpenRoot(dir)
+	require.NoError(t, err)
+	fsys := root.FS()
 	files := map[string]string{}
-	err := filepath.WalkDir(dir, func(path string, entry fs.DirEntry, err error) error {
+	walkErr := fs.WalkDir(fsys, ".", func(path string, entry fs.DirEntry, err error) error {
 		if err != nil || entry.IsDir() {
 			return err
 		}
-		data, err := os.ReadFile(path)
+		data, err := fs.ReadFile(fsys, path)
 		if err != nil {
 			return err
 		}
@@ -255,7 +258,8 @@ func snapshot(t *testing.T, dir string) map[string]string {
 		files[path] = hex.EncodeToString(sum[:])
 		return nil
 	})
-	require.NoError(t, err)
+	require.NoError(t, root.Close())
+	require.NoError(t, walkErr)
 	return files
 }
 
