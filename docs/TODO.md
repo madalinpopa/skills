@@ -51,7 +51,7 @@ Proposed documentation commit:
 - [x] [Phase 1: Read-only sync planning](#phase-1-read-only-sync-planning)
 - [x] [Phase 2: Safe target trees](#phase-2-safe-target-trees)
 - [x] [Phase 3: Runtime failure and backup reporting](#phase-3-runtime-failure-and-backup-reporting)
-- [ ] [Phase 4: Force and recovery commands](#phase-4-force-and-recovery-commands)
+- [x] [Phase 4: Force and recovery commands](#phase-4-force-and-recovery-commands)
 - [ ] [Phase 5: Discovery independent of local metadata](#phase-5-discovery-independent-of-local-metadata)
 - [ ] [Phase 6: A lock for every target](#phase-6-a-lock-for-every-target)
 - [ ] [Phase 7: Content from the recorded commit](#phase-7-content-from-the-recorded-commit)
@@ -180,10 +180,10 @@ requires preserving them.
 3. `test(install): preserve local-only files during forced updates`
 4. `fix(install): force conflicts without deleting local-only files`
 
-- [ ] CLI failing tests reviewed.
-- [ ] CLI implementation and verification reviewed.
-- [ ] Installer failing tests reviewed.
-- [ ] Installer implementation and verification reviewed.
+- [x] CLI failing tests reviewed.
+- [x] CLI implementation and verification reviewed.
+- [x] Installer failing tests reviewed.
+- [x] Installer implementation and verification reviewed.
 
 ## Phase 5: Discovery independent of local metadata
 
