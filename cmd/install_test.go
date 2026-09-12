@@ -51,3 +51,23 @@ func TestInstall_missingSkillIsReported(t *testing.T) {
 	assert.NoDirExists(t, filepath.Join(home, ".claude"), "nothing is written when a name is unknown")
 	assert.NoDirExists(t, filepath.Join(home, ".agents"))
 }
+
+func TestInstall_global(t *testing.T) {
+	source := gittest.Init(t)
+	addSkill(t, source, "go-review", "published", "Reviews Go code.", "[go]")
+	gittest.Run(t, source, "add", ".")
+	gittest.Commit(t, source, "add skills")
+	home := configureStore(t, source)
+	var out, errOut bytes.Buffer
+
+	err := cmd.Execute(t.Context(), []string{"install", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)
+
+	require.NoError(t, err, errOut.String())
+	assert.Contains(t, out.String(), "go-review")
+	assert.Contains(t, out.String(), "added")
+	assert.FileExists(t, filepath.Join(home, ".claude", "skills", "go-review", "SKILL.md"))
+	assert.FileExists(t, filepath.Join(home, ".claude", "skills", "go-review", ".skill-lock.json"))
+	assert.FileExists(t, filepath.Join(home, ".agents", "skills", "go-review", "SKILL.md"))
+	assert.FileExists(t, filepath.Join(home, ".agents", "skills", "go-review", ".skill-lock.json"))
+	assert.NoDirExists(t, filepath.Join(home, ".gemini"), "gemini shares the .agents target")
+}
