@@ -34,12 +34,7 @@ func newApp(dryRun bool) (app, error) {
 		return app{}, err
 	}
 	dir := config.Dir(os.Getenv("XDG_CONFIG_HOME"), home)
-	var cfg config.Config
-	if dryRun {
-		cfg, err = config.Load(dir)
-	} else {
-		cfg, err = config.Init(dir)
-	}
+	cfg, err := config.Load(dir)
 	if err != nil {
 		return app{}, err
 	}
@@ -57,11 +52,14 @@ func newApp(dryRun bool) (app, error) {
 }
 
 func (a app) ready(ctx context.Context) error {
-	if !a.dryRun {
+	if a.dryRun {
+		if _, err := os.Stat(a.store.Dir); errors.Is(err, fs.ErrNotExist) {
+			return errors.New("the store is not initialised; run 'skills init' first")
+		}
 		return a.store.Init(ctx)
 	}
-	if _, err := os.Stat(a.store.Dir); errors.Is(err, fs.ErrNotExist) {
-		return errors.New("the store is not initialised; run 'skills init' first")
+	if _, err := config.Init(a.dir); err != nil {
+		return err
 	}
 	return a.store.Init(ctx)
 }

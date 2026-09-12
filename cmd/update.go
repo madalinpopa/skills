@@ -41,6 +41,9 @@ func resolveUpdate(c *cobra.Command, names, agents []string, global, force bool)
 	if err != nil {
 		return app{}, installRequest{}, err
 	}
+	if len(chosen) == 0 {
+		return a, installRequest{}, nil
+	}
 	rev, catalog, err := openStore(c.Context(), a)
 	if err != nil {
 		return app{}, installRequest{}, err

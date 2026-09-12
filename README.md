@@ -115,6 +115,17 @@ Flags:
 --no-color    disable color (NO_COLOR is honoured too)
 ```
 
+`--global` applies to `ls`, `install`, `update`, `remove` and `diff`. `--agent`
+and `--force` apply to `install`, `update`, `remove` and `diff` (`diff` takes
+no `--force`). `--dry-run`, `-v` and `--no-color` apply everywhere and are
+ignored by commands that write nothing. `ls --local` and `ls --global` scan
+the default agents' directories from the config and take no `--agent`.
+
+Only `init`, `sync`, `ls`, `install`, `diff` and an `update` with something to
+update read the store. They create the config on first run and clone the
+store if it is missing. Listing installed skills, removing them and an empty
+`update` load the config read-only and never clone.
+
 ## Your edits are never lost
 
 Each installed skill carries a `.skill-lock.json` recording what the CLI wrote.
