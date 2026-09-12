@@ -164,7 +164,7 @@ until it becomes large enough to justify a separate package. Remove the empty
 
 ## Phases
 
-- [ ] [Phase 1: CLI foundation, configuration and project scope](TODO_1.md) —
+- [x] [Phase 1: CLI foundation, configuration and project scope](TODO_1.md) —
   four commits, one PR
 - [ ] [Phase 2: Git store and portable skill metadata](TODO_2.md) — four
   commits, one PR

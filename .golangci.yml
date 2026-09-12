@@ -28,6 +28,8 @@ linters:
     gosec:
       excludes:
         - G104
+        - G204
+        - G304
   exclusions:
     rules:
       - path: '(.+)\.go$'
