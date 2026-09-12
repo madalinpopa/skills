@@ -92,21 +92,21 @@ func sortByName(plans []SkillPlan) {
 }
 
 func PlanFiles(want, have, base Files) []FileChange {
-	union := map[string]struct{}{}
-	for p := range maps.Keys(want) {
-		union[p] = struct{}{}
-	}
-	for p := range maps.Keys(have) {
-		union[p] = struct{}{}
-	}
-	for p := range maps.Keys(base) {
-		union[p] = struct{}{}
-	}
 	var changes []FileChange
-	for _, p := range slices.Sorted(maps.Keys(union)) {
+	for _, p := range paths(want, have, base) {
 		changes = append(changes, FileChange{Path: p, Action: fileAction(p, want, have, base)})
 	}
 	return changes
+}
+
+func paths(sets ...Files) []string {
+	union := map[string]struct{}{}
+	for _, set := range sets {
+		for p := range set {
+			union[p] = struct{}{}
+		}
+	}
+	return slices.Sorted(maps.Keys(union))
 }
 
 func fileAction(p string, want, have, base Files) Action {
