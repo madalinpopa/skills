@@ -38,15 +38,8 @@ func (s Store) Init(ctx context.Context) error {
 }
 
 func (s Store) Sync(ctx context.Context) (Result, error) {
-	if err := s.check(ctx); err != nil {
+	if err := s.checkClean(ctx); err != nil {
 		return Result{}, err
-	}
-	status, err := s.git(ctx, "status", "--porcelain")
-	if err != nil {
-		return Result{}, err
-	}
-	if status != "" {
-		return Result{}, fmt.Errorf("store %s has local changes; inspect them with 'git -C %s status'", s.Dir, s.Dir)
 	}
 	old, err := s.Commit(ctx)
 	if err != nil {
@@ -63,6 +56,25 @@ func (s Store) Sync(ctx context.Context) (Result, error) {
 		return Result{}, err
 	}
 	return Result{Old: old, New: head}, nil
+}
+
+func (s Store) Preview(ctx context.Context) (Result, error) {
+	if err := s.checkClean(ctx); err != nil {
+		return Result{}, err
+	}
+	local, err := s.Commit(ctx)
+	if err != nil {
+		return Result{}, err
+	}
+	out, err := s.git(ctx, "ls-remote", "--quiet", "origin", "refs/heads/"+s.Branch)
+	if err != nil {
+		return Result{}, err
+	}
+	remote, _, ok := strings.Cut(out, "\t")
+	if !ok {
+		return Result{}, fmt.Errorf("branch %s does not exist on %s", s.Branch, s.Repo)
+	}
+	return Result{Old: local, New: remote}, nil
 }
 
 func (s Store) Commit(ctx context.Context) (string, error) {
@@ -102,6 +114,20 @@ func (s Store) clone(ctx context.Context) error {
 	}
 	_, err := run(ctx, "", "clone", "--quiet", "--branch", s.Branch, "--single-branch", s.Repo, s.Dir)
 	return err
+}
+
+func (s Store) checkClean(ctx context.Context) error {
+	if err := s.check(ctx); err != nil {
+		return err
+	}
+	status, err := s.git(ctx, "--no-optional-locks", "status", "--porcelain")
+	if err != nil {
+		return err
+	}
+	if status != "" {
+		return fmt.Errorf("store %s has local changes; inspect them with 'git -C %s status'", s.Dir, s.Dir)
+	}
+	return nil
 }
 
 func (s Store) check(ctx context.Context) error {

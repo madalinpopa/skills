@@ -61,6 +61,10 @@ skills update    # move installed skills to the synced content
 `sync` only moves the store forward, so it never rewrites a file in your
 project. `update` is the step that touches your project.
 
+`sync --dry-run` asks the remote for its branch head and prints the local and
+remote commits. It does not fetch, so it cannot promise a fast-forward; the
+real `sync` checks that.
+
 ## Scope
 
 Commands act on the current Git repository, from any subdirectory. Outside a
