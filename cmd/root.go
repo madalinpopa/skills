@@ -50,7 +50,7 @@ func newRoot(in io.Reader, out, errOut io.Writer) *cobra.Command {
 	root.SetIn(in)
 	root.SetOut(out)
 	root.SetErr(errOut)
-	root.AddCommand(newInitCmd(), newSyncCmd(), newLsCmd(), newInstallCmd())
+	root.AddCommand(newInitCmd(), newSyncCmd(), newLsCmd(), newInstallCmd(), newUpdateCmd(), newRemoveCmd())
 	root.SetFlagErrorFunc(func(_ *cobra.Command, err error) error {
 		return usageError{err}
 	})

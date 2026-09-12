@@ -43,6 +43,20 @@ const (
 )
 
 func Parse(data []byte) (Metadata, error) {
+	meta, err := Describe(data)
+	if err != nil {
+		return Metadata{}, err
+	}
+	switch {
+	case meta.Status == "":
+		return Metadata{}, errors.New("status is required: published or draft")
+	case meta.Status != Published && meta.Status != Draft:
+		return Metadata{}, fmt.Errorf("status %q is not published or draft", meta.Status)
+	}
+	return meta, nil
+}
+
+func Describe(data []byte) (Metadata, error) {
 	front, _, err := split(data)
 	if err != nil {
 		return Metadata{}, err
@@ -62,10 +76,6 @@ func Parse(data []byte) (Metadata, error) {
 		return Metadata{}, errors.New("name is required")
 	case meta.Description == "":
 		return Metadata{}, errors.New("description is required")
-	case meta.Status == "":
-		return Metadata{}, errors.New("status is required: published or draft")
-	case meta.Status != Published && meta.Status != Draft:
-		return Metadata{}, fmt.Errorf("status %q is not published or draft", meta.Status)
 	}
 	return meta, nil
 }

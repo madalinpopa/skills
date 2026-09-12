@@ -31,41 +31,72 @@ type Desired struct {
 }
 
 type Request struct {
-	Name    string
-	Targets []Desired
+	Name        string
+	Unavailable bool
+	Targets     []Desired
 }
 
 type Installer struct {
-	Source string
-	Commit string
-	Now    func() time.Time
+	Source  string
+	Commit  string
+	Backups string
+	Force   bool
+	Now     func() time.Time
 }
 
 func (i Installer) Install(reqs []Request) ([]SkillPlan, error) {
 	specs := make([]Spec, 0, len(reqs))
-	byName := map[string]Request{}
+	requests := map[string]Request{}
+	specByName := map[string]Spec{}
 	for _, req := range reqs {
 		spec, err := i.spec(req)
 		if err != nil {
 			return nil, err
 		}
 		specs = append(specs, spec)
-		byName[req.Name] = req
+		requests[req.Name] = req
+		specByName[req.Name] = spec
 	}
 	plans := Plan(specs)
-	for _, plan := range plans {
+	for idx, plan := range plans {
+		if plan.State == StateConflict && i.Force {
+			forced, err := i.force(specByName[plan.Name])
+			if err != nil {
+				return nil, fmt.Errorf("install %s: %w", plan.Name, err)
+			}
+			plans[idx] = forced
+			plan = forced
+		}
 		if plan.State != StateAdd && plan.State != StateUpdate {
 			continue
 		}
-		if err := i.apply(byName[plan.Name], plan); err != nil {
+		if err := i.apply(requests[plan.Name], plan); err != nil {
 			return nil, fmt.Errorf("install %s: %w", plan.Name, err)
 		}
 	}
 	return plans, nil
 }
 
+func (i Installer) force(spec Spec) (SkillPlan, error) {
+	var backups []string
+	for idx := range spec.Targets {
+		target := &spec.Targets[idx]
+		path, err := i.backup(target.Dir)
+		if err != nil {
+			return SkillPlan{}, err
+		}
+		if path != "" {
+			backups = append(backups, path)
+		}
+		target.Base = target.Have
+	}
+	plan := planSkill(spec)
+	plan.Backups = backups
+	return plan, nil
+}
+
 func (i Installer) spec(req Request) (Spec, error) {
-	spec := Spec{Name: req.Name, Available: true, Source: i.Source}
+	spec := Spec{Name: req.Name, Available: !req.Unavailable, Source: i.Source}
 	for _, desired := range req.Targets {
 		have, err := hashDir(desired.Dir)
 		if err != nil {
@@ -265,15 +296,23 @@ func perm(mode fs.FileMode) fs.FileMode {
 func Requests(storeDir string, skills []skill.Skill, dests []Destination) ([]Request, error) {
 	reqs := make([]Request, 0, len(skills))
 	for _, s := range skills {
-		req := Request{Name: s.Name}
-		for _, dest := range dests {
-			files, err := skill.Render(os.DirFS(filepath.Join(storeDir, filepath.FromSlash(s.Dir))), string(dest.Variant))
-			if err != nil {
-				return nil, fmt.Errorf("%s: %w", s.Name, err)
-			}
-			req.Targets = append(req.Targets, Desired{Dir: filepath.Join(dest.Dir, s.Name), Files: files})
+		req, err := request(storeDir, s, dests)
+		if err != nil {
+			return nil, err
 		}
 		reqs = append(reqs, req)
 	}
 	return reqs, nil
+}
+
+func request(storeDir string, s skill.Skill, dests []Destination) (Request, error) {
+	req := Request{Name: s.Name}
+	for _, dest := range dests {
+		files, err := skill.Render(os.DirFS(filepath.Join(storeDir, filepath.FromSlash(s.Dir))), string(dest.Variant))
+		if err != nil {
+			return Request{}, fmt.Errorf("%s: %w", s.Name, err)
+		}
+		req.Targets = append(req.Targets, Desired{Dir: filepath.Join(dest.Dir, s.Name), Files: files})
+	}
+	return req, nil
 }

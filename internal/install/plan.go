@@ -27,6 +27,7 @@ const (
 	StateAdd         State = "add"
 	StateUpdate      State = "update"
 	StateConflict    State = "conflict"
+	StateRemove      State = "remove"
 	StateUnavailable State = "unavailable"
 	StateForeign     State = "foreign"
 )
@@ -61,6 +62,7 @@ type SkillPlan struct {
 	State     State
 	Source    string
 	Conflicts []string
+	Backups   []string
 	Targets   []TargetPlan
 }
 

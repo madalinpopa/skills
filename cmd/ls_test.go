@@ -2,6 +2,9 @@ package cmd_test
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,7 +25,7 @@ func TestLs_listsPublishedSkills(t *testing.T) {
 	gittest.Run(t, source, "add", ".")
 	gittest.Commit(t, source, "add skills")
 	home := configureStore(t, source)
-	installGlobally(t, home, "installed-only")
+	installSkill(t, home, "installed-only")
 	var out, errOut bytes.Buffer
 
 	err := cmd.Execute(t.Context(), []string{"ls"}, strings.NewReader(""), &out, &errOut)
@@ -47,10 +50,59 @@ func addSkill(t *testing.T, repo, name, status, description, tags string) {
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte(content), 0o600))
 }
 
-func installGlobally(t *testing.T, home, name string) {
+func TestLs_installedScopes(t *testing.T) {
+	project := gittest.Init(t)
+	home := configureStore(t, gittest.Init(t))
+	installSkill(t, project, "project-skill")
+	installSkill(t, home, "home-skill")
+	t.Chdir(project)
+	tests := map[string]struct {
+		flag   string
+		listed string
+		hidden string
+	}{
+		"local":  {flag: "--local", listed: "project-skill", hidden: "home-skill"},
+		"global": {flag: "--global", listed: "home-skill", hidden: "project-skill"},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			var out, errOut bytes.Buffer
+
+			err := cmd.Execute(t.Context(), []string{"ls", tt.flag}, strings.NewReader(""), &out, &errOut)
+
+			require.NoError(t, err, errOut.String())
+			lines := strings.Split(strings.TrimSpace(out.String()), "\n")
+			require.Len(t, lines, 1, "one line per installed skill")
+			assert.Contains(t, lines[0], tt.listed)
+			assert.Contains(t, lines[0], "Installed description.")
+			assert.Contains(t, lines[0], "agents, claude", "the physical targets in directory order, not one agent per copy")
+			assert.NotContains(t, out.String(), tt.hidden, "no fallback to the other scope")
+			assert.NoDirExists(t, storeDir(home), "installed listings do not touch the store")
+		})
+	}
+}
+
+func TestLs_localAndGlobalIsUsageError(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
+	var out, errOut bytes.Buffer
+
+	err := cmd.Execute(t.Context(), []string{"ls", "--local", "--global"}, strings.NewReader(""), &out, &errOut)
+
+	require.Error(t, err)
+	assert.ErrorIs(t, err, cmd.ErrUsage)
+}
+
+func installSkill(t *testing.T, root, name string) {
 	t.Helper()
-	dir := filepath.Join(home, ".claude", "skills", name)
-	require.NoError(t, os.MkdirAll(dir, 0o750))
-	require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte("---\nname: "+name+"\ndescription: d\n---\n"), 0o600))
-	require.NoError(t, os.WriteFile(filepath.Join(dir, ".skill-lock.json"), []byte("{}"), 0o600))
+	for _, agent := range []string{".claude", ".agents"} {
+		dir := filepath.Join(root, agent, "skills", name)
+		require.NoError(t, os.MkdirAll(dir, 0o750))
+		content := []byte("---\nname: " + name + "\ndescription: Installed description.\n---\n")
+		require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), content, 0o600))
+		sum := sha256.Sum256(content)
+		lock := fmt.Sprintf(`{"name":%q,"source":"https://example.com/store","commit":"abc","files":{"SKILL.md":%q}}`, name, hex.EncodeToString(sum[:]))
+		require.NoError(t, os.WriteFile(filepath.Join(dir, ".skill-lock.json"), []byte(lock), 0o600))
+	}
 }
