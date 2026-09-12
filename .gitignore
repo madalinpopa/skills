@@ -12,6 +12,7 @@
 
 # docs
 !docs/**
+!LICENSE
 
 # tooling
 !.gitignore
