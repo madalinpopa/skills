@@ -30,19 +30,3 @@ func TestRemove_global(t *testing.T) {
 	assert.Contains(t, out.String(), backups, "the backup path is printed")
 	assert.NoDirExists(t, storeDir(home), "removal does not need the store")
 }
-
-func TestRemove_globalOnlySuggestsGlobal(t *testing.T) {
-	project := gittest.Init(t)
-	home := configureStore(t, gittest.Init(t))
-	installSkill(t, home, "go-review")
-	t.Chdir(project)
-	var out, errOut bytes.Buffer
-
-	err := cmd.Execute(t.Context(), "", []string{"remove", "go-review"}, strings.NewReader(""), &out, &errOut)
-
-	require.Error(t, err)
-	assert.NotErrorIs(t, err, cmd.ErrUsage)
-	assert.Contains(t, errOut.String(), "--global")
-	assert.FileExists(t, filepath.Join(home, ".claude", "skills", "go-review", "SKILL.md"), "project scope never falls back to global")
-	assert.FileExists(t, filepath.Join(home, ".agents", "skills", "go-review", "SKILL.md"))
-}

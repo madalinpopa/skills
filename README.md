@@ -84,8 +84,10 @@ skills remove go-review --global
 ```
 
 Scope is explicit. A command never falls back from the project to your home
-directory. Removing a skill that is only installed globally tells you to add
-`--global`.
+directory. When `update`, `diff` or `remove` names a skill that is only
+installed globally for the selected agents, the error tells you to add
+`--global`. Only the missing names are checked, so a skill installed in the
+project is never reported as global only.
 
 ## Commands
 
@@ -112,6 +114,17 @@ Flags:
 -v            show individual files and their targets
 --no-color    disable color (NO_COLOR is honoured too)
 ```
+
+`--global` applies to `ls`, `install`, `update`, `remove` and `diff`. `--agent`
+and `--force` apply to `install`, `update`, `remove` and `diff` (`diff` takes
+no `--force`). `--dry-run`, `-v` and `--no-color` apply everywhere and are
+ignored by commands that write nothing. `ls --local` and `ls --global` scan
+the default agents' directories from the config and take no `--agent`.
+
+Only `init`, `sync`, `ls`, `install`, `diff` and an `update` with something to
+update read the store. They create the config on first run and clone the
+store if it is missing. Listing installed skills, removing them and an empty
+`update` load the config read-only and never clone.
 
 ## Your edits are never lost
 

@@ -58,7 +58,7 @@ Proposed documentation commit:
 - [x] [Phase 8: Valid portable frontmatter](#phase-8-valid-portable-frontmatter)
 - [x] [Phase 9: Executable state and legacy locks](#phase-9-executable-state-and-legacy-locks)
 - [x] [Phase 10: Dry-run and verbose output](#phase-10-dry-run-and-verbose-output)
-- [ ] [Phase 11: Scope hints and first-run boundaries](#phase-11-scope-hints-and-first-run-boundaries)
+- [x] [Phase 11: Scope hints and first-run boundaries](#phase-11-scope-hints-and-first-run-boundaries)
 - [ ] [Phase 12: Config and target validation](#phase-12-config-and-target-validation)
 
 ## Phase 1: Read-only sync planning
@@ -389,10 +389,10 @@ statement: it needs the store to reconstruct its base.
 3. `test(cli): define lazy first-run initialization`
 4. `fix(cli): initialize config and store only when needed`
 
-- [ ] Scope-hint failing tests reviewed.
-- [ ] Scope-hint implementation and verification reviewed.
-- [ ] Initialization failing tests reviewed.
-- [ ] Initialization implementation, README and verification reviewed.
+- [x] Scope-hint failing tests reviewed.
+- [x] Scope-hint implementation and verification reviewed.
+- [x] Initialization failing tests reviewed.
+- [x] Initialization implementation, README and verification reviewed.
 
 ## Phase 12: Config and target validation
 
