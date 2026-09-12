@@ -97,12 +97,16 @@ func TestLs_localAndGlobalIsUsageError(t *testing.T) {
 func installSkill(t *testing.T, root, name string) {
 	t.Helper()
 	for _, agent := range []string{".claude", ".agents"} {
-		dir := filepath.Join(root, agent, "skills", name)
-		require.NoError(t, os.MkdirAll(dir, 0o750))
-		content := []byte("---\nname: " + name + "\ndescription: Installed description.\n---\n")
-		require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), content, 0o600))
-		sum := sha256.Sum256(content)
-		lock := fmt.Sprintf(`{"name":%q,"source":"https://example.com/store","commit":"abc","files":{"SKILL.md":%q}}`, name, hex.EncodeToString(sum[:]))
-		require.NoError(t, os.WriteFile(filepath.Join(dir, ".skill-lock.json"), []byte(lock), 0o600))
+		writeInstalled(t, filepath.Join(root, agent, "skills", name), name, "https://example.com/store", "abc")
 	}
+}
+
+func writeInstalled(t *testing.T, dir, name, source, commit string) {
+	t.Helper()
+	require.NoError(t, os.MkdirAll(dir, 0o750))
+	content := []byte("---\nname: " + name + "\ndescription: Installed description.\n---\n")
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), content, 0o600))
+	sum := sha256.Sum256(content)
+	lock := fmt.Sprintf(`{"name":%q,"source":%q,"commit":%q,"files":{"SKILL.md":%q}}`, name, source, commit, hex.EncodeToString(sum[:]))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".skill-lock.json"), []byte(lock), 0o600))
 }
