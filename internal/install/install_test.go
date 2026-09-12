@@ -81,19 +81,58 @@ func TestInstall_lockIsDeterministic(t *testing.T) {
 
 func TestInstall_adoptsIdenticalSkill(t *testing.T) {
 	t.Parallel()
-	dir := filepath.Join(t.TempDir(), "go-review")
-	write(t, filepath.Join(dir, "SKILL.md"), claudeSkill)
+	root := t.TempDir()
+	claudeDir := filepath.Join(root, ".claude", "skills", "go-review")
+	agentsDir := filepath.Join(root, ".agents", "skills", "go-review")
+	_, err := newInstaller().Install([]install.Request{oneTarget(claudeDir)})
+	require.NoError(t, err)
+	claudeLock := read(t, filepath.Join(claudeDir, install.LockFile))
+	write(t, filepath.Join(agentsDir, "SKILL.md"), agentsSkill)
 	past := installedAt.Add(-24 * time.Hour)
-	require.NoError(t, os.Chtimes(filepath.Join(dir, "SKILL.md"), past, past))
+	require.NoError(t, os.Chtimes(filepath.Join(agentsDir, "SKILL.md"), past, past))
+	req := install.Request{Name: "go-review", Targets: []install.Desired{
+		{Dir: claudeDir, Files: map[string]skill.File{"SKILL.md": {Data: claudeSkill}}},
+		{Dir: agentsDir, Files: map[string]skill.File{"SKILL.md": {Data: agentsSkill}}},
+	}}
 
-	results, err := newInstaller().Install([]install.Request{oneTarget(dir)})
+	results, err := newInstaller().Install([]install.Request{req})
+
+	require.NoError(t, err)
+	assert.Equal(t, install.StateAdd, results[0].State, "a missing lock is work even beside a managed target")
+	assert.Equal(t, map[string]string{"SKILL.md": sha(agentsSkill)}, readLock(t, agentsDir).Files)
+	assert.Equal(t, claudeLock, read(t, filepath.Join(claudeDir, install.LockFile)))
+	info, err := os.Stat(filepath.Join(agentsDir, "SKILL.md"))
+	require.NoError(t, err)
+	assert.True(t, info.ModTime().Equal(past), "identical content is not rewritten")
+	found, err := install.Scan([]install.Destination{
+		{Dir: filepath.Dir(claudeDir), Variant: install.VariantClaude},
+		{Dir: filepath.Dir(agentsDir), Variant: install.VariantAgents},
+	})
+	require.NoError(t, err)
+	require.Len(t, found, 1)
+	assert.Len(t, found[0].Targets, 2, "both targets are discovered afterwards")
+}
+
+func TestInstall_dryRunWritesNoMissingLock(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	claudeDir := filepath.Join(root, ".claude", "skills", "go-review")
+	agentsDir := filepath.Join(root, ".agents", "skills", "go-review")
+	_, err := newInstaller().Install([]install.Request{oneTarget(claudeDir)})
+	require.NoError(t, err)
+	write(t, filepath.Join(agentsDir, "SKILL.md"), agentsSkill)
+	req := install.Request{Name: "go-review", Targets: []install.Desired{
+		{Dir: claudeDir, Files: map[string]skill.File{"SKILL.md": {Data: claudeSkill}}},
+		{Dir: agentsDir, Files: map[string]skill.File{"SKILL.md": {Data: agentsSkill}}},
+	}}
+	dry := newInstaller()
+	dry.DryRun = true
+
+	results, err := dry.Install([]install.Request{req})
 
 	require.NoError(t, err)
 	assert.Equal(t, install.StateAdd, results[0].State)
-	assert.Equal(t, map[string]string{"SKILL.md": sha(claudeSkill)}, readLock(t, dir).Files)
-	info, err := os.Stat(filepath.Join(dir, "SKILL.md"))
-	require.NoError(t, err)
-	assert.True(t, info.ModTime().Equal(past), "identical content is not rewritten")
+	assert.NoFileExists(t, filepath.Join(agentsDir, install.LockFile))
 }
 
 func TestInstall_differentUnmanagedSkillIsConflict(t *testing.T) {
