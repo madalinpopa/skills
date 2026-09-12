@@ -168,7 +168,7 @@ until it becomes large enough to justify a separate package. Remove the empty
   four commits, one PR
 - [x] [Phase 2: Git store and portable skill metadata](TODO_2.md) — four
   commits, one PR
-- [ ] [Phase 3: Catalog listing and change planning](TODO_3.md) — four commits,
+- [x] [Phase 3: Catalog listing and change planning](TODO_3.md) — four commits,
   one PR
 - [ ] [Phase 4: Safe installation and lock files](TODO_4.md) — four commits,
   one PR
