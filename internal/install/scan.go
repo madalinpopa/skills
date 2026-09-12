@@ -30,10 +30,17 @@ func Scan(dests []Destination) ([]Installation, error) {
 			return nil, err
 		}
 		for _, entry := range entries {
-			if !entry.IsDir() {
+			dir := filepath.Join(dest.Dir, entry.Name())
+			info, err := os.Stat(dir)
+			if errors.Is(err, fs.ErrNotExist) {
 				continue
 			}
-			dir := filepath.Join(dest.Dir, entry.Name())
+			if err != nil {
+				return nil, err
+			}
+			if !info.IsDir() {
+				continue
+			}
 			_, err = ReadLock(dir)
 			if errors.Is(err, fs.ErrNotExist) {
 				continue

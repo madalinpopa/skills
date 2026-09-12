@@ -61,20 +61,26 @@ func (i Installer) remove(inst Installation) (SkillPlan, error) {
 	dirs := make([]string, 0, len(inst.Targets))
 	for _, target := range inst.Targets {
 		dir := filepath.Join(target.Dir, inst.Name)
-		have, err := hashDir(dir)
+		t, err := inspect(dir)
 		if err != nil {
 			return SkillPlan{}, err
 		}
+		plan.Issues = append(plan.Issues, t.issues...)
 		lock, err := ReadLock(dir)
 		if err != nil {
 			return SkillPlan{}, err
 		}
-		for _, p := range slices.Sorted(maps.Keys(have)) {
-			if lock.Files[p] != have[p] {
+		for _, p := range slices.Sorted(maps.Keys(t.files)) {
+			if lock.Files[p] != t.files[p] {
 				plan.Conflicts = append(plan.Conflicts, filepath.Join(dir, filepath.FromSlash(p)))
 			}
 		}
 		dirs = append(dirs, dir)
+	}
+	if len(plan.Issues) > 0 {
+		plan.State = StateUnsupported
+		plan.Conflicts = nil
+		return plan, nil
 	}
 	if len(plan.Conflicts) > 0 && !i.Force {
 		plan.State = StateConflict

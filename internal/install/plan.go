@@ -30,7 +30,13 @@ const (
 	StateRemove      State = "remove"
 	StateUnavailable State = "unavailable"
 	StateForeign     State = "foreign"
+	StateUnsupported State = "unsupported"
 )
+
+type Issue struct {
+	Path   string
+	Reason string
+}
 
 type FileChange struct {
 	Path   string
@@ -43,6 +49,7 @@ type Target struct {
 	Want   Files
 	Have   Files
 	Base   Files
+	Issues []Issue
 }
 
 type Spec struct {
@@ -63,6 +70,7 @@ type SkillPlan struct {
 	Source    string
 	Conflicts []string
 	Backups   []string
+	Issues    []Issue
 	Targets   []TargetPlan
 }
 
@@ -136,6 +144,7 @@ func planSkill(spec Spec) SkillPlan {
 		if target.Base != nil {
 			installed = true
 		}
+		plan.Issues = append(plan.Issues, target.Issues...)
 		files := PlanFiles(target.Want, target.Have, target.Base)
 		for _, change := range files {
 			switch change.Action {
@@ -148,6 +157,10 @@ func planSkill(spec Spec) SkillPlan {
 		plan.Targets = append(plan.Targets, TargetPlan{Dir: target.Dir, Files: files})
 	}
 	switch {
+	case len(plan.Issues) > 0:
+		plan.State = StateUnsupported
+		plan.Conflicts = nil
+		plan.Targets = nil
 	case len(plan.Conflicts) > 0:
 		plan.State = StateConflict
 	case !installed:

@@ -56,6 +56,9 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 		case install.StateUnavailable:
 			symbol, message, tint = "!", "unavailable in store, left installed", yellow
 			attention++
+		case install.StateUnsupported:
+			symbol, message, tint = "!", "skipped, needs manual repair", yellow
+			attention++
 		case install.StateUnchanged:
 			continue
 		}
@@ -68,6 +71,9 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 			for _, path := range r.paths(res) {
 				fmt.Fprintf(&b, "      %s\n", path)
 			}
+		}
+		for _, issue := range res.Issues {
+			fmt.Fprintf(&b, "      %s %s\n", r.relative(issue.Path), issue.Reason)
 		}
 		for _, backup := range res.Backups {
 			fmt.Fprintf(&b, "      backed up to %s\n", backup)
@@ -93,7 +99,7 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 func attention(results []install.SkillPlan) error {
 	for _, res := range results {
 		switch res.State {
-		case install.StateConflict, install.StateForeign, install.StateUnavailable:
+		case install.StateConflict, install.StateForeign, install.StateUnavailable, install.StateUnsupported:
 			return ErrAttention
 		}
 	}

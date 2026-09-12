@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"maps"
 	"os"
 	"path"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	"github.com/aymanbagabas/go-udiff"
 	"github.com/spf13/cobra"
@@ -44,9 +46,24 @@ func newDiffCmd() *cobra.Command {
 	return c
 }
 
+func explain(issues []install.Issue) string {
+	lines := make([]string, 0, len(issues))
+	for _, issue := range issues {
+		lines = append(lines, issue.Path+" "+issue.Reason)
+	}
+	return strings.Join(lines, "; ")
+}
+
 func diffSkill(c *cobra.Command, a app, inst install.Installation) error {
 	for _, target := range inst.Targets {
 		dir := filepath.Join(target.Dir, inst.Name)
+		issues, err := install.Check(dir)
+		if err != nil {
+			return err
+		}
+		if len(issues) > 0 {
+			return errors.New(explain(issues))
+		}
 		lock, err := install.ReadLock(dir)
 		if err != nil {
 			return err

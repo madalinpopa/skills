@@ -141,6 +141,10 @@ A skill that disappears from the store, or becomes a draft, is reported as
 unavailable and left installed. A skill installed from another store is
 reported and left alone.
 
+Symlinks and special files inside an installed skill are not supported. The
+CLI reports the path and reason, leaves the whole skill untouched even with
+`--force`, and never follows a link to read or write outside the skill.
+
 `--dry-run` prints the same plan without writing anything:
 
 ```sh
