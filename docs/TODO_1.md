@@ -73,7 +73,7 @@ implementation commit message.
 ## Slice 2: Configuration and project scope
 
 - [x] Tests reviewed by the user.
-- [ ] Implementation and verification reviewed by the user.
+- [x] Implementation and verification reviewed by the user.
 
 ### Test checkpoint
 
@@ -121,14 +121,14 @@ review and provide the proposed implementation commit message.
 
 ## Phase acceptance criteria
 
-- [ ] No-argument help succeeds and performs no writes.
-- [ ] Configuration defaults and TOML overrides are covered by readable tests.
-- [ ] Project scope is the Git root from any nested directory.
-- [ ] Non-repository use warns once and uses the current directory.
-- [ ] Global scope never performs repository detection.
-- [ ] Cobra and Viper do not leak into domain packages.
-- [ ] `go fix ./...`, formatting, `go test ./...` and `go vet ./...` pass.
-- [ ] The user has reviewed all changes and received proposed commit messages.
+- [x] No-argument help succeeds and performs no writes.
+- [x] Configuration defaults and TOML overrides are covered by readable tests.
+- [x] Project scope is the Git root from any nested directory.
+- [x] Non-repository use warns once and uses the current directory.
+- [x] Global scope never performs repository detection.
+- [x] Cobra and Viper do not leak into domain packages.
+- [x] `go fix ./...`, formatting, `go test ./...` and `go vet ./...` pass.
+- [x] The user has reviewed all changes and received proposed commit messages.
 
 ## Out of scope
 
