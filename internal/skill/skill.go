@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"path"
+	"strings"
 
 	"go.yaml.in/yaml/v3"
 )
@@ -273,13 +274,22 @@ func Discover(fsys fs.FS) ([]Skill, error) {
 }
 
 func split(data []byte) (front, body []byte, err error) {
-	rest, ok := bytes.CutPrefix(data, []byte(delimiter))
-	if !ok {
+	line, rest, ok := cutLine(data)
+	if !ok || line != "---" {
 		return nil, nil, errors.New("missing frontmatter")
 	}
-	front, body, ok = bytes.Cut(rest, []byte("\n"+delimiter))
-	if !ok {
-		return nil, nil, errors.New("unclosed frontmatter")
+	for ok {
+		line, rest, ok = cutLine(rest)
+		if ok && line == "---" {
+			return front, rest, nil
+		}
+		front = append(front, line...)
+		front = append(front, '\n')
 	}
-	return append(front, '\n'), body, nil
+	return nil, nil, errors.New("unclosed frontmatter")
+}
+
+func cutLine(data []byte) (line string, rest []byte, ok bool) {
+	raw, rest, ok := bytes.Cut(data, []byte("\n"))
+	return strings.TrimSuffix(string(raw), "\r"), rest, ok
 }
