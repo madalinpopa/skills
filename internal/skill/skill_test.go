@@ -78,6 +78,66 @@ func TestParse_failed(t *testing.T) {
 	}
 }
 
+const (
+	notMapping = "---\nname: x\ndescription: d\nstatus: published\nx-claude: [allowed-tools]\n---\n# x\n"
+	duplicate  = "---\nname: x\ndescription: d\nstatus: published\nx-claude:\n  allowed-tools: a\n  allowed-tools: b\n---\n# x\n"
+	reserved   = "---\nname: x\ndescription: d\nstatus: published\nx-claude:\n  name: other\n---\n# x\n"
+	collision  = "---\nname: x\ndescription: d\nstatus: published\nallowed-tools: a\nx-claude:\n  allowed-tools: b\n---\n# x\n"
+	numericKey = "---\nname: x\ndescription: d\nstatus: published\nx-claude:\n  1: a\n---\n# x\n"
+	twoNames   = "---\nname: x\nname: y\ndescription: d\nstatus: published\n---\n# x\n"
+)
+
+func TestParse_rejectsUnsafeExtensions(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		source string
+		want   string
+	}{
+		"x-claude is not a mapping":    {source: notMapping, want: "x-claude"},
+		"duplicate extension key":      {source: duplicate, want: "allowed-tools"},
+		"reserved extension key":       {source: reserved, want: "name"},
+		"extension collides top-level": {source: collision, want: "allowed-tools"},
+		"non-string extension key":     {source: numericKey, want: "x-claude"},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			_, err := skill.Parse([]byte(tt.source))
+
+			require.Error(t, err)
+			assert.ErrorContains(t, err, tt.want)
+		})
+	}
+}
+
+func TestTransform_failed(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		source string
+		agent  string
+		want   string
+	}{
+		"duplicate extension key for claude": {source: duplicate, agent: "claude", want: "allowed-tools"},
+		"duplicate extension key for codex":  {source: duplicate, agent: "codex", want: "allowed-tools"},
+		"collision for codex":                {source: collision, agent: "codex", want: "allowed-tools"},
+		"not a mapping for codex":            {source: notMapping, agent: "codex", want: "x-claude"},
+		"duplicate top-level key":            {source: twoNames, agent: "claude", want: "name"},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			_, err := skill.Transform([]byte(tt.source), tt.agent)
+
+			require.Error(t, err, "invalid extensions are rejected even when the output would drop them")
+			assert.ErrorContains(t, err, tt.want)
+		})
+	}
+}
+
 func TestTransform(t *testing.T) {
 	t.Parallel()
 
