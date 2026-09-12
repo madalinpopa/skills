@@ -28,6 +28,11 @@ skills init      # do the first run explicitly
 `XDG_CONFIG_HOME` is honoured when set. `--dry-run` never creates the config or
 clones the store. If the store is missing, it tells you to run `skills init`.
 
+The config lists the agents and where each keeps its skills. A project path
+must be relative and stay inside the project. A global path must be absolute
+or start with `~/`. The default agent list must name at least one configured
+agent. Anything else is a config error and no command runs.
+
 ## Use it
 
 ```sh
