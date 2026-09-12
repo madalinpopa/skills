@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/spf13/cobra"
 
@@ -72,6 +73,7 @@ func (a app) installer(commit string, force bool) install.Installer {
 		Backups: filepath.Join(a.dir, "backups"),
 		Force:   force,
 		DryRun:  a.dryRun,
+		Modes:   runtime.GOOS != "windows",
 		Now:     utcNow,
 	}
 }

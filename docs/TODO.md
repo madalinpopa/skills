@@ -56,7 +56,7 @@ Proposed documentation commit:
 - [x] [Phase 6: A lock for every target](#phase-6-a-lock-for-every-target)
 - [x] [Phase 7: Content from the recorded commit](#phase-7-content-from-the-recorded-commit)
 - [x] [Phase 8: Valid portable frontmatter](#phase-8-valid-portable-frontmatter)
-- [ ] [Phase 9: Executable state and legacy locks](#phase-9-executable-state-and-legacy-locks)
+- [x] [Phase 9: Executable state and legacy locks](#phase-9-executable-state-and-legacy-locks)
 - [ ] [Phase 10: Dry-run and verbose output](#phase-10-dry-run-and-verbose-output)
 - [ ] [Phase 11: Scope hints and first-run boundaries](#phase-11-scope-hints-and-first-run-boundaries)
 - [ ] [Phase 12: Config and target validation](#phase-12-config-and-target-validation)
@@ -326,10 +326,10 @@ with zero changes reported. Bundled script execution is correctness work.
 3. `test(cli): show executable-only local changes in diff`
 4. `fix(cli): report executable changes in skill diffs`
 
-- [ ] Installer failing tests reviewed.
-- [ ] Installer implementation and verification reviewed.
-- [ ] Diff failing tests reviewed.
-- [ ] Diff implementation and verification reviewed.
+- [x] Installer failing tests reviewed.
+- [x] Installer implementation and verification reviewed.
+- [x] Diff failing tests reviewed.
+- [x] Diff implementation and verification reviewed.
 
 ## Phase 10: Dry-run and verbose output
 

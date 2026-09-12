@@ -107,6 +107,6 @@ func writeInstalled(t *testing.T, dir, name, source, commit string) {
 	content := []byte("---\nname: " + name + "\ndescription: Installed description.\n---\n")
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), content, 0o600))
 	sum := sha256.Sum256(content)
-	lock := fmt.Sprintf(`{"name":%q,"source":%q,"commit":%q,"files":{"SKILL.md":%q}}`, name, source, commit, hex.EncodeToString(sum[:]))
+	lock := fmt.Sprintf(`{"name":%q,"source":%q,"commit":%q,"files":{"SKILL.md":%q},"executable":{"SKILL.md":false}}`, name, source, commit, hex.EncodeToString(sum[:]))
 	require.NoError(t, os.WriteFile(filepath.Join(dir, ".skill-lock.json"), []byte(lock), 0o600))
 }

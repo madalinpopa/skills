@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 
@@ -45,6 +46,22 @@ func newDiffCmd() *cobra.Command {
 	c.Flags().StringSliceVar(&agents, "agent", nil, "narrow to certain agents (default: config defaults)")
 	c.Flags().BoolVar(&global, "global", false, "act on the home directories instead of the repository")
 	return c
+}
+
+func modeChanged(base, have map[string]skill.File, p string) bool {
+	old, tracked := base[p]
+	now, present := have[p]
+	if runtime.GOOS == "windows" || !tracked || !present {
+		return false
+	}
+	return old.Mode&0o111 != 0 != (now.Mode&0o111 != 0)
+}
+
+func gitMode(mode fs.FileMode) string {
+	if mode&0o111 != 0 {
+		return "100755"
+	}
+	return "100644"
 }
 
 func explain(issues []install.Issue) string {
@@ -100,12 +117,14 @@ func diffSkill(c *cobra.Command, a app, inst install.Installation) error {
 		}
 		slices.Sort(paths)
 		for _, p := range paths {
-			old, now := base[p].Data, have[p].Data
-			if bytes.Equal(old, now) {
-				continue
-			}
+			old, now := base[p], have[p]
 			rel := a.renderer(c).relative(filepath.Join(dir, filepath.FromSlash(p)))
-			c.Print(udiff.Unified("a/"+rel, "b/"+rel, string(old), string(now)))
+			if modeChanged(base, have, p) {
+				c.Printf("--- a/%s\n+++ b/%s\nold mode %s\nnew mode %s\n", rel, rel, gitMode(old.Mode), gitMode(now.Mode))
+			}
+			if !bytes.Equal(old.Data, now.Data) {
+				c.Print(udiff.Unified("a/"+rel, "b/"+rel, string(old.Data), string(now.Data)))
+			}
 		}
 	}
 	return nil

@@ -86,6 +86,61 @@ func TestRemove_forceBacksUpEditedContent(t *testing.T) {
 	assert.Equal(t, []byte("local only\n"), read(t, filepath.Join(results[0].Backups[0], "notes.md")))
 }
 
+func TestRemove_localModeEditIsConflict(t *testing.T) {
+	t.Parallel()
+	dir := filepath.Join(t.TempDir(), ".claude", "skills", "go-review")
+	installed(t, dir, map[string][]byte{"SKILL.md": claudeSkill, "scripts/check.sh": []byte("#!/bin/sh\n")})
+	require.NoError(t, os.Chmod(filepath.Join(dir, "scripts", "check.sh"), 0o755))
+	remover := newInstaller()
+	remover.Backups = filepath.Join(t.TempDir(), "backups")
+
+	results, err := remover.Remove([]install.Installation{
+		{Name: "go-review", Targets: []install.Destination{{Dir: filepath.Dir(dir), Variant: install.VariantClaude}}},
+	})
+
+	require.NoError(t, err)
+	assert.Equal(t, install.StateConflict, results[0].State)
+	assert.Equal(t, []string{filepath.Join(dir, "scripts", "check.sh")}, results[0].Conflicts)
+	assert.DirExists(t, dir)
+}
+
+func TestRemove_forceBackupKeepsExecutableBit(t *testing.T) {
+	t.Parallel()
+	dir := filepath.Join(t.TempDir(), ".claude", "skills", "go-review")
+	installed(t, dir, map[string][]byte{"SKILL.md": claudeSkill, "scripts/check.sh": []byte("#!/bin/sh\n")})
+	require.NoError(t, os.Chmod(filepath.Join(dir, "scripts", "check.sh"), 0o755))
+	remover := newInstaller()
+	remover.Backups = filepath.Join(t.TempDir(), "backups")
+	remover.Force = true
+
+	results, err := remover.Remove([]install.Installation{
+		{Name: "go-review", Targets: []install.Destination{{Dir: filepath.Dir(dir), Variant: install.VariantClaude}}},
+	})
+
+	require.NoError(t, err)
+	assert.Equal(t, install.StateRemove, results[0].State)
+	require.Len(t, results[0].Backups, 1)
+	info, err := os.Stat(filepath.Join(results[0].Backups[0], "scripts", "check.sh"))
+	require.NoError(t, err)
+	assert.NotZero(t, info.Mode()&0o100, "the backup keeps the executable bit")
+}
+
+func TestRemove_legacyLockNeedsForce(t *testing.T) {
+	t.Parallel()
+	dir := filepath.Join(t.TempDir(), ".claude", "skills", "go-review")
+	legacyLock(t, dir, map[string][]byte{"SKILL.md": claudeSkill})
+	remover := newInstaller()
+	remover.Backups = filepath.Join(t.TempDir(), "backups")
+
+	results, err := remover.Remove([]install.Installation{
+		{Name: "go-review", Targets: []install.Destination{{Dir: filepath.Dir(dir), Variant: install.VariantClaude}}},
+	})
+
+	require.NoError(t, err)
+	assert.Equal(t, install.StateConflict, results[0].State, "an unknown base mode needs force before removal")
+	assert.FileExists(t, filepath.Join(dir, "SKILL.md"))
+}
+
 func TestRemove_foreignSourceIsRemovable(t *testing.T) {
 	t.Parallel()
 	dir := filepath.Join(t.TempDir(), ".claude", "skills", "go-review")

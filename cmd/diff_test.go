@@ -37,6 +37,30 @@ func TestDiff_showsOnlyYourEdits(t *testing.T) {
 	assert.NotContains(t, out.String(), ".agents", "the untouched copy produces no diff")
 }
 
+func TestDiff_showsExecutableChange(t *testing.T) {
+	source := gittest.Init(t)
+	addSkill(t, source, "go-review", "published", "Reviews Go code.", "[go]")
+	script := filepath.Join(source, "skills", "go-review", "scripts", "check.sh")
+	require.NoError(t, os.MkdirAll(filepath.Dir(script), 0o750))
+	require.NoError(t, os.WriteFile(script, []byte("#!/bin/sh\n"), 0o600))
+	gittest.Run(t, source, "add", ".")
+	gittest.Commit(t, source, "add skills")
+	home := configureStore(t, source)
+	run(t, "install", "--global", "go-review")
+	local := filepath.Join(home, ".claude", "skills", "go-review", "scripts", "check.sh")
+	require.NoError(t, os.Chmod(local, 0o755))
+	var out, errOut bytes.Buffer
+
+	err := cmd.Execute(t.Context(), "", []string{"diff", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)
+
+	require.NoError(t, err, errOut.String())
+	assert.Contains(t, out.String(), filepath.Join(".claude", "skills", "go-review", "scripts", "check.sh"))
+	assert.Contains(t, out.String(), "old mode 100644")
+	assert.Contains(t, out.String(), "new mode 100755")
+	assert.NotContains(t, out.String(), "@@", "a mode-only change has no content hunk")
+	assert.NotContains(t, out.String(), ".agents", "the untouched copy produces no diff")
+}
+
 func TestDiff_failed(t *testing.T) {
 	source := gittest.Init(t)
 	head := gittest.Run(t, source, "rev-parse", "HEAD")
