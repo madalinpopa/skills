@@ -10,6 +10,9 @@
 # skill + prompt content
 !*.md
 
+# docs
+!docs/**
+
 # tooling
 !.gitignore
 !.github/**
