@@ -138,6 +138,33 @@ func TestTransform_failed(t *testing.T) {
 	}
 }
 
+const crlf = "---\r\nname: x\r\ndescription: d\r\nstatus: published\r\n---\r\n# x\r\n\r\nWindows body.\r\n"
+
+func TestParse_acceptsCRLF(t *testing.T) {
+	t.Parallel()
+
+	meta, err := skill.Parse([]byte(crlf))
+
+	require.NoError(t, err)
+	assert.Equal(t, skill.Metadata{Name: "x", Description: "d", Status: skill.Published}, meta)
+}
+
+func TestTransform_normalisesDelimitersAndKeepsBody(t *testing.T) {
+	t.Parallel()
+	lf := strings.ReplaceAll(crlf, "\r\n", "\n")
+	fromLF, err := skill.Transform([]byte(lf), "claude")
+	require.NoError(t, err)
+
+	out, err := skill.Transform([]byte(crlf), "claude")
+
+	require.NoError(t, err)
+	front, body, found := strings.Cut(strings.TrimPrefix(string(out), "---\n"), "\n---\n")
+	require.True(t, found, "the emitted frontmatter uses LF delimiters")
+	assert.Equal(t, "name: x\ndescription: d", front, "the frontmatter is emitted the same way for both line endings")
+	assert.Equal(t, "# x\r\n\r\nWindows body.\r\n", body, "the body keeps its bytes")
+	assert.Equal(t, fromLF[:len(fromLF)-len("# x\n\nWindows body.\n")], out[:len(out)-len(body)])
+}
+
 func TestTransform(t *testing.T) {
 	t.Parallel()
 
