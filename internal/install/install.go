@@ -114,6 +114,7 @@ func (i Installer) force(spec Spec) (SkillPlan, error) {
 		}
 	}
 	plan := planSkill(spec)
+	plan.Forced = true
 	plan.Backups = backups
 	return plan, nil
 }

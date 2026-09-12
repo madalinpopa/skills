@@ -83,6 +83,7 @@ type SkillPlan struct {
 	State     State
 	Source    string
 	Managed   bool
+	Forced    bool
 	Conflicts []string
 	Backups   []string
 	Issues    []Issue

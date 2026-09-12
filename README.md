@@ -174,6 +174,10 @@ reported and never rewritten, even with `--force`. `ls --local` and
 skills update --dry-run
 ```
 
+Its lines say `would add`, `would update` or `would remove`, and the summary
+counts skills that would change. Where a change would be backed up first it
+says so, without creating a backup. Skipped skills still exit 3.
+
 ## Exit codes
 
 | code | meaning |

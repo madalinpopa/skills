@@ -7,6 +7,7 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
@@ -88,11 +89,13 @@ func (i Installer) remove(inst Installation) (SkillPlan, error) {
 				plan.Conflicts = append(plan.Conflicts, filepath.Join(dir, filepath.FromSlash(p)))
 			}
 		}
+		plan.Targets = append(plan.Targets, removal(dir, t.files))
 		dirs = append(dirs, dir)
 	}
 	if len(plan.Issues) > 0 {
 		plan.State = StateUnsupported
 		plan.Conflicts = nil
+		plan.Targets = nil
 		return plan, nil
 	}
 	if len(plan.Conflicts) > 0 && !i.Force {
@@ -115,4 +118,12 @@ func (i Installer) remove(inst Installation) (SkillPlan, error) {
 		}
 	}
 	return plan, nil
+}
+
+func removal(dir string, files Files) TargetPlan {
+	changes := []FileChange{{Path: LockFile, Action: ActionRemove}}
+	for _, p := range slices.Sorted(maps.Keys(files)) {
+		changes = append(changes, FileChange{Path: p, Action: ActionRemove})
+	}
+	return TargetPlan{Dir: dir, Files: changes}
 }

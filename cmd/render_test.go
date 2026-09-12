@@ -40,6 +40,37 @@ func TestRender_default(t *testing.T) {
 	}, lines(out.String()), "one line per skill, shared targets aggregated, unchanged skills silent")
 }
 
+func TestRender_dryRun(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	var out bytes.Buffer
+	r := renderer{out: &out, root: root, dryRun: true}
+
+	require.NoError(t, r.results("update", []install.SkillPlan{
+		{Name: "forced", State: install.StateUpdate, Forced: true},
+		{Name: "go-review", State: install.StateAdd, Targets: []install.TargetPlan{
+			{Dir: filepath.Join(root, ".agents", "skills", "go-review"), Files: []install.FileChange{{Path: "SKILL.md", Action: install.ActionAdd}}},
+			{Dir: filepath.Join(root, ".claude", "skills", "go-review"), Files: []install.FileChange{{Path: "SKILL.md", Action: install.ActionAdd}}},
+		}},
+		{Name: "old-skill", State: install.StateRemove},
+		{Name: "sql-review", State: install.StateConflict, Managed: true, Conflicts: []string{filepath.Join(root, ".claude", "skills", "sql-review", "SKILL.md")}},
+		{Name: "unchanged", State: install.StateUnchanged},
+	}))
+
+	assert.Equal(t, []string{
+		"  ~ forced       would update",
+		"      would back up first",
+		"  + go-review    would add",
+		"  - old-skill    would remove",
+		"      would back up first",
+		"  ! sql-review   skipped, you edited it",
+		"",
+		"  5 skills, 3 would change, 1 needs attention",
+		"  Run 'skills diff sql-review' to see your changes,",
+		"  or 'skills update sql-review --force' to overwrite (backed up).",
+	}, lines(out.String()), "dry-run describes the plan per skill and never claims a write or a backup path")
+}
+
 func TestRender_attention(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

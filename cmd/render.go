@@ -25,6 +25,7 @@ type renderer struct {
 	color   bool
 	verbose bool
 	global  bool
+	dryRun  bool
 	agents  []string
 }
 
@@ -42,13 +43,13 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 		var symbol, message, tint string
 		switch res.State {
 		case install.StateAdd:
-			symbol, message, tint = "+", "added", green
+			symbol, message, tint = "+", r.did("add", "added"), green
 			changed++
 		case install.StateUpdate:
-			symbol, message, tint = "~", "updated", green
+			symbol, message, tint = "~", r.did("update", "updated"), green
 			changed++
 		case install.StateRemove:
-			symbol, message, tint = "-", "removed", red
+			symbol, message, tint = "-", r.did("remove", "removed"), red
 			changed++
 		case install.StateConflict:
 			symbol, message, tint = "!", "skipped, you edited it", yellow
@@ -85,8 +86,11 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 		for _, backup := range res.Backups {
 			fmt.Fprintf(&b, "      backed up to %s\n", backup)
 		}
+		if r.dryRun && (res.State == install.StateRemove || res.Forced) {
+			fmt.Fprint(&b, "      would back up first\n")
+		}
 	}
-	summary := fmt.Sprintf("%d %s, %d changed", len(results), plural(len(results), "skill", "skills"), changed)
+	summary := fmt.Sprintf("%d %s, %d %s", len(results), plural(len(results), "skill", "skills"), changed, r.did("change", "changed"))
 	if attention > 0 {
 		summary += fmt.Sprintf(", %d %s attention", attention, plural(attention, "needs", "need"))
 	}
@@ -101,6 +105,13 @@ func (r renderer) results(command string, results []install.SkillPlan) error {
 	}
 	_, err := io.WriteString(r.out, b.String())
 	return err
+}
+
+func (r renderer) did(planned, done string) string {
+	if r.dryRun {
+		return "would " + planned
+	}
+	return done
 }
 
 func (r renderer) hints(command string, conflicts []install.SkillPlan) []string {

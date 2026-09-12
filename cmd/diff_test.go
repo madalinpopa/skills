@@ -48,7 +48,7 @@ func TestDiff_showsExecutableChange(t *testing.T) {
 	home := configureStore(t, source)
 	run(t, "install", "--global", "go-review")
 	local := filepath.Join(home, ".claude", "skills", "go-review", "scripts", "check.sh")
-	require.NoError(t, os.Chmod(local, 0o755))
+	require.NoError(t, os.Chmod(local, 0o755)) //nolint:gosec // the test needs the executable bit set
 	var out, errOut bytes.Buffer
 
 	err := cmd.Execute(t.Context(), "", []string{"diff", "--global", "go-review"}, strings.NewReader(""), &out, &errOut)

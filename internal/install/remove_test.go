@@ -3,6 +3,7 @@ package install_test
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -41,6 +42,43 @@ func TestRemove_backsUpThenRemoves(t *testing.T) {
 	assert.Equal(t, claudeSkill, read(t, filepath.Join(backup, "SKILL.md")))
 	assert.FileExists(t, filepath.Join(backup, "scripts", "check.sh"))
 	assert.FileExists(t, filepath.Join(backup, install.LockFile))
+	assert.Equal(t, removedTarget(dir, "SKILL.md", "scripts/check.sh"), results[0].Targets, "the plan lists what was removed")
+}
+
+func TestRemove_dryRunPlansEveryTarget(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	claude := filepath.Join(root, ".claude", "skills")
+	agents := filepath.Join(root, ".agents", "skills")
+	installed(t, filepath.Join(claude, "go-review"), map[string][]byte{"SKILL.md": claudeSkill, "scripts/check.sh": []byte("#!/bin/sh\n")})
+	installed(t, filepath.Join(agents, "go-review"), map[string][]byte{"SKILL.md": agentsSkill})
+	dry := newInstaller()
+	dry.DryRun = true
+
+	results, err := dry.Remove([]install.Installation{
+		{Name: "go-review", Targets: []install.Destination{
+			{Dir: agents, Variant: install.VariantAgents},
+			{Dir: claude, Variant: install.VariantClaude},
+		}},
+	})
+
+	require.NoError(t, err)
+	require.Len(t, results, 1)
+	assert.Equal(t, install.StateRemove, results[0].State)
+	assert.Equal(t, slices.Concat(
+		removedTarget(filepath.Join(agents, "go-review"), "SKILL.md"),
+		removedTarget(filepath.Join(claude, "go-review"), "SKILL.md", "scripts/check.sh"),
+	), results[0].Targets, "every file and the lock under every selected target")
+	assert.FileExists(t, filepath.Join(claude, "go-review", "SKILL.md"), "dry-run removes nothing")
+	assert.FileExists(t, filepath.Join(agents, "go-review", "SKILL.md"))
+}
+
+func removedTarget(dir string, files ...string) []install.TargetPlan {
+	changes := []install.FileChange{{Path: install.LockFile, Action: install.ActionRemove}}
+	for _, p := range files {
+		changes = append(changes, install.FileChange{Path: p, Action: install.ActionRemove})
+	}
+	return []install.TargetPlan{{Dir: dir, Files: changes}}
 }
 
 func TestRemove_editedNeedsAttention(t *testing.T) {
@@ -90,7 +128,7 @@ func TestRemove_localModeEditIsConflict(t *testing.T) {
 	t.Parallel()
 	dir := filepath.Join(t.TempDir(), ".claude", "skills", "go-review")
 	installed(t, dir, map[string][]byte{"SKILL.md": claudeSkill, "scripts/check.sh": []byte("#!/bin/sh\n")})
-	require.NoError(t, os.Chmod(filepath.Join(dir, "scripts", "check.sh"), 0o755))
+	require.NoError(t, os.Chmod(filepath.Join(dir, "scripts", "check.sh"), 0o755)) //nolint:gosec // the test needs the executable bit set
 	remover := newInstaller()
 	remover.Backups = filepath.Join(t.TempDir(), "backups")
 
@@ -108,7 +146,7 @@ func TestRemove_forceBackupKeepsExecutableBit(t *testing.T) {
 	t.Parallel()
 	dir := filepath.Join(t.TempDir(), ".claude", "skills", "go-review")
 	installed(t, dir, map[string][]byte{"SKILL.md": claudeSkill, "scripts/check.sh": []byte("#!/bin/sh\n")})
-	require.NoError(t, os.Chmod(filepath.Join(dir, "scripts", "check.sh"), 0o755))
+	require.NoError(t, os.Chmod(filepath.Join(dir, "scripts", "check.sh"), 0o755)) //nolint:gosec // the test needs the executable bit set
 	remover := newInstaller()
 	remover.Backups = filepath.Join(t.TempDir(), "backups")
 	remover.Force = true
