@@ -33,7 +33,7 @@ func TestInstall_unknownAgentIsUsageError(t *testing.T) {
 
 	require.Error(t, err)
 	assert.ErrorIs(t, err, cmd.ErrUsage)
-	assert.Contains(t, errOut.String(), "claude, codex, gemini")
+	assert.Contains(t, errOut.String(), "available: claude, codex\n", "the hint lists exactly the configured agents")
 	assert.NoDirExists(t, storeDir(home), "agents are validated before the store is touched")
 }
 
@@ -71,7 +71,6 @@ func TestInstall_global(t *testing.T) {
 	assert.FileExists(t, filepath.Join(home, ".claude", "skills", "go-review", ".skill-lock.json"))
 	assert.FileExists(t, filepath.Join(home, ".agents", "skills", "go-review", "SKILL.md"))
 	assert.FileExists(t, filepath.Join(home, ".agents", "skills", "go-review", ".skill-lock.json"))
-	assert.NoDirExists(t, filepath.Join(home, ".gemini"), "gemini shares the .agents target")
 }
 
 func TestInstall_usesCommittedContent(t *testing.T) {
