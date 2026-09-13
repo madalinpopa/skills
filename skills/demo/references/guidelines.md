@@ -43,7 +43,7 @@ The source extensions are defined by this repository's `docs/SPEC.md`:
   or redefine `name`, `description`, `status`, `tags`, or `x-claude`.
 
 The CLI removes `status` and `tags` on install. It lifts `x-claude` into Claude's
-frontmatter and drops it for Codex/Gemini. These are store extensions, not
+frontmatter and drops it for every other agent. These are store extensions, not
 standard fields. See the [Claude skills reference](https://code.claude.com/docs/en/skills)
 for supported extension values.
 
@@ -52,8 +52,8 @@ symlinks are unsupported. The root `.skill-lock.json` belongs to the installer.
 Keep generated reports outside the installed skill so they do not become local
 installation content.
 
-After installation, run `skills-ref validate` against the shared Codex/Gemini
-copy if the official reference validator is available. The source and Claude
-copy contain extensions that this strict validator rejects. Check Claude's
-extra fields separately. Metadata validation does not replace trying the skill
-on a representative request.
+After installation, run `skills-ref validate` against the shared
+`.agents/skills` copy if the official reference validator is available. The
+source and Claude copy contain extensions that this strict validator rejects.
+Check Claude's extra fields separately. Metadata validation does not replace
+trying the skill on a representative request.

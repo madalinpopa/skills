@@ -61,10 +61,10 @@ resource is missing, report its path rather than inventing replacement content.
 
 `status`, `tags`, and `x-claude` are this repository's source extensions.
 Installation removes `status` and `tags`. For Claude it lifts `x-claude` fields
-into frontmatter; for Codex and Gemini it drops that block. The demo is
+into frontmatter; for every other agent it drops that block. The demo is
 explicitly invoked in Claude because `disable-model-invocation` is true.
 
 The other fields demonstrate the Agent Skills specification. `allowed-tools`
 pre-approves reading where supported; script execution uses the client's normal
-permission checks. Validate the shared Codex/Gemini copy against the standard
-and check the Claude extensions against Claude's documentation.
+permission checks. Validate the shared `.agents/skills` copy against the
+standard and check the Claude extensions against Claude's documentation.
