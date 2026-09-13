@@ -48,6 +48,13 @@ frontmatter and drops it for every other agent. These are store extensions, not
 standard fields. See the [Claude skills reference](https://code.claude.com/docs/en/skills)
 for supported extension values.
 
+Claude fields such as `model`, `hooks`, or `paths` placed at the top level are
+copied to every agent. Put them under `x-claude` when other agents should not
+see them. Unknown fields pass through unchanged. The CLI keeps these values but
+does not check that an agent supports them. Every mapping, including nested
+ones such as `metadata` and `hooks`, must have unique keys. A Claude skill
+without `name` and `description` needs both added before it goes into a store.
+
 The CLI copies regular files and preserves executable intent. Use real files;
 symlinks are unsupported. The root `.skill-lock.json` belongs to the installer.
 Keep generated reports outside the installed skill so they do not become local
