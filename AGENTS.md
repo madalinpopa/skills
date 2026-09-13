@@ -1,130 +1,124 @@
 # Agent instructions
 
-`skills` is a Go CLI. [docs/SPEC.md](docs/SPEC.md) is the source of truth
-for how it works. Read the relevant part of it before you change any behavior.
+`skills` is a Go CLI. [docs/SPEC.md](docs/SPEC.md) is the behavior source of truth.
 
-No AI LLM tool may append AI attribution (such as Co-Authored-By trailers or generated-by signatures)
-to commits or pull requests. Genuine human attribution must be preserved.
+## Change workflow
 
-Each change that adds or changes behavior has two commits:
+Before any change, inspect current code and re-read the relevant spec. Check
+current official docs for every external library touched; do not rely on
+remembered APIs or old examples.
 
-1. `test(<scope>): ...` adds the smallest useful failing tests.
-2. `feat(<scope>): ...` or `fix(<scope>): ...` makes those tests pass.
+For each behavioral change:
 
-For each change:
+1. Write only necessary tests and run them. **Stop for review:** show the
+   test changes, output proving failure for the right reason, and a proposed
+   `test(<scope>): ...` commit message.
+2. Implement only after explicit developer approval. Write the smallest clear
+   code that passes the tests and fits the spec.
+3. Run the verification below. **Stop for review:** show changes, results, and
+   a proposed `feat(<scope>): ...` or `fix(<scope>): ...` commit message.
 
-1. Look at the current code and re-read the relevant spec section.
-2. Check the current official docs for every external library you touch. Do not
-   rely on remembered APIs or old examples.
-3. Write only the tests this change needs. Run them and show that they fail for
-   the right reason.
-4. Stop. Show the user the test changes, the failure output and a proposed
-   commit message.
-5. Do not write the implementation until the user says to go ahead.
-6. Write the smallest clear code that passes the tests and fits the spec.
-7. Run the verification steps below. Stop again and show the user the changes,
-   the results and a proposed commit message.
-8. Do not create a Git or Jujutsu commit unless the user asks for it. Proposing
-   a commit message is required. Creating the commit is not.
+Each behavioral change has two commits: failing tests, then implementation.
+Config, docs, and release changes that gain nothing from failing tests may use
+one commit; developer review before committing still applies.
 
-Config, docs and release work that gains nothing from a failing test can be a
-single commit. It still needs user review before you commit. For every any change
-requested by user, provide the commit message. 
+Propose a commit message for every requested change; never create Git or
+Jujutsu commits unless asked. Keep PRs focused on one piece of work; open them
+only after full developer review and an explicit request.
+On “ready to create PR,” review the latest commits between `main` and `HEAD`
+and provide a PR title. Never add AI attribution (including Co-Authored-By
+trailers or generated-by signatures) to commits or PRs; preserve genuine human
+attribution.
 
-Keep each pull request focused on one piece of work. Do not open a pull request
-until the user has reviewed all of it and asks for one. When user says "ready to create PR"
-review the latest commits between `main` and `HEAD` and provide a PR title.
+## Feature and phase planning
+
+For one or more planned phases/commits or an explicit feature-planning request,
+use [FEATURE.md](docs/templates/FEATURE.md) and
+[PHASE.md](docs/templates/PHASE.md).
+
+- Reuse an existing feature or create `docs/features/<feature-name>/FEATURE.md`
+  with scope, non-goals, acceptance criteria, and roadmap.
+- Detail only the active phase in `phase-NN-<outcome>.md` beside it; outline
+  future phases. One reviewable outcome, including its test/implementation
+  commit pair, belongs to one phase.
+- Present the plan for review before changes; honor existing explicit approval
+  within its scope. Plan approval never bypasses test review or authorizes
+  commits, PRs, or additional scope.
+- Follow template context-loading and review checkpoints. Update the checkpoint
+  and roadmap at review boundaries and session end with evidence, developer
+  decisions, and the exact next action.
+- On resume, read the feature overview and active phase; verify recorded state
+  against the working tree.
 
 ## Modern Go
 
-- Invoke `$modern-go-guidelines:use-modern-go` before you create or edit any Go
-  file.
-- Run its `list` operation for the exact file you are changing, or for Go 1.27
-  if the file does not exist yet. Read the full, unfiltered output.
-- Use `explain` only for guideline IDs that need more detail.
-- Run the guidance again when you move to a different kind of file or package.
-- Follow the guidance unless it would change required behavior or break the
-  build. Explain any exception.
-- Run `go fix ./...` after each implementation and review its diff.
-
-Write explicit, idiomatic code that is easy to read. Use small packages with
-clear jobs, descriptive names and direct control flow. Any complex abstraction
-needs a concrete reason. Trust internal invariants. Validate external input,
-config, filesystem state and Git results, but do not add extra defensive
-layers "just in case". Avoid adding large doc comments. The code should explain
-itself. Add doc comments only if you feel they explain something that is not
-obvious from the code and will help the user. When you do write comments, keep
-them short and concise. Avoid long or large comment blocks.
+- Before creating or editing any Go file, invoke
+  `$modern-go-guidelines:use-modern-go`. Run `list` for that exact file, or Go
+  1.27 for a new file, and read the full, unfiltered output.
+- Use `explain` only for IDs needing detail. Re-run guidance when moving to a
+  different kind of file or package. Follow it unless it would change required
+  behavior or break the build; explain exceptions.
+- Write explicit, idiomatic, readable code with descriptive names and direct
+  control flow. Keep packages small and focused; never create them to fill
+  slots. Complex abstractions need a concrete reason.
+- Trust internal invariants. Validate external input, config, filesystem
+  state, and Git results; avoid speculative defensive layers.
+- Let code explain itself. Add short doc comments only for useful information
+  not obvious from code; avoid long comment blocks.
 
 ## Package boundaries
 
-- `main.go`: version injection, process context and running the command only.
-- `cmd`: Cobra commands, argument checks, output rendering, writers and exit
-  codes.
-- `internal/config`: config types, defaults, Viper loading and first-run save.
-- `internal/project`: finding the repository root, with a fallback outside a
-  repository.
-- `internal/store`: Git clone, fast-forward sync and commit lookup.
-- `internal/skill`: catalog discovery, YAML metadata checks and per-agent
-  transforms.
+- `main.go`: version injection, process context, command execution only.
+- `cmd`: [Cobra](https://cobra.dev/) commands, argument checks, flags, help, output
+  rendering, writers, and exit codes.
+- `internal/config`: config types, defaults, [Viper](https://github.com/spf13/viper)
+  TOML loading, and first-run save.
+- `internal/project`: repository-root discovery with a fallback outside repos.
+- `internal/store`: Git clone, fast-forward sync, commit lookup.
+- `internal/skill`: catalog discovery, YAML metadata checks, per-agent transforms.
 - `internal/install`: target trees, three-way planning, locks, filesystem
-  changes, backups, update and removal.
-- `internal/gittest`: helpers that build temporary Git repositories for tests.
+  changes, backups, update, removal.
+- `internal/gittest`: helpers creating temporary Git repositories for tests.
 
-Keep Cobra inside `cmd` and Viper inside `internal/config`. Domain packages must
-not depend on either one, and must not print. Pass Git arguments straight to the
-process runner and never build a shell command string. Do not create a package
-only to fill a slot.
-
-## External libraries
-
-- [Cobra](https://cobra.dev/) for commands, arguments, flags and help.
-- [Viper](https://github.com/spf13/viper) for TOML config and defaults.
-- [Testify](https://github.com/stretchr/testify) for test assertions.
-- [Testcontainers for Go](https://golang.testcontainers.org/) only when a real
-  container adds coverage that temporary directories and local Git repositories
-  cannot.
+Keep Cobra in `cmd` and Viper in `internal/config`. Domain packages must neither
+depend on them nor print. Pass Git arguments directly to the process runner;
+never construct shell command strings.
 
 ## Tests
 
-- Test first: reviewed failing test, then the implementation.
-- Test behavior users can see and real failures that could come back. Do not
-  test plain field assignment, library behavior or private helpers with no real
-  logic.
-- Avoid overlap. Each behavior gets one main test at the lowest useful layer.
+- Test observable behavior and realistic regressions, not plain field
+  assignments, library behavior, or private helpers without real logic.
+  Never add tests just for coverage.
+- Give each behavior one main test at the lowest useful layer; avoid overlap.
   Integration tests cover only what unit tests cannot prove.
-- Follow Arrange, Act, Assert, with comments and spacing that makes the three parts easy to
-  see.
-- Use Testify consistently: `require` for setup that later checks depend on,
-  `assert` for independent checks.
-- Use `map[string]struct` table tests when cases share the same setup and
-  assertions. Keep tables small. Split large or uneven cases into `_success` and
-  `_failed` tests instead.
-- Call `t.Parallel()` in tests and subtests unless they change process state or
-  share external resources. Pass paths, environment values, clocks and writers
-  in as dependencies so tests can stay parallel.
-- Do not force parallel tests around `t.Setenv`, working-directory changes,
-  shared repositories or shared containers. Briefly explain the exception.
-- Use temporary directories and local Git repositories for filesystem and Git
-  tests. They need no network and give better feedback than mocks.
-- A container test must use Testcontainers for Go with an Ubuntu image that has
-  Git. At the very start, check `INTEGRATION=true` and skip with a clear message
-  if it is not set. Do not repeat unit coverage.
-- The default test run must need neither network nor Docker.
-- Do not add tests just to raise coverage.
+- Make Arrange, Act, Assert clear with comments and spacing.
+- Use [Testify](https://github.com/stretchr/testify) consistently: `require`
+  for setup that later checks depend on, `assert` for independent checks.
+- Use small `map[string]struct` tables for shared setup and assertions.
+  Split large or uneven cases into `_success` and `_failed` tests.
+- Use `t.Parallel()` in tests and subtests except for process-state changes or
+  shared external resources; briefly explain exceptions. Do not force it with
+  `t.Setenv`, working-directory changes, shared repositories, or shared
+  containers. Pass paths, environment values, clocks, and writers as dependencies.
+- Use temporary directories and local Git repositories for filesystem/Git
+  tests: network-free and more informative than mocks.
+- Use [Testcontainers for Go](https://golang.testcontainers.org/) only when a
+  container adds coverage beyond temporary directories/local Git repos. Use
+  an Ubuntu image with Git. At the very start of each container test, check
+  `INTEGRATION=true`; otherwise skip with a clear message.
+- Default tests must need neither network nor Docker.
 
 ## Verification
 
-After each implementation:
+After each implementation, in order:
 
-1. Run the tests for the changed package.
-2. Run `go fix ./...` and review what it changed.
-3. Run `task format` and make sure no Go file is left unformatted.
+1. Run changed-package tests.
+2. Run `go fix ./...` and review its diff.
+3. Run `task format`; ensure no Go file remains unformatted.
 4. Run `go test ./...`.
 5. Run `go vet ./...`.
-6. Run `task test:integration` only when the change touches a real integration
-   boundary.
-7. Review the final diff and make sure unrelated user changes are untouched.
+6. Run `task test:integration` only when touching a real integration boundary.
+7. Review the final diff; preserve unrelated user changes.
 
-Never hide a failed command. Say whether the failure comes from the change, the
-environment or an integration dependency that is not available.
+Report every failed command and whether the cause is the change, environment,
+or an unavailable integration dependency.
