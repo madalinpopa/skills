@@ -410,8 +410,9 @@ useful.
 
 ## Skill metadata
 
-One `SKILL.md` serves every agent. Its frontmatter carries three things the
-agents never see, and the CLI resolves them on install.
+One `SKILL.md` serves every agent. Its frontmatter may carry three things the
+agents never see, and the CLI resolves them on install. All three are optional,
+so a standard Agent Skills file installs without them.
 
 ```markdown
 ---
@@ -430,8 +431,8 @@ x-claude:
 
 | field | purpose |
 | --- | --- |
-| `status` | `published` or `draft`. A draft is invisible to `ls` and cannot be installed. |
-| `tags` | grouping for `ls` and, later, a TUI |
+| `status` | `published` or `draft`. Omitted means published. A draft is invisible to `ls` and cannot be installed. |
+| `tags` | grouping for `ls` and, later, a TUI. Omitted or empty means no tags. |
 | `x-claude` | frontmatter only Claude should see |
 
 ### What install writes
@@ -448,8 +449,10 @@ Most skills have no `x-claude`, so their two installed copies differ only by the
 absence of the store-only fields.
 
 Validate source metadata before writing any selected skill: require nonempty
-`name` and `description`, a directory-matching name, and `status` equal to
-`published` or `draft`. If present, `tags` is a list of strings and `x-claude`
+`name` and `description` and a directory-matching name. Only absence is a
+default: an omitted `status` means `published`, but an explicit empty, null or
+unsupported value is an error. If present, `tags` is a list of strings; null
+and non-string elements are errors rather than coerced. If present, `x-claude`
 is a mapping with unique string keys. Reject `name`, `description`, `status`,
 `tags` and `x-claude` inside that mapping, and keys colliding with existing
 top-level fields. Do not maintain a vendor-specific allowlist of every possible
@@ -478,8 +481,9 @@ skill forever.
 
 `status: draft` keeps a work in progress unpublished without a release. A draft
 can be pushed, reviewed and iterated on in the open, but it is invisible to `ls`
-and cannot be installed until the field flips to `published` and the next
-`sync` picks it up.
+and cannot be installed until the field flips to `published` or is removed, and
+the next `sync` picks it up. Omitting `status` publishes a valid skill, so work
+in progress must say `status: draft` explicitly.
 
 Registration is therefore a field, not a registry. There is no separate list of
 known skills to keep in step with the directory, and no CLI release required to
@@ -597,8 +601,8 @@ Exit codes are part of the command contract:
 
 ## Releases
 
-Only the CLI is released. A skill is published by setting `status: published`
-and pushing to the store; it reaches a project on the next `skills sync` plus
+Only the CLI is released. A skill is published by pushing it to the store
+without `status: draft`; it reaches a project on the next `skills sync` plus
 `skills update`. Adding or editing a skill never needs a CLI release.
 
 `main` is protected and work lands through a pull request. Merging a published

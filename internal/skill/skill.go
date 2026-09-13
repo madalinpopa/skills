@@ -48,16 +48,50 @@ func Parse(data []byte) (Metadata, error) {
 	if err != nil {
 		return Metadata{}, err
 	}
-	switch {
-	case meta.Status == "":
-		return Metadata{}, errors.New("status is required: published or draft")
-	case meta.Status != Published && meta.Status != Draft:
-		return Metadata{}, fmt.Errorf("status %q is not published or draft", meta.Status)
-	}
-	if _, _, err := frontmatter(data); err != nil {
+	doc, _, err := frontmatter(data)
+	if err != nil {
 		return Metadata{}, err
 	}
+	mapping := doc.Content[0]
+	meta.Status = Published
+	for i := 0; i < len(mapping.Content); i += 2 {
+		key, value := mapping.Content[i], mapping.Content[i+1]
+		switch key.Value {
+		case "status":
+			meta.Status, err = parseStatus(value)
+		case "tags":
+			meta.Tags, err = parseTags(value)
+		}
+		if err != nil {
+			return Metadata{}, err
+		}
+	}
 	return meta, nil
+}
+
+func parseStatus(node *yaml.Node) (Status, error) {
+	if node.Kind != yaml.ScalarNode || node.Tag != "!!str" {
+		return "", errors.New("status must be published or draft")
+	}
+	status := Status(node.Value)
+	if status != Published && status != Draft {
+		return "", fmt.Errorf("status %q is not published or draft", node.Value)
+	}
+	return status, nil
+}
+
+func parseTags(node *yaml.Node) ([]string, error) {
+	if node.Kind != yaml.SequenceNode {
+		return nil, errors.New("tags must be a list of strings")
+	}
+	var tags []string
+	for _, item := range node.Content {
+		if item.Kind != yaml.ScalarNode || item.Tag != "!!str" {
+			return nil, errors.New("tags must be a list of strings")
+		}
+		tags = append(tags, item.Value)
+	}
+	return tags, nil
 }
 
 func Describe(data []byte) (Metadata, error) {
@@ -66,15 +100,13 @@ func Describe(data []byte) (Metadata, error) {
 		return Metadata{}, err
 	}
 	var raw struct {
-		Name        string   `yaml:"name"`
-		Description string   `yaml:"description"`
-		Status      Status   `yaml:"status"`
-		Tags        []string `yaml:"tags"`
+		Name        string `yaml:"name"`
+		Description string `yaml:"description"`
 	}
 	if err := yaml.Unmarshal(front, &raw); err != nil {
 		return Metadata{}, err
 	}
-	meta := Metadata(raw)
+	meta := Metadata{Name: raw.Name, Description: raw.Description}
 	switch {
 	case meta.Name == "":
 		return Metadata{}, errors.New("name is required")

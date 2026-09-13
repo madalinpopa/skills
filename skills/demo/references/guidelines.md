@@ -37,8 +37,9 @@ a concrete task, expected result, and checks; load supporting detail as needed.
 
 The source extensions are defined by this repository's `docs/SPEC.md`:
 
-- `status: published` makes a skill installable; `draft` keeps it unpublished.
-- `tags` groups skills in the catalog.
+- `status: draft` keeps a skill unpublished. Omitting `status` or setting
+  `published` makes it installable, so mark work in progress explicitly.
+- `tags` groups skills in the catalog. Omitting it means no tags.
 - `x-claude` holds Claude-only fields. Its keys must not duplicate shared fields
   or redefine `name`, `description`, `status`, `tags`, or `x-claude`.
 

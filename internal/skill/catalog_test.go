@@ -18,6 +18,7 @@ func TestCatalog(t *testing.T) {
 		"skills/sql-review/SKILL.md": {Data: []byte(published("sql-review", "Reviews SQL queries.", "[sql]"))},
 		"skills/go-review/SKILL.md":  {Data: []byte(goReview)},
 		"skills/plain/SKILL.md":      {Data: []byte(plain)},
+		"skills/standard/SKILL.md":   {Data: []byte("---\nname: standard\ndescription: Has no store fields.\nlicense: MIT\n---\n# Standard\n")},
 	}}
 
 	skills, err := skill.Catalog(fsys)
@@ -38,7 +39,13 @@ func TestCatalog(t *testing.T) {
 			Tags:        []string{"sql"},
 			Dir:         "skills/sql-review",
 		},
-	}, skills, "published only, sorted by name whatever the filesystem order")
+		{
+			Name:        "standard",
+			Description: "Has no store fields.",
+			Status:      skill.Published,
+			Dir:         "skills/standard",
+		},
+	}, skills, "published only, sorted by name whatever the filesystem order; a status-free skill is published")
 }
 
 func TestCatalog_empty(t *testing.T) {
