@@ -179,8 +179,10 @@ tags: [go, review]
 `name` must match the directory name. `status` is `published` or `draft`. A
 draft stays out of `ls` and out of every project until it is ready, so no
 release is needed to publish a skill, just a push. `status` and `tags` are
-stripped on install. Claude-only frontmatter goes under an `x-claude` key,
-which is lifted into place for Claude Code and dropped for the others.
+stripped on install. Standard and unknown fields pass through to every agent.
+Claude-only frontmatter goes under an `x-claude` key, which is lifted into
+place for Claude Code and dropped for the others. See
+[Field kinds](docs/SPEC.md#field-kinds) for the limits.
 
 The `description` decides whether a skill fires, so say both what it does and
 when to use it.

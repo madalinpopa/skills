@@ -433,7 +433,34 @@ x-claude:
 | --- | --- |
 | `status` | `published` or `draft`. Omitted means published. A draft is invisible to `ls` and cannot be installed. |
 | `tags` | grouping for `ls` and, later, a TUI. Omitted or empty means no tags. |
-| `x-claude` | frontmatter only Claude should see |
+| `x-claude` | frontmatter only Claude should see; dropped from the shared copy |
+
+### Field kinds
+
+Frontmatter holds three kinds of fields:
+
+- **Standard fields** from the [Agent Skills specification](https://agentskills.io/specification):
+  `name`, `description`, `license`, `compatibility`, `metadata` and the
+  experimental `allowed-tools`. Author and version belong under `metadata`.
+- **Claude fields** from the [Claude Code frontmatter reference](https://code.claude.com/docs/en/skills#frontmatter-reference),
+  such as `when_to_use`, `model`, `effort`, `context`, `hooks`, `paths` and
+  `disable-model-invocation`. At the top level they pass through to every
+  agent. Put them under `x-claude` to keep them out of the shared copy.
+- **Store fields**: `status`, `tags` and `x-claude`. Only this CLI reads them.
+
+The CLI keeps the YAML value and type of every field it retains, but it does
+not read, check or run those values. A kept field does not prove the target
+agent supports it. Unknown fields pass through. There is no field allowlist and
+no configurable transform. The CLI never moves a top-level field on its own.
+
+Top-level `allowed-tools` is a standard field, so it stays in the shared copy.
+The standard defines it as a space-separated string; Claude Code also accepts a
+YAML list.
+
+Claude Code accepts a skill without `name` or `description`. This CLI requires
+both, so such a skill needs them added before it goes into a store. The CLI
+checks what install needs; it is not a full Agent Skills validator and does not
+promise to import every Claude skill unchanged.
 
 ### What install writes
 
@@ -673,15 +700,16 @@ Codex keeps its extras in a sidecar file, `agents/openai.yaml`, holding display
 name, icons, invocation policy and MCP tool dependencies. The other tools never
 read it, so carrying it costs nothing.
 
-Claude Code keeps its extras in the frontmatter itself: `allowed-tools`,
-`model`, `effort`, `context`, `hooks`, `paths`, `disable-model-invocation` and
-others. Codex and Gemini document only `name` and `description`, and neither
-says what it does with unknown keys.
+Claude Code keeps its extras in the frontmatter itself: `model`, `effort`,
+`context`, `hooks`, `paths`, `disable-model-invocation` and others. Codex and
+Gemini do not say what they do with keys they do not know.
 
 The authoring rule:
 
-- Claude-only frontmatter goes under `x-claude`, which is dropped for the other
-  tools. See [Skill metadata](#skill-metadata).
+- Standard fields, including `allowed-tools`, stay at the top level.
+- Claude fields at the top level are copied to every agent. Put them under
+  `x-claude` to keep them out of the shared copy. See
+  [Field kinds](#field-kinds).
 - `status` and `tags` are store-only and are stripped on install.
 - Codex-specific settings go in `agents/openai.yaml`, which the others ignore.
 
