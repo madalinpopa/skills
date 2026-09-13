@@ -1,7 +1,7 @@
 ---
 name: create-repo-skill
 description: Creates or updates skills in the madalinpopa/skills repository using its naming, metadata, and packaging rules. Use when authoring this repository's skill catalog or maintaining its skill authoring guidance; not for generic skill creation elsewhere or Go CLI implementation.
-status: draft
+status: published
 tags: [skills, authoring, repository]
 ---
 

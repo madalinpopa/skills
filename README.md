@@ -181,7 +181,13 @@ needs attention.
 Use [create-repo-skill](skills/create-repo-skill/SKILL.md) to create or update a
 skill in this repository. It starts with `skill-creator` and contains the
 repository's authoring workflow, CLI frontmatter rules, and agent options.
-Read it directly from the source path; it does not need to be installed.
+Install it into this project with `skills sync`, then
+`skills install create-repo-skill --agent codex` (use `claude` for Claude Code).
+For an existing installation, use `skills update create-repo-skill --agent codex`
+after syncing. Invoke the installed skill; [AGENTS.md](AGENTS.md#creating-and-updating-skills)
+defines the automatic setup workflow. Installation requires the published skill
+to be committed on the configured store branch. Local `.agents/` and `.claude/`
+installations are ignored by version control.
 
 See its [naming and category legend](skills/create-repo-skill/references/naming.md)
 for prefixes such as `create-`, `use-`, and `review-`, plus `workflow-` for
