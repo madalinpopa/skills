@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>skills · your own store of agent skills</title>
+  <meta name="description" content="A small Go CLI that installs agent skills from a Git repository you own into Claude Code, Codex, and Gemini CLI, and keeps them current.">
+  <meta property="og:title" content="skills · your own store of agent skills">
+  <meta property="og:description" content="Stop installing skills you have never read. Keep your own, in your own repo, and install them anywhere with one command.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/site.css">
+  <script>
+    try {
+      var t = localStorage.getItem("theme");
+      if (t) document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="./">skills<span class="cursor"></span></a>
+    <nav class="nav-links" aria-label="Site">
+      <a href="#why" class="hide-sm">Why</a>
+      <a href="#how" class="hide-sm">How it works</a>
+      <a href="#start">Get started</a>
+      <a href="docs/">Docs</a>
+      <a href="https://github.com/madalinpopa/skills" rel="noopener">GitHub</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="kicker">a cli for agent skills</div>
+        <h1>Your skills.<br>Your repo.<br><span class="accent">Your rules.</span></h1>
+        <p class="lede">
+          <code>skills</code> is a small Go CLI that installs agent skills from a Git repository
+          you own into Claude Code, Codex, and Gemini CLI, and keeps them current as your repo changes.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#start">Get started</a>
+          <a class="btn btn-secondary" href="docs/">Read the docs</a>
+        </div>
+        <div class="install-line">
+          <code id="install-cmd">go install github.com/madalinpopa/skills@latest</code>
+          <button type="button" data-copy="install-cmd" aria-label="Copy install command">copy</button>
+        </div>
+        <div class="agents">
+          <span>Claude Code</span>
+          <span>Codex</span>
+          <span>Gemini CLI</span>
+          <span>macOS · Linux · Windows</span>
+        </div>
+      </div>
+
+      <div class="term" data-terminal='[
+        {"cmd":"skills sync","out":"  <span class=\"m\">pulled store</span>  a1b2c3d -&gt; e4f5a6b"},
+        {"cmd":"skills install go-review","out":"  <span class=\"g\">+</span> go-review   <span class=\"g\">added</span>\n\n  1 skill, 1 changed"},
+        {"cmd":"skills update","out":"  <span class=\"cy\">~</span> go-review    <span class=\"cy\">updated</span>\n  <span class=\"a\">!</span> sql-review   <span class=\"a\">skipped, you edited it</span>\n\n  2 skills, 1 changed, 1 needs attention\n  <span class=\"m\">Run &#39;skills diff sql-review&#39; to see your changes,</span>\n  <span class=\"m\">or &#39;skills update sql-review --force&#39; to overwrite (backed up).</span>"}
+      ]'>
+        <div class="term-bar">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="title">~/code/my-project</span>
+        </div>
+        <pre class="term-body"><span class="p">$ </span><span class="c">skills sync</span>
+  <span class="m">pulled store</span>  a1b2c3d -&gt; e4f5a6b
+
+<span class="p">$ </span><span class="c">skills install go-review</span>
+  <span class="g">+</span> go-review   <span class="g">added</span>
+
+  1 skill, 1 changed
+
+<span class="p">$ </span><span class="c">skills update</span>
+  <span class="cy">~</span> go-review    <span class="cy">updated</span>
+  <span class="a">!</span> sql-review   <span class="a">skipped, you edited it</span>
+
+  2 skills, 1 changed, 1 needs attention</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="manifesto" id="why">
+    <div class="wrap manifesto-grid">
+      <div>
+        <div class="kicker">why</div>
+        <h2>Stop installing skills you have never read.</h2>
+        <p class="big">
+          A skill is a prompt that runs with your permissions, inside your projects,
+          with your tools. It deserves the same care as any code you pull into a build.
+        </p>
+      </div>
+      <ul class="claims">
+        <li>
+          <span class="n">01</span>
+          <div>
+            <strong>Skills are personal.</strong>
+            <p>A good skill encodes how <em>you</em> work: your review checklist, your test layout, your release steps. Somebody else's skill encodes somebody else's habits.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n">02</span>
+          <div>
+            <strong>Internet skills are unreviewed input.</strong>
+            <p>You would not paste a random script into your shell. A skill from an unknown marketplace is the same thing, dressed up as Markdown.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n">03</span>
+          <div>
+            <strong>Build your own private store.</strong>
+            <p>One Git repo. A folder per skill. Review it like code, sync it to every machine, and install it into any project with one command.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n">04</span>
+          <div>
+            <strong>Borrow ideas, not files.</strong>
+            <p>Read other people's skills for inspiration. Then write your own, in your own words, and keep it where you can see it change.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">how it works</div>
+        <h2>Three moving parts, no server.</h2>
+        <p class="lede">
+          The CLI shells out to Git. It uses your existing credentials, works with
+          private repositories, and never needs a registry.
+        </p>
+      </div>
+
+      <div class="flow">
+        <div class="node">
+          <div class="tag">01 · the repo</div>
+          <h3>github.com/you/skills</h3>
+          <p>Any Git repository with a <code>skills/</code> folder. One folder per skill, one <code>SKILL.md</code> inside. The rest of the repo can hold anything.</p>
+        </div>
+        <div class="edge">
+          <code>skills sync</code>
+          <svg viewBox="0 0 44 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M0 7h40M34 1l6 6-6 6"/></svg>
+        </div>
+        <div class="node">
+          <div class="tag">02 · the store</div>
+          <h3>~/.config/skills/store</h3>
+          <p>A sparse clone shared by every project on your machine. <code>sync</code> fast-forwards it and never touches installed skills.</p>
+        </div>
+        <div class="edge">
+          <code>skills install</code>
+          <svg viewBox="0 0 44 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M0 7h40M34 1l6 6-6 6"/></svg>
+        </div>
+        <div class="node">
+          <div class="tag">03 · the project</div>
+          <h3>.claude/skills · .agents/skills</h3>
+          <p>A copy per agent, each with its own <code>.skill-lock.json</code>. Delete the folder and the state goes with it.</p>
+        </div>
+      </div>
+
+      <p class="flow-note">
+        Skills are not compiled into the binary. Pushing a change to your repo is the whole release:
+        the next <code>sync</code> plus <code>update</code> brings it into every project.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">what you get</div>
+        <h2>Small, explicit, and careful with your edits.</h2>
+      </div>
+      <div class="features">
+        <div class="feature">
+          <div class="glyph">1</div>
+          <h3>One file, three agents</h3>
+          <p>Write one <code>SKILL.md</code>. The CLI strips store-only fields and resolves Claude-specific frontmatter on install, so the copies never drift apart.</p>
+        </div>
+        <div class="feature">
+          <div class="glyph">~</div>
+          <h3>Updates that never clobber you</h3>
+          <p>Every file is compared three ways: what the store wants, what is on disk, and what the CLI last wrote. Your edits are detected, not guessed.</p>
+        </div>
+        <div class="feature">
+          <div class="glyph">!</div>
+          <h3>Conflicts skip, never overwrite</h3>
+          <p>An edited skill is skipped and reported. <code>--force</code> replaces it only after a timestamped backup, and prints the exact path.</p>
+        </div>
+        <div class="feature">
+          <div class="glyph">#</div>
+          <h3>Drafts without a release</h3>
+          <p>Put <code>status: draft</code> in the frontmatter and a skill stays invisible until you flip it. Publishing is a field, not a registry.</p>
+        </div>
+        <div class="feature">
+          <div class="glyph">{}</div>
+          <h3>Stateless about projects</h3>
+          <p>Each installed skill carries its own lock with source, commit, and file hashes. Copy it to another project and the record goes along.</p>
+        </div>
+        <div class="feature">
+          <div class="glyph">$?</div>
+          <h3>Built for scripts</h3>
+          <p>Exit codes mean something: <code>0</code> done, <code>1</code> error, <code>2</code> bad usage, <code>3</code> needs your attention. <code>--dry-run</code> shows the plan and writes nothing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="start">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">get started</div>
+        <h2>Two minutes from install to your first skill.</h2>
+        <p class="lede">You need Git 2.45 or newer on your <code>PATH</code>. Everything else is one binary.</p>
+      </div>
+
+      <div class="split">
+        <div>
+          <ol class="steps">
+            <li><div><strong>Install the CLI.</strong> Use <code>go install</code>, or grab a binary for macOS, Linux, or Windows from <a href="https://github.com/madalinpopa/skills/releases" rel="noopener">Releases</a>.</div></li>
+            <li><div><strong>Point it at your repo.</strong> Edit <code>~/.config/skills/config.toml</code>, or skip this step to try the demo store first.</div></li>
+            <li><div><strong>Install a skill in a project.</strong> The first command that needs the store clones it. You never run setup by hand.</div></li>
+            <li><div><strong>Keep it current.</strong> <code>sync</code> pulls your repo, <code>update</code> moves installed skills to it. Two steps, on purpose.</div></li>
+          </ol>
+          <a class="btn btn-secondary" href="docs/">Every command, explained →</a>
+        </div>
+
+        <div class="code" data-lang="sh">
+<pre><span class="p">$ </span>go install github.com/madalinpopa/skills@latest
+
+<span class="p">$ </span>cd ~/code/my-project
+<span class="p">$ </span>skills ls                  <span class="m"># what the store offers</span>
+<span class="p">$ </span>skills install go-review   <span class="m"># copy it into this project</span>
+<span class="p">$ </span>skills ls --local          <span class="m"># what is installed here</span>
+
+<span class="p">$ </span>skills sync                <span class="m"># pull new commits into the store</span>
+<span class="p">$ </span>skills update              <span class="m"># bring installed skills up to date</span>
+<span class="p">$ </span>skills diff go-review      <span class="m"># see what you changed locally</span>
+<span class="p">$ </span>skills remove go-review    <span class="m"># uninstall, backed up first</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="own">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="kicker">bring your own</div>
+        <h2>A store is just a repo with a folder in it.</h2>
+        <p class="lede">
+          No fork needed. Create a Git repository, add a <code>skills/</code> folder,
+          and tell the CLI where it lives. Private repos work through your normal Git credentials.
+        </p>
+      </div>
+
+      <div class="split">
+        <div class="code" data-lang="layout">
+<pre>skills/
+  go-review/
+    SKILL.md              <span class="m">the skill itself</span>
+    agents/openai.yaml    <span class="m">optional, Codex only</span>
+    references/           <span class="m">optional, every agent</span>
+  django-testing/
+    SKILL.md
+  release-notes/
+    SKILL.md              <span class="m">status: draft, not installable yet</span></pre>
+        </div>
+
+        <div class="code" data-lang="toml">
+<pre><span class="m"># ~/.config/skills/config.toml</span>
+<span class="k">[store]</span>
+repo = <span class="s">"https://github.com/your-name/your-skills"</span>
+branch = <span class="s">"main"</span>
+
+<span class="k">[agents.claude]</span>
+project = <span class="s">".claude/skills"</span>
+global  = <span class="s">"~/.claude/skills"</span>
+
+<span class="k">[agents.codex]</span>
+project = <span class="s">".agents/skills"</span>
+global  = <span class="s">"~/.agents/skills"</span>
+
+<span class="k">[defaults]</span>
+agents = [<span class="s">"claude"</span>, <span class="s">"codex"</span>]</pre>
+        </div>
+      </div>
+
+      <p class="flow-note">
+        The folder name is the skill name. The CLI reads only committed files under <code>skills/</code>,
+        so your repo can also hold notes, prompts, or anything else.
+        See <a href="docs/#own-store">using your own store</a> for switching from another repository.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <a class="brand" href="./">skills<span class="cursor"></span></a>
+    <span>MIT licensed. Built in Go. Shells out to Git.</span>
+    <nav aria-label="Footer">
+      <a href="docs/">Docs</a>
+      <a href="https://github.com/madalinpopa/skills" rel="noopener">GitHub</a>
+      <a href="https://github.com/madalinpopa/skills/releases" rel="noopener">Releases</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+</body>
+</html>
