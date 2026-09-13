@@ -50,6 +50,13 @@ use [FEATURE.md](docs/templates/FEATURE.md) and
 - On resume, read the feature overview and active phase; verify recorded state
   against the working tree.
 
+## Creating and updating skills
+
+Before creating or editing a skill, read and follow
+[create-repo-skill](skills/create-repo-skill/SKILL.md) directly from this checkout.
+It requires `skill-creator` first and defines this repository's authoring,
+naming (including `workflow-*`), metadata, placement, and validation rules.
+
 ## Modern Go
 
 - Before creating or editing any Go file, invoke

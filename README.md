@@ -178,39 +178,15 @@ needs attention.
 
 ## Writing a skill
 
-One directory per skill, one `SKILL.md` inside it:
+Use [create-repo-skill](skills/create-repo-skill/SKILL.md) to create or update a
+skill in this repository. It starts with `skill-creator` and contains the
+repository's authoring workflow, CLI frontmatter rules, and agent options.
+Read it directly from the source path; it does not need to be installed.
 
-```
-skills/
-  go-review/
-    SKILL.md                shared by every agent
-    agents/openai.yaml      optional, Codex only
-    references/             optional
-```
-
-```markdown
----
-name: go-review
-description: Reviews Go code for correctness and idiom. Use when reviewing a Go
-  diff, a pull request touching .go files, or Go code quality.
-status: published
-tags: [go, review]
----
-
-# Go review
-...
-```
-
-`name` must match the directory name. `status` is `published` or `draft`. A
-draft stays out of `ls` and out of every project until it is ready, so no
-release is needed to publish a skill, just a push. `status` and `tags` are
-stripped on install. Standard and unknown fields pass through to every agent.
-Claude-only frontmatter goes under an `x-claude` key, which is lifted into
-place for Claude Code and dropped for the others. See
-[Field kinds](docs/SPEC.md#field-kinds) for the limits.
-
-The `description` decides whether a skill fires, so say both what it does and
-when to use it.
+See its [naming and category legend](skills/create-repo-skill/references/naming.md)
+for prefixes such as `create-`, `use-`, and `review-`, plus `workflow-` for
+skills that coordinate other skills toward a larger outcome. All skill source
+files belong under `skills/<skill-name>/`.
 
 ## Development
 
