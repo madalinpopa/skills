@@ -108,6 +108,9 @@ func Transform(data []byte, agent string) ([]byte, error) {
 		kept = append(kept, claude.Content...)
 	}
 	mapping.Content = kept
+	if err := expandAliases(mapping); err != nil {
+		return nil, err
+	}
 
 	var out bytes.Buffer
 	out.WriteString(delimiter)
@@ -122,6 +125,22 @@ func Transform(data []byte, agent string) ([]byte, error) {
 	out.WriteString(delimiter)
 	out.Write(body)
 	return out.Bytes(), nil
+}
+
+func expandAliases(node *yaml.Node) error {
+	if node.Kind == yaml.AliasNode {
+		var value any
+		if err := node.Decode(&value); err != nil {
+			return err
+		}
+		return node.Encode(value)
+	}
+	for _, child := range node.Content {
+		if err := expandAliases(child); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func frontmatter(data []byte) (*yaml.Node, []byte, error) {

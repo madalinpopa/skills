@@ -230,6 +230,33 @@ func TestTransform_isDeterministic(t *testing.T) {
 	assert.Equal(t, first, second)
 }
 
+func TestTransform_preservesAliasesToStoreMetadata(t *testing.T) {
+	t.Parallel()
+	data := []byte("---\nname: demo\nstatus: published\ntags: [&summary Demonstrates skill installation.]\ndescription: *summary\n---\n# Demo\n")
+	before, err := skill.Parse(data)
+	require.NoError(t, err, "the source has valid YAML and store metadata")
+
+	tests := map[string]struct {
+		agent string
+	}{
+		"claude": {agent: "claude"},
+		"shared": {agent: "agents"},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			out, err := skill.Transform(data, tt.agent)
+
+			require.NoError(t, err)
+			after, err := skill.Describe(out)
+			require.NoError(t, err, "stripping tags must not leave an undefined YAML alias")
+			assert.Equal(t, before.Description, after.Description)
+			assert.NotContains(t, string(out), "tags:")
+		})
+	}
+}
+
 func TestRender(t *testing.T) {
 	t.Parallel()
 	fsys := fstest.MapFS{

@@ -392,7 +392,7 @@ func inspect(dir string) (tree, error) {
 			t.dirs[p] = true
 		case !entry.Type().IsRegular():
 			t.issues = append(t.issues, Issue{Path: full, Reason: "is not a regular file"})
-		case entry.Name() != LockFile:
+		case p != LockFile:
 			info, err := entry.Info()
 			if err != nil {
 				return err
@@ -487,6 +487,11 @@ func request(store fs.FS, s skill.Skill, dests []Destination) (Request, error) {
 	req := Request{Name: s.Name}
 	source, err := fs.Sub(store, s.Dir)
 	if err != nil {
+		return Request{}, fmt.Errorf("%s: %w", s.Name, err)
+	}
+	if _, err := fs.Stat(source, LockFile); err == nil {
+		return Request{}, fmt.Errorf("%s/%s: reserved for installation state", s.Dir, LockFile)
+	} else if !errors.Is(err, fs.ErrNotExist) {
 		return Request{}, fmt.Errorf("%s: %w", s.Name, err)
 	}
 	for _, dest := range dests {

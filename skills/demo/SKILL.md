@@ -1,51 +1,70 @@
 ---
 name: demo
-description: Demonstrates the standard structure, metadata, and files for agent skills. Use when the user asks for a demo, example, template, or tests the installation of skills.
+description: Demonstrates Agent Skills packaging with a bundled script, reference, and output template. Use when exploring this demo, learning the skill folder layout, or smoke-testing a skills CLI installation.
+license: MIT. See LICENSE.txt for terms.
+compatibility: Requires Python 3 for the bundled script. No third-party packages or network access are needed.
+allowed-tools: Read
+metadata:
+  purpose: installation-example
 status: published
-tags:
-  - demo
-  - example
-  - guidelines
-  - testing
+tags: [demo, example, testing]
 x-claude:
   disable-model-invocation: true
   user-invocable: true
-  allowed-tools:
-    - "Bash(echo *)"
-    - "Read"
-  context: inline
 ---
 
-# Demo Skill
+# Demo
 
-This is a professional reference and template demonstrating the standard structure, metadata format, and guidelines for authoring agent-agnostic skills that work seamlessly across Claude Code, OpenAI Codex/ChatGPT, and Gemini CLI.
+Use this working example to explain skill resources or exercise an installed
+copy. Resolve the paths below relative to the directory containing this file.
 
-## Purpose
-
-The `demo` skill acts as an educational blueprint and functional test case for the `skills` CLI. It shows how the tool resolves differences between platforms while maintaining a single, clean source of truth.
-
-## Standard Layout
-
-A standard skill directory in the store is structured as follows:
+## Explore the layout
 
 ```text
-skills/
-  demo/
-    SKILL.md                <-- Core markdown instructions & shared frontmatter
-    agents/
-      openai.yaml           <-- Codex/ChatGPT-specific settings & MCP dependencies
-    references/
-      guidelines.md         <-- Optional helper files copied to all agent targets
+demo/
+├── SKILL.md
+├── LICENSE.txt
+├── scripts/show-template.py
+├── references/guidelines.md
+└── assets/report-template.md
 ```
 
-## Best Practices
+Read [references/guidelines.md](references/guidelines.md) when explaining the
+format or adapting this example into a new skill. Keep only the resources the
+new task uses.
 
-To author high-quality, portable skills:
+## Exercise an installation
 
-1. **Write Descriptive Triggers**: The `description` field in the frontmatter is the primary discovery and routing mechanism. Write in the third person, lead with the primary trigger words (e.g., "Demonstrates...", "Reviews..."), and be highly specific.
-2. **Keep the Body Concise**: The body of your skill is injected directly into the LLM's context window. Keep it under 500 lines to preserve token budget.
-3. **Use Portable Paths**: Always use forward slashes (`/`) for paths.
-4. **Be Unambiguous**: Use consistent terminology throughout the file to avoid confusing the model.
-5. **Separate Vendor Extras**:
-   - Claude Code specific controls are placed inside the `x-claude` block in `SKILL.md`.
-   - OpenAI Codex/ChatGPT specific settings live in `agents/openai.yaml`.
+1. Run [scripts/show-template.py](scripts/show-template.py) with Python 3:
+
+   ```sh
+   python3 scripts/show-template.py
+   ```
+
+   Run this command from the skill directory, or pass the script's absolute
+   path from another directory. Use `--help` for usage.
+2. Confirm that stdout matches [assets/report-template.md](assets/report-template.md).
+   This demonstrates that the script can find its bundled asset. It does not
+   validate metadata or prove that every installed file is intact.
+3. Fill the template in your response with the path checked, observed result,
+   and any failure. Mark checks you did not run as unverified. Save a report
+   only if requested, using the user's output location.
+
+For example, “Check the demo installation” should produce a short report with
+the actual script result. “Explain the optional folders” only needs an
+explanation; it does not require running the script.
+
+If Python is unavailable, report that the script check could not run. If a
+resource is missing, report its path rather than inventing replacement content.
+
+## Store metadata
+
+`status`, `tags`, and `x-claude` are this repository's source extensions.
+Installation removes `status` and `tags`. For Claude it lifts `x-claude` fields
+into frontmatter; for Codex and Gemini it drops that block. The demo is
+explicitly invoked in Claude because `disable-model-invocation` is true.
+
+The other fields demonstrate the Agent Skills specification. `allowed-tools`
+pre-approves reading where supported; script execution uses the client's normal
+permission checks. Validate the shared Codex/Gemini copy against the standard
+and check the Claude extensions against Claude's documentation.

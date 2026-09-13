@@ -1,8 +1,7 @@
-# Design
+# Specification
 
-The intended behavior of the `skills` CLI and the reasons behind it.
-[TODO.md](TODO.md) tracks the remaining implementation work. A requirement here
-does not mean the current binary already implements it.
+The behavior of the `skills` CLI and the reasons behind it. The binary
+implements this contract; change the document when the behavior changes.
 
 ## Goal
 
@@ -254,6 +253,11 @@ Only CLI-managed files belong in these maps; the lock itself and preserved
 local-only files are excluded. A completely unchanged installation keeps its
 commit and timestamp. Missing target locks still need to be written.
 
+The root `.skill-lock.json` path is reserved for installation state; reject
+source skills containing a file or directory there before writing any selected
+skill. Files with that name in subdirectories are ordinary content and receive
+the same copying and local-edit protection as other resources.
+
 The full Git commit is recorded rather than an abbreviated hash. During install
 or update, if a lock's `source` differs from the configured store, the CLI leaves
 the skill untouched, reports that it came from another source, and exits as
@@ -457,6 +461,9 @@ The frontmatter is parsed and validated with a YAML library. The transformation
 drops `status` and `tags`, then either lifts or drops `x-claude`. The output is
 serialised deterministically. This remains a pure function from bytes and an
 agent name to bytes, so it tests without touching disk.
+
+Expand YAML aliases in retained fields so removing or moving their anchors
+cannot leave invalid frontmatter.
 
 This transformation is why there is no per-agent copy in the store. The CLI has
 to rewrite frontmatter anyway to strip `status` and `tags`; resolving

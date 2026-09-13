@@ -1,26 +1,59 @@
-# Agent Skills Authoring Guidelines
+# Authoring reference
 
-This reference details the best practices for authoring skills compatible with Claude Code, OpenAI Codex, and Gemini CLI.
+Use the [Agent Skills specification](https://agentskills.io/specification) as
+the format reference and its [authoring guide](https://agentskills.io/skill-creation/best-practices)
+when deciding what instructions belong in a skill.
 
-## General Best Practices
+## Metadata
 
-- **The description decides whether the skill fires.** Say what it does and when to use it, lead with the trigger words, and write in the third person.
-- **Be concise.** The body shares the context window with everything else. Keep it under 500 lines.
-- **Keep file references one level deep.** Nested references get partially read.
-- **Use forward slashes in paths**, and avoid dates and version notes that age.
-- **Use one term for one thing** throughout a skill.
-- **Keep each skill focused** on one job.
+Write YAML frontmatter followed by Markdown instructions.
 
-## Platform Differences
+| Field | Constraint |
+| --- | --- |
+| `name` | Required; 1–64 lowercase alphanumeric characters or hyphens; match the directory; no leading, trailing, or consecutive hyphens. |
+| `description` | Required; 1–1024 characters explaining the task and when it applies. |
+| `license` | Optional license identifier or bundled license reference. |
+| `compatibility` | Optional; 1–500 characters describing actual environment requirements. |
+| `metadata` | Optional mapping of string keys to string values; quote numeric-looking values. |
+| `allowed-tools` | Optional experimental space-separated tool string; support depends on the client. |
 
-### Claude Code
-- Command identity is taken from the directory name.
-- Custom frontmatter properties like `allowed-tools` and `disable-model-invocation` should be nested under `x-claude`.
+This demo uses `allowed-tools: Read` to demonstrate the experimental field.
 
-### OpenAI Codex / ChatGPT
-- Command identity is taken from the `name` field in the frontmatter.
-- OpenAI-specific UI config and MCP tool dependencies go in `agents/openai.yaml`.
+## Resources and instructions
 
-### Gemini CLI
-- Command identity is taken from the `name` field in the frontmatter.
-- Uses the same `SKILL.md` format but strips store-specific or Claude-specific fields upon installation.
+- `scripts/` holds executable helpers. Document dependencies, usage, and failures.
+- `references/` holds guidance read when a task needs it.
+- `assets/` holds templates and other output resources.
+
+These folders are optional. This demo includes all three to exercise copying.
+The standard also permits other directories, but this example intentionally
+uses only those three conventions.
+
+Keep the entrypoint below 500 lines and preferably 5,000 tokens. Link resources
+directly from `SKILL.md` using paths relative to the skill root. Give the agent
+a concrete task, expected result, and checks; load supporting detail as needed.
+
+## Using this repository
+
+The source extensions are defined by this repository's `docs/SPEC.md`:
+
+- `status: published` makes a skill installable; `draft` keeps it unpublished.
+- `tags` groups skills in the catalog.
+- `x-claude` holds Claude-only fields. Its keys must not duplicate shared fields
+  or redefine `name`, `description`, `status`, `tags`, or `x-claude`.
+
+The CLI removes `status` and `tags` on install. It lifts `x-claude` into Claude's
+frontmatter and drops it for Codex/Gemini. These are store extensions, not
+standard fields. See the [Claude skills reference](https://code.claude.com/docs/en/skills)
+for supported extension values.
+
+The CLI copies regular files and preserves executable intent. Use real files;
+symlinks are unsupported. The root `.skill-lock.json` belongs to the installer.
+Keep generated reports outside the installed skill so they do not become local
+installation content.
+
+After installation, run `skills-ref validate` against the shared Codex/Gemini
+copy if the official reference validator is available. The source and Claude
+copy contain extensions that this strict validator rejects. Check Claude's
+extra fields separately. Metadata validation does not replace trying the skill
+on a representative request.

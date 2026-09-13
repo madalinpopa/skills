@@ -9,7 +9,7 @@
 
 # skill + prompt content
 !*.md
-!skills/**/*.yaml
+!skills/**
 
 # docs
 !docs/**
