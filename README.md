@@ -47,10 +47,13 @@ Skills land in the directory each agent reads.
 
 ```
 .claude/skills/go-review/   Claude Code
-.agents/skills/go-review/   Codex and Gemini CLI
+.agents/skills/go-review/   Codex (Gemini CLI reads it too)
 ```
 
 The default agents are `claude` and `codex`. Use `--agent` to narrow a command.
+Gemini CLI reads the shared `.agents/skills` directory, so `--agent codex`
+covers it. To use `--agent gemini`, add an `[agents.gemini]` entry with the
+same paths to the config.
 Use `--global` to install into your home directory instead, so a skill is
 available in every project. Scope is explicit: a command never falls back from
 the project to your home directory.

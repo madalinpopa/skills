@@ -116,10 +116,6 @@ global  = "~/.claude/skills"
 project = ".agents/skills"
 global  = "~/.agents/skills"
 
-[agents.gemini]
-project = ".agents/skills"
-global  = "~/.agents/skills"
-
 [defaults]
 agents = ["claude", "codex"]
 ```
@@ -140,9 +136,14 @@ directory. Empty paths and paths that escape project scope are config errors.
 Selected target roots must not overlap, except for identical paths that can
 be de-duplicated. Reject different transforms sharing one target.
 
-Codex and Gemini share `.agents/skills`, so two agents resolve to one directory.
-Installs are de-duplicated by resolved path: asking for both writes the files
-once.
+Several agents may share one directory, for example custom aliases that also
+point at `.agents/skills`. Installs are de-duplicated by resolved path: asking
+for all of them writes the files once.
+
+Gemini CLI reads `.agents/skills` too, so `--agent codex` already serves it and
+there is no built-in `gemini` alias. To select it by name, add an
+`[agents.gemini]` entry with the same paths. A config that already defines one
+keeps working unchanged.
 
 ## Agents and targets
 
@@ -151,6 +152,9 @@ once.
 | Claude Code | `.claude/skills/` | `~/.claude/skills/` |
 | Codex | `.agents/skills/` | `~/.agents/skills/` |
 | Gemini CLI | `.agents/skills/` (alias, preferred over `.gemini/skills/`) | `~/.agents/skills/` (alias) |
+
+Only `claude` and `codex` are configured by default. Gemini CLI is served by
+the shared `.agents/skills` directory; see [Configuration](#configuration).
 
 All three use the same skill format: a directory holding a `SKILL.md` whose
 frontmatter carries `name` and `description`, with optional `scripts/`,

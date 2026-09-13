@@ -21,7 +21,6 @@ func TestDefault(t *testing.T) {
 	assert.Equal(t, map[string]config.Agent{
 		"claude": {Project: ".claude/skills", Global: "~/.claude/skills"},
 		"codex":  {Project: ".agents/skills", Global: "~/.agents/skills"},
-		"gemini": {Project: ".agents/skills", Global: "~/.agents/skills"},
 	}, cfg.Agents)
 	assert.Equal(t, []string{"claude", "codex"}, cfg.Defaults.Agents)
 }
@@ -170,7 +169,9 @@ func TestInit_createsDefaultFile(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, config.Default(), cfg)
-	assert.FileExists(t, filepath.Join(dir, "config.toml"))
+	written, err := os.ReadFile(filepath.Join(dir, "config.toml"))
+	require.NoError(t, err)
+	assert.NotContains(t, string(written), "gemini", "the written file offers only claude and codex")
 
 	loaded, err := config.Load(dir)
 	require.NoError(t, err)
@@ -180,13 +181,28 @@ func TestInit_createsDefaultFile(t *testing.T) {
 func TestInit_keepsExistingFile(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
-	custom := "[store]\nrepo = \"https://example.com/mine\"\n"
+	custom := `[store]
+repo = "https://example.com/mine"
+
+[agents.claude]
+project = ".claude/skills"
+global  = "~/.claude/skills"
+
+[agents.gemini]
+project = ".agents/skills"
+global  = "~/.agents/skills"
+
+[defaults]
+agents = ["claude", "gemini"]
+`
 	writeConfig(t, dir, custom)
 
 	cfg, err := config.Init(dir)
 
 	require.NoError(t, err)
 	assert.Equal(t, "https://example.com/mine", cfg.Store.Repo)
+	assert.Equal(t, config.Agent{Project: ".agents/skills", Global: "~/.agents/skills"}, cfg.Agents["gemini"], "an explicitly configured gemini agent keeps working")
+	assert.Equal(t, []string{"claude", "gemini"}, cfg.Defaults.Agents)
 	got, err := os.ReadFile(filepath.Join(dir, "config.toml"))
 	require.NoError(t, err)
 	assert.Equal(t, custom, string(got), "init never rewrites an existing config")

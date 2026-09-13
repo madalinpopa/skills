@@ -186,10 +186,11 @@ func TestTransform(t *testing.T) {
 			want:   []string{"name: go-review", "description: Reviews Go code for correctness and idiom."},
 			unwant: []string{"x-claude", "disable-model-invocation", "allowed-tools", "status:", "tags:"},
 		},
-		"gemini drops x-claude": {
+		"custom shared agent drops x-claude": {
 			source: goReview,
-			agent:  "gemini",
-			unwant: []string{"x-claude", "allowed-tools"},
+			agent:  "amp",
+			want:   []string{"name: go-review", "description: Reviews Go code for correctness and idiom."},
+			unwant: []string{"x-claude", "disable-model-invocation", "allowed-tools", "status:", "tags:"},
 		},
 		"plain skill only loses store fields": {
 			source: plain,

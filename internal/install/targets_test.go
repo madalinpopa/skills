@@ -1,6 +1,7 @@
 package install_test
 
 import (
+	"maps"
 	"os"
 	"path/filepath"
 	"testing"
@@ -18,6 +19,7 @@ func TestTargets(t *testing.T) {
 
 	tests := map[string]struct {
 		agents []string
+		extra  map[string]config.Agent
 		global bool
 		want   []install.Destination
 	}{
@@ -33,8 +35,12 @@ func TestTargets(t *testing.T) {
 				{Dir: filepath.FromSlash("/repo/.claude/skills"), Variant: install.VariantClaude},
 			},
 		},
-		"codex and gemini share one target": {
-			agents: []string{"codex", "gemini"},
+		"custom agents sharing one directory are written once": {
+			agents: []string{"codex", "gemini", "amp"},
+			extra: map[string]config.Agent{
+				"gemini": {Project: ".agents/skills", Global: "~/.agents/skills"},
+				"amp":    {Project: ".agents/skills", Global: "~/.agents/skills"},
+			},
 			want: []install.Destination{
 				{Dir: filepath.FromSlash("/repo/.agents/skills"), Variant: install.VariantAgents},
 			},
@@ -56,7 +62,10 @@ func TestTargets(t *testing.T) {
 				root = filepath.FromSlash("/home/u")
 			}
 
-			got, err := install.Targets(config.Default(), root, tt.global, tt.agents)
+			cfg := config.Default()
+			maps.Copy(cfg.Agents, tt.extra)
+
+			got, err := install.Targets(cfg, root, tt.global, tt.agents)
 
 			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
@@ -70,8 +79,7 @@ func TestTargets_unknownAgent(t *testing.T) {
 	_, err := install.Targets(config.Default(), "/repo", false, []string{"claude", "nope"})
 
 	require.ErrorIs(t, err, install.ErrUnknownAgent)
-	assert.ErrorContains(t, err, `"nope"`)
-	assert.ErrorContains(t, err, "claude, codex, gemini", "the message lists the available agents")
+	assert.EqualError(t, err, `unknown agent "nope"; available: claude, codex`, "the message lists exactly the configured agents")
 }
 
 func TestTargets_ambiguousConfig(t *testing.T) {

@@ -46,10 +46,6 @@ global  = "~/.claude/skills"
 project = ".agents/skills"
 global  = "~/.agents/skills"
 
-[agents.gemini]
-project = ".agents/skills"
-global  = "~/.agents/skills"
-
 [defaults]
 agents = ["claude", "codex"]
 `
@@ -63,7 +59,6 @@ func Default() Config {
 		Agents: map[string]Agent{
 			"claude": {Project: ".claude/skills", Global: "~/.claude/skills"},
 			"codex":  {Project: ".agents/skills", Global: "~/.agents/skills"},
-			"gemini": {Project: ".agents/skills", Global: "~/.agents/skills"},
 		},
 		Defaults: Defaults{Agents: []string{"claude", "codex"}},
 	}
