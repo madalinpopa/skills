@@ -92,6 +92,25 @@ is made in a temporary directory and moved into place only after setup
 succeeds, so a failed setup never leaves a half-made store. An existing store,
 including an older full clone, is used as it is and never converted.
 
+`sync` keeps the store partial and sparse: it downloads the current `skills/`
+content and nothing else. Reading a commit never downloads anything, so `ls`,
+`install`, `update`, `diff` and dry runs do not reach the network through the
+store. Content that was downloaded before, such as the commit a skill was
+installed from, stays readable offline. A fresh store may not have content from
+older commits. Reading it is an error that names the commit and the missing
+file, with a command to download it:
+
+```
+git -C ~/.config/skills/store archive <commit> skills > /dev/null
+```
+
+Then run the command again. The CLI never downloads old history on its own.
+
+Only new stores get the smaller download. An older full clone keeps working
+and still reads only `skills/`. To switch, commit or copy any local work in the
+store, move the old store aside, and let the next command clone a new one. Keep
+the old store until the new one works.
+
 ### Store layout
 
 One directory per skill, one `SKILL.md` inside it:

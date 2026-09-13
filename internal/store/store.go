@@ -91,11 +91,12 @@ func (s Store) Commit(ctx context.Context) (string, error) {
 }
 
 func (s Store) Tree(ctx context.Context, commit string) (fs.FS, error) {
-	listing, err := output(ctx, s.Dir, nil, "ls-tree", "-r", "-z", "--full-tree", commit, "--", "skills")
+	listing, err := output(ctx, s.Dir, nil, noLazyFetch, "ls-tree", "-r", "-z", "--full-tree", commit, "--", "skills")
 	if err != nil {
 		return nil, fmt.Errorf("commit %s: %w", commit, err)
 	}
 	tree := fstest.MapFS{}
+	paths := map[string]string{}
 	var oids []string
 	for entry := range bytes.SplitSeq(bytes.TrimSuffix(listing, []byte{0}), []byte{0}) {
 		meta, name, ok := bytes.Cut(entry, []byte{'\t'})
@@ -108,12 +109,13 @@ func (s Store) Tree(ctx context.Context, commit string) (fs.FS, error) {
 		}
 		tree[string(name)] = &fstest.MapFile{Mode: blobMode(fields[0])}
 		oids = append(oids, fields[2]+" "+string(name))
+		paths[fields[2]] = string(name)
 	}
 	if len(oids) == 0 {
 		return tree, nil
 	}
 	stdin := strings.NewReader(strings.Join(oids, "\n") + "\n")
-	blobs, err := output(ctx, s.Dir, stdin, "cat-file", "--batch=%(objectname) %(objectsize) %(rest)")
+	blobs, err := output(ctx, s.Dir, stdin, noLazyFetch, "cat-file", "--batch=%(objectname) %(objectsize) %(rest)")
 	if err != nil {
 		return nil, err
 	}
@@ -121,6 +123,10 @@ func (s Store) Tree(ctx context.Context, commit string) (fs.FS, error) {
 		header, rest, ok := bytes.Cut(blobs, []byte{'\n'})
 		if !ok {
 			return nil, fmt.Errorf("git cat-file: unexpected output %q", header)
+		}
+		if oid, missing := strings.CutSuffix(string(header), " missing"); missing {
+			return nil, fmt.Errorf("commit %s: %s is not downloaded; download it with 'git -C %s archive %s skills > %s' and try again",
+				commit, paths[oid], s.Dir, commit, os.DevNull)
 		}
 		fields := strings.SplitN(string(header), " ", 3)
 		if len(fields) != 3 {
@@ -226,15 +232,20 @@ func (s Store) git(ctx context.Context, args ...string) (string, error) {
 	return run(ctx, s.Dir, args...)
 }
 
+var noLazyFetch = []string{"GIT_NO_LAZY_FETCH=1"}
+
 func run(ctx context.Context, dir string, args ...string) (string, error) {
-	out, err := output(ctx, dir, nil, args...)
+	out, err := output(ctx, dir, nil, nil, args...)
 	return strings.TrimSpace(string(out)), err
 }
 
-func output(ctx context.Context, dir string, stdin io.Reader, args ...string) ([]byte, error) {
+func output(ctx context.Context, dir string, stdin io.Reader, env []string, args ...string) ([]byte, error) {
 	cmd := exec.CommandContext(ctx, "git", args...)
 	cmd.Dir = dir
 	cmd.Stdin = stdin
+	if env != nil {
+		cmd.Env = append(os.Environ(), env...)
+	}
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
