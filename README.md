@@ -39,62 +39,87 @@ agent. Anything else is a config error and no command runs.
 skills ls                   # published skills in the store
 skills install go-review    # install into this project
 skills ls --local           # what this project has installed
+skills sync                 # fast-forward the store
+skills update               # move installed skills to the synced content
 ```
 
-Skills land in the directory each agent reads:
+Skills land in the directory each agent reads. 
 
 ```
 .claude/skills/go-review/   Claude Code
 .agents/skills/go-review/   Codex and Gemini CLI
 ```
 
-Codex and Gemini share one directory, so their copy is written once. Two
-agents may share a directory only with the same format, and one agent's
-directory may not sit inside another's. In a project, a directory that is a
-link to somewhere outside the repository is refused. The default agents are
-`claude` and `codex`. Use `--agent` to narrow a command to some of them:
+The default agents are `claude` and `codex`. Use `--agent` to narrow a command.
+Use `--global` to install into your home directory instead, so a skill is
+available in every project. Scope is explicit: a command never falls back from
+the project to your home directory.
 
 ```sh
 skills install go-review --agent claude
-```
-
-To pick up newer skills:
-
-```sh
-skills sync      # fast-forward the store
-skills update    # move installed skills to the synced content
-```
-
-`sync` only moves the store forward, so it never rewrites a file in your
-project. `update` is the step that touches your project.
-
-`sync --dry-run` asks the remote for its branch head and prints the local and
-remote commits. It does not fetch, so it cannot promise a fast-forward; the
-real `sync` checks that.
-
-Listing, install, update and diff read skills from the store's current commit,
-which is the commit recorded in each lock. Uncommitted edits, untracked
-directories and ignored files in the store clone are never installed.
-
-## Scope
-
-Commands act on the current Git repository, from any subdirectory. Outside a
-repository they warn and use the current directory.
-
-`--global` acts on your home directory instead, so a skill is available in
-every project:
-
-```sh
 skills install go-review --global
-skills ls --global
-skills remove go-review --global
 ```
 
-Scope is explicit. A command never falls back from the project to your home
-directory. When `update`, `diff` or `remove` names a skill that is only
-installed globally for the selected agents, the error tells you to add
-`--global`. Only the missing names are checked, so a skill installed in the
-project is never reported as global only.
+## Examples
+
+Install a skill. `-v` shows the files written for each agent:
+
+```
+$ skills install demo -v
+  + demo   added
+      .agents/skills/demo/SKILL.md
+      .agents/skills/demo/references/guidelines.md
+      .claude/skills/demo/SKILL.md
+      .claude/skills/demo/references/guidelines.md
+
+  1 skill, 1 changed
+```
+
+Update after you edited a skill. The edited skill is skipped and the command
+exits 3:
+
+```
+$ skills update
+  ~ go-review        updated
+  ! demo             skipped, you edited it
+
+  2 skills, 1 changed, 1 needs attention
+  Run 'skills diff demo' to see your changes,
+  or 'skills update demo --force' to overwrite (backed up).
+```
+
+See your changes, then overwrite them:
+
+```
+$ skills diff demo
+--- a/.claude/skills/demo/SKILL.md
++++ b/.claude/skills/demo/SKILL.md
+@@ -65,3 +65,4 @@
+ permission checks.
++my local note
+
+$ skills update demo --force
+  ~ demo   updated
+      backed up to ~/.config/skills/backups/20260913-004647/.../.claude/skills/demo
+
+  1 skill, 1 changed
+```
+
+Preview a change with `--dry-run`. Nothing is written:
+
+```
+$ skills remove demo --dry-run
+  - demo   would remove
+      would back up first
+
+  1 skill, 1 would change
+```
+
+Symbols carry the meaning, so nothing is lost when color is off:
+
+```
++  added      ~  updated      -  removed      !  needs attention
+```
 
 ## Commands
 
@@ -111,8 +136,6 @@ project is never reported as global only.
 | `skills diff <skill>` | show your edits to an installed skill |
 | `skills version` | CLI version and current store commit |
 
-Flags:
-
 ```
 --global      act on the home directory instead of the repository
 --agent       narrow to certain agents (default: config defaults)
@@ -122,90 +145,8 @@ Flags:
 --no-color    disable color (NO_COLOR is honoured too)
 ```
 
-`--global` applies to `ls`, `install`, `update`, `remove` and `diff`. `--agent`
-and `--force` apply to `install`, `update`, `remove` and `diff` (`diff` takes
-no `--force`). `--dry-run`, `-v` and `--no-color` apply everywhere and are
-ignored by commands that write nothing. `ls --local` and `ls --global` scan
-the default agents' directories from the config and take no `--agent`.
-
-Only `init`, `sync`, `ls`, `install`, `diff` and an `update` with something to
-update read the store. They create the config on first run and clone the
-store if it is missing. Listing installed skills, removing them and an empty
-`update` load the config read-only and never clone.
-
-## Your edits are never lost
-
-Each installed skill carries a `.skill-lock.json` recording what the CLI wrote.
-Every target directory gets its own lock. If a copy already sits in a target
-with no lock and matches the store, `install` adopts it by writing the lock and
-leaves the files as they are.
-An update compares three things per file: what the store holds, what is on disk,
-and what the CLI last wrote. On Linux and macOS the executable bit is part of
-that comparison, so bundled scripts run after install and a local `chmod`
-counts as an edit. A lock written before executable bits were recorded needs
-`--force` the first time an update or removal would change that skill.
-
-If the file on disk still matches what the CLI wrote, you never touched it, so
-it is safe to overwrite. Anything else is your own edit. The update skips the
-whole skill, says so, and carries on with the others:
-
-```
-$ skills update
-  ~ go-review        updated
-  ! sql-review       skipped, you edited it
-
-  2 skills, 1 changed, 1 needs attention
-  Run 'skills diff sql-review' to see your changes,
-  or 'skills update sql-review --force' to overwrite (backed up).
-```
-
-`skills diff sql-review` shows your changes as a unified diff against the
-content the CLI installed. A changed executable bit is shown as an old and
-new mode line, the way Git shows it. `skills update --force` overwrites, after copying
-the old content into a timestamped directory under `~/.config/skills/backups/`.
-The exact backup path is printed. `skills install --force` does the same, and
-also replaces a skill directory that `skills` did not install. Hints repeat the
-skill names, `--global` and `--agent` you passed, so they never widen the
-request.
-
-`skills remove` also backs up before deleting, and refuses an edited skill
-unless `--force` is present.
-
-If a write or removal fails part way, the command stops, prints the skills it
-completed and every backup path it created, and exits 1. The failed skill is
-marked and never counted as changed. There is no automatic rollback.
-
-A skill that disappears from the store, or becomes a draft, is reported as
-unavailable and left installed. A skill installed from another store is
-reported and left alone.
-
-Symlinks and special files inside an installed skill are not supported. The
-CLI reports the path and reason, leaves the whole skill untouched even with
-`--force`, and never follows a link to read or write outside the skill.
-
-A skill is found by its `.skill-lock.json`, not by its frontmatter, so a
-broken `SKILL.md` can still be diffed, updated or removed. A damaged lock is
-reported and never rewritten, even with `--force`. `ls --local` and
-`ls --global` mark such rows and exit 3.
-
-`--dry-run` prints the same plan without writing anything:
-
-```sh
-skills update --dry-run
-```
-
-Its lines say `would add`, `would update` or `would remove`, and the summary
-counts skills that would change. Where a change would be backed up first it
-says so, without creating a backup. Skipped skills still exit 3.
-
-## Exit codes
-
-| code | meaning |
-| --- | --- |
-| `0` | every requested operation completed |
-| `1` | runtime error |
-| `2` | invalid command or arguments |
-| `3` | attention required; one or more requested skills were skipped |
+Exit codes: `0` success, `1` runtime error, `2` bad arguments, `3` a skill
+needs attention.
 
 ## Writing a skill
 
@@ -232,35 +173,35 @@ tags: [go, review]
 ...
 ```
 
-`name` must match the directory name. `status` is required and is `published`
-or `draft`. `status` and `tags` are for the store and are stripped on install,
-so the agents only ever see fields they understand. `status: draft` keeps a
-work in progress out of `ls` and out of everyone's projects until it is ready.
-No release is needed, just push it.
+`name` must match the directory name. `status` is `published` or `draft`. A
+draft stays out of `ls` and out of every project until it is ready, so no
+release is needed to publish a skill, just a push. `status` and `tags` are
+stripped on install. Claude-only frontmatter goes under an `x-claude` key,
+which is lifted into place for Claude Code and dropped for the others.
 
-Claude-only frontmatter goes under an `x-claude` key, which is lifted into place
-for Claude Code and dropped for the others. Most skills need none of it. Its
-keys must be unique strings, must not repeat a top-level field, and must not
-be `name`, `description`, `status`, `tags` or `x-claude`. A skill that breaks
-this is a store error for every agent, not just Claude. The frontmatter may
-use LF or CRLF line endings; the installed copy always gets LF delimiters and
-keeps the body bytes as written.
-
-The `description` is what decides whether a skill fires, so say both what it
-does and when to use it.
+The `description` decides whether a skill fires, so say both what it does and
+when to use it.
 
 ## Development
 
+Common work runs through [Task](https://taskfile.dev):
+
 ```sh
-go test ./...        # the default suite needs neither network nor Docker
-golangci-lint run    # the lint config lives in .golangci.yml
+task                     # unit tests, integration tests and lint
+task test:unit           # go test ./... (needs neither network nor Docker)
+task test:integration    # INTEGRATION=true go test ./... -count=1 (needs Docker)
+task lint                # golangci-lint run and go mod tidy -diff
+task format              # go fmt and golangci-lint fmt
+task security            # govulncheck
 ```
 
-CI runs formatting, vet, lint and tests on every pull request. Pushing a `v*`
-tag builds and publishes the release binaries with GoReleaser.
+Releases are tags. `task patch`, `task minor` or `task major` creates the next
+version tag and pushes it. CI runs formatting, vet, lint and tests on every
+pull request. Pushing a `v*` tag builds and publishes the release binaries
+with GoReleaser.
 
 ## Specification
 
-[docs/SPEC.md](docs/SPEC.md) covers the whole contract and the reasoning: the
-store and config layout, how the three-way comparison protects local edits, what
-each agent supports and where they differ, and how releases work.
+[docs/SPEC.md](docs/SPEC.md) is the full contract: config layout, scope rules,
+the three-way comparison that protects local edits, backups, locks, exit
+codes and the differences between agents.
