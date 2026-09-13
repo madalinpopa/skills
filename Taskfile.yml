@@ -56,7 +56,7 @@ tasks:
   release:next:
     desc: Create the next patch release tag
     cmds:
-      - task: patch
+      - task: release:patch
   release:patch:
     desc: Create a new patch release tag
     vars:
