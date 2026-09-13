@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"testing/fstest"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -313,6 +314,44 @@ func TestInstall_noopKeepsLock(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, install.StateUnchanged, results[0].State)
 	assert.Equal(t, lockBefore, read(t, filepath.Join(dir, install.LockFile)), "an unchanged skill keeps its lock")
+}
+
+func TestInstall_preservesEditsToNestedLockFile(t *testing.T) {
+	t.Parallel()
+	dir := filepath.Join(t.TempDir(), "go-review")
+	req := oneTarget(dir)
+	req.Targets[0].Files["assets/.skill-lock.json"] = skill.File{Data: []byte("{\"example\": true}\n")}
+	_, err := newInstaller().Install([]install.Request{req})
+	require.NoError(t, err)
+	file := filepath.Join(dir, "assets", ".skill-lock.json")
+	local := []byte("{\"example\": \"edited locally\"}\n")
+	write(t, file, local)
+	lockBefore := read(t, filepath.Join(dir, install.LockFile))
+
+	results, err := newInstaller().Install([]install.Request{req})
+
+	require.NoError(t, err)
+	require.Len(t, results, 1)
+	assert.Equal(t, install.StateConflict, results[0].State)
+	assert.Equal(t, local, read(t, file), "a nested lock-named asset is user content, so edits must not be overwritten")
+	assert.Equal(t, lockBefore, read(t, filepath.Join(dir, install.LockFile)))
+}
+
+func TestRequests_rejectsSourceLockFile(t *testing.T) {
+	t.Parallel()
+	store := fstest.MapFS{
+		"skills/go-review/SKILL.md":         {Data: []byte("---\nname: go-review\ndescription: Reviews Go code.\nstatus: published\n---\n# Go review\n")},
+		"skills/go-review/.skill-lock.json": {Data: []byte("{\"example\": true}\n")},
+	}
+	catalog, err := skill.Catalog(store)
+	require.NoError(t, err)
+	dests := []install.Destination{{Dir: t.TempDir(), Variant: install.VariantAgents}}
+
+	_, err = install.Requests(store, catalog, dests)
+
+	require.Error(t, err, "source content must not be silently replaced by the installer's lock")
+	assert.ErrorContains(t, err, "go-review")
+	assert.ErrorContains(t, err, install.LockFile)
 }
 
 func newInstaller() install.Installer {
