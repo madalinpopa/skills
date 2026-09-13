@@ -189,6 +189,14 @@ defines the automatic setup workflow. Installation requires the published skill
 to be committed on the configured store branch. Local `.agents/` and `.claude/`
 installations are ignored by version control.
 
+The authoring skill also works in forks: it follows the current checkout's
+`AGENTS.md`, `docs/SPEC.md`, and `skills/` layout. Forking does not change the
+CLI's installation source. Keep the upstream store to use its published skills,
+or explicitly set `store.repo` and `store.branch` in your CLI config to install
+from your fork. An existing store clone must match that configuration; preserve
+any local work and move the old store aside before initializing a replacement.
+This store configuration is shared across projects on the machine.
+
 See its [naming and category legend](skills/create-repo-skill/references/naming.md)
 for prefixes such as `create-`, `use-`, and `review-`, plus `workflow-` for
 skills that coordinate other skills toward a larger outcome. All skill source
