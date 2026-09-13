@@ -1,8 +1,8 @@
 # Design
 
-The intended behavior of the `skills` CLI and the reasons behind it.
-[TODO.md](TODO.md) tracks the remaining implementation work. A requirement here
-does not mean the current binary already implements it.
+The intended behavior of the `skills` CLI and the reasons behind it. The
+current binary implements this contract; change the document when the behavior
+changes.
 
 ## Goal
 
