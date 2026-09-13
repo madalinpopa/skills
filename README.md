@@ -203,7 +203,7 @@ task format              # go fmt and golangci-lint fmt
 task security            # govulncheck
 ```
 
-Releases are tags. `task patch`, `task minor` or `task major` creates the next
+Releases are tags. `task release:patch`, `task release:minor` or `task release:major` creates the next
 version tag and pushes it. CI runs formatting, vet, lint and tests on every
 pull request. Pushing a `v*` tag builds and publishes the release binaries
 with GoReleaser.
