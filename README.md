@@ -15,6 +15,9 @@ Prebuilt binaries for macOS, Linux and Windows on amd64 and arm64 are attached
 to every [release](https://github.com/madalinpopa/skills/releases), with a
 checksum file next to them.
 
+The CLI needs [Git](https://git-scm.com/) 2.45 or newer on your `PATH`. The
+store is a partial, sparse clone, so it downloads only what `skills/` needs.
+
 ## First run
 
 The first command that needs the store creates `~/.config/skills/config.toml`

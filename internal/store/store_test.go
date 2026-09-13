@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -32,6 +33,88 @@ func TestInit_clonesConfiguredBranch(t *testing.T) {
 	assert.Equal(t, "feature", gittest.Run(t, s.Dir, "rev-parse", "--abbrev-ref", "HEAD"))
 	assert.Equal(t, "origin/feature", gittest.Run(t, s.Dir, "branch", "-r", "--format=%(refname:short)"),
 		"only the configured branch is fetched")
+}
+
+func TestInit_createsPartialSparseClone(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	gittest.Run(t, source, "config", "uploadpack.allowFilter", "true")
+	gittest.Run(t, source, "checkout", "-q", "-b", "feature")
+	writeFiles(t, source, map[string]string{
+		"skills/go-review/SKILL.md": "# v1\n",
+		"docs/guide.md":             "# guide\n",
+	})
+	gittest.Run(t, source, "add", ".")
+	old := gittest.Commit(t, source, "v1")
+	writeFiles(t, source, map[string]string{"skills/go-review/SKILL.md": "# v2\n"})
+	gittest.Run(t, source, "add", ".")
+	head := gittest.Commit(t, source, "v2")
+	skillBlob := gittest.Run(t, source, "rev-parse", head+":skills/go-review/SKILL.md")
+	docsBlob := gittest.Run(t, source, "rev-parse", head+":docs/guide.md")
+	s := newStore(t, "file://"+source, "feature")
+
+	err := s.Init(t.Context())
+
+	require.NoError(t, err)
+	got, err := s.Commit(t.Context())
+	require.NoError(t, err)
+	assert.Equal(t, head, got, "the store is at the tip of the configured branch")
+	assert.True(t, hasObject(t, s.Dir, old), "older commits stay available")
+	assert.True(t, hasObject(t, s.Dir, skillBlob), "current skill content is downloaded")
+	assert.False(t, hasObject(t, s.Dir, docsBlob), "content outside skills is not downloaded")
+	assert.FileExists(t, filepath.Join(s.Dir, "skills", "go-review", "SKILL.md"))
+	assert.FileExists(t, filepath.Join(s.Dir, "README.md"), "cone mode keeps root files")
+	assert.NoDirExists(t, filepath.Join(s.Dir, "docs"), "other directories are not checked out")
+}
+
+func TestInit_acceptsServerWithoutFiltering(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	writeFiles(t, source, map[string]string{
+		"skills/go-review/SKILL.md": "# v1\n",
+		"docs/guide.md":             "# guide\n",
+	})
+	gittest.Run(t, source, "add", ".")
+	gittest.Commit(t, source, "v1")
+	s := newStore(t, "file://"+source, "main")
+
+	err := s.Init(t.Context())
+
+	require.NoError(t, err, "a server that ignores the filter still gives a usable store")
+	assert.FileExists(t, filepath.Join(s.Dir, "skills", "go-review", "SKILL.md"))
+	assert.NoDirExists(t, filepath.Join(s.Dir, "docs"), "the checkout is still sparse")
+}
+
+func TestInit_leavesExistingFullCloneUnchanged(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	writeFiles(t, source, map[string]string{"docs/guide.md": "# guide\n"})
+	gittest.Run(t, source, "add", ".")
+	gittest.Commit(t, source, "docs")
+	s := newStore(t, source, "main")
+	gittest.Run(t, filepath.Dir(s.Dir), "clone", "-q", "--branch", "main", "--single-branch", source, s.Dir)
+	before := snapshot(t, s.Dir)
+
+	err := s.Init(t.Context())
+
+	require.NoError(t, err)
+	assert.Equal(t, before, snapshot(t, s.Dir), "an existing clone is not converted, pruned or recloned")
+}
+
+func writeFiles(t *testing.T, dir string, files map[string]string) {
+	t.Helper()
+	for name, data := range files {
+		file := filepath.Join(dir, filepath.FromSlash(name))
+		require.NoError(t, os.MkdirAll(filepath.Dir(file), 0o750))
+		require.NoError(t, os.WriteFile(file, []byte(data), 0o600))
+	}
+}
+
+func hasObject(t *testing.T, dir, oid string) bool {
+	t.Helper()
+	cmd := exec.Command("git", "--no-lazy-fetch", "cat-file", "-e", oid)
+	cmd.Dir = dir
+	return cmd.Run() == nil
 }
 
 func TestInit_isIdempotent(t *testing.T) {
@@ -430,6 +513,89 @@ func treePaths(t *testing.T, fsys fs.FS) []string {
 	})
 	require.NoError(t, err)
 	return paths
+}
+
+func TestSync_keepsPartialSparseClone(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	gittest.Run(t, source, "config", "uploadpack.allowFilter", "true")
+	writeFiles(t, source, map[string]string{
+		"skills/changed/SKILL.md": "# v1\n",
+		"skills/deleted/SKILL.md": "# deleted\n",
+	})
+	gittest.Run(t, source, "add", ".")
+	gittest.Commit(t, source, "v1")
+	s := newStore(t, "file://"+source, "main")
+	require.NoError(t, s.Init(t.Context()))
+	writeFiles(t, source, map[string]string{
+		"skills/changed/SKILL.md": "# v2\n",
+		"skills/added/SKILL.md":   "# added\n",
+		"docs/guide.md":           "# guide\n",
+	})
+	require.NoError(t, os.RemoveAll(filepath.Join(source, "skills", "deleted")))
+	gittest.Run(t, source, "add", "-A")
+	head := gittest.Commit(t, source, "v2")
+	changed := gittest.Run(t, source, "rev-parse", head+":skills/changed/SKILL.md")
+	added := gittest.Run(t, source, "rev-parse", head+":skills/added/SKILL.md")
+	docs := gittest.Run(t, source, "rev-parse", head+":docs/guide.md")
+
+	_, err := s.Sync(t.Context())
+
+	require.NoError(t, err)
+	assert.True(t, hasObject(t, s.Dir, changed), "changed skill content is downloaded")
+	assert.True(t, hasObject(t, s.Dir, added), "added skill content is downloaded")
+	assert.False(t, hasObject(t, s.Dir, docs), "content outside skills is not downloaded")
+	assert.FileExists(t, filepath.Join(s.Dir, "skills", "added", "SKILL.md"))
+	assert.NoDirExists(t, filepath.Join(s.Dir, "skills", "deleted"))
+	assert.NoDirExists(t, filepath.Join(s.Dir, "docs"), "the checkout stays sparse")
+}
+
+func TestTree_readsDownloadedHistoryOffline(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	gittest.Run(t, source, "config", "uploadpack.allowFilter", "true")
+	writeFiles(t, source, map[string]string{"skills/go-review/SKILL.md": "# v1\n"})
+	gittest.Run(t, source, "add", ".")
+	old := gittest.Commit(t, source, "v1")
+	s := newStore(t, "file://"+source, "main")
+	require.NoError(t, s.Init(t.Context()))
+	writeFiles(t, source, map[string]string{"skills/go-review/SKILL.md": "# v2\n"})
+	gittest.Run(t, source, "add", ".")
+	gittest.Commit(t, source, "v2")
+	_, err := s.Sync(t.Context())
+	require.NoError(t, err)
+	require.NoError(t, os.RemoveAll(source), "the remote is gone")
+
+	tree, err := s.Tree(t.Context(), old)
+
+	require.NoError(t, err, "content downloaded before a sync stays readable offline")
+	data, err := fs.ReadFile(tree, "skills/go-review/SKILL.md")
+	require.NoError(t, err)
+	assert.Equal(t, "# v1\n", string(data))
+}
+
+func TestTree_doesNotDownloadMissingContent(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	gittest.Run(t, source, "config", "uploadpack.allowFilter", "true")
+	writeFiles(t, source, map[string]string{"skills/go-review/SKILL.md": "# v1\n"})
+	gittest.Run(t, source, "add", ".")
+	old := gittest.Commit(t, source, "v1")
+	oldBlob := gittest.Run(t, source, "rev-parse", old+":skills/go-review/SKILL.md")
+	writeFiles(t, source, map[string]string{"skills/go-review/SKILL.md": "# v2\n"})
+	gittest.Run(t, source, "add", ".")
+	gittest.Commit(t, source, "v2")
+	s := newStore(t, "file://"+source, "main")
+	require.NoError(t, s.Init(t.Context()))
+	require.False(t, hasObject(t, s.Dir, oldBlob), "the fresh clone has not downloaded older content")
+	before := snapshot(t, s.Dir)
+
+	_, err := s.Tree(t.Context(), old)
+
+	require.Error(t, err, "a fresh clone does not have content from older commits")
+	assert.ErrorContains(t, err, old, "the error names the recorded commit")
+	assert.ErrorContains(t, err, "skills/go-review/SKILL.md", "the error names the missing file")
+	assert.Equal(t, before, snapshot(t, s.Dir), "reading never downloads objects")
 }
 
 func TestTree_unknownCommit(t *testing.T) {

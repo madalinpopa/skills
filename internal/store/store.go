@@ -26,8 +26,17 @@ type Result struct {
 	New string
 }
 
+const minGitMajor, minGitMinor = 2, 45
+
 func (s Store) Init(ctx context.Context) error {
-	_, err := os.Stat(s.Dir)
+	version, err := run(ctx, "", "version")
+	if err != nil {
+		return err
+	}
+	if err = checkGitVersion(version); err != nil {
+		return err
+	}
+	_, err = os.Stat(s.Dir)
 	if errors.Is(err, os.ErrNotExist) {
 		return s.clone(ctx)
 	}
@@ -82,11 +91,12 @@ func (s Store) Commit(ctx context.Context) (string, error) {
 }
 
 func (s Store) Tree(ctx context.Context, commit string) (fs.FS, error) {
-	listing, err := output(ctx, s.Dir, nil, "ls-tree", "-r", "-z", "--full-tree", commit, "--", "skills")
+	listing, err := output(ctx, s.Dir, nil, noLazyFetch, "ls-tree", "-r", "-z", "--full-tree", commit, "--", "skills")
 	if err != nil {
 		return nil, fmt.Errorf("commit %s: %w", commit, err)
 	}
 	tree := fstest.MapFS{}
+	paths := map[string]string{}
 	var oids []string
 	for entry := range bytes.SplitSeq(bytes.TrimSuffix(listing, []byte{0}), []byte{0}) {
 		meta, name, ok := bytes.Cut(entry, []byte{'\t'})
@@ -99,12 +109,13 @@ func (s Store) Tree(ctx context.Context, commit string) (fs.FS, error) {
 		}
 		tree[string(name)] = &fstest.MapFile{Mode: blobMode(fields[0])}
 		oids = append(oids, fields[2]+" "+string(name))
+		paths[fields[2]] = string(name)
 	}
 	if len(oids) == 0 {
 		return tree, nil
 	}
 	stdin := strings.NewReader(strings.Join(oids, "\n") + "\n")
-	blobs, err := output(ctx, s.Dir, stdin, "cat-file", "--batch=%(objectname) %(objectsize) %(rest)")
+	blobs, err := output(ctx, s.Dir, stdin, noLazyFetch, "cat-file", "--batch=%(objectname) %(objectsize) %(rest)")
 	if err != nil {
 		return nil, err
 	}
@@ -112,6 +123,10 @@ func (s Store) Tree(ctx context.Context, commit string) (fs.FS, error) {
 		header, rest, ok := bytes.Cut(blobs, []byte{'\n'})
 		if !ok {
 			return nil, fmt.Errorf("git cat-file: unexpected output %q", header)
+		}
+		if oid, missing := strings.CutSuffix(string(header), " missing"); missing {
+			return nil, fmt.Errorf("commit %s: %s is not downloaded; download it with 'git -C %s archive %s skills > %s' and try again",
+				commit, paths[oid], s.Dir, commit, os.DevNull)
 		}
 		fields := strings.SplitN(string(header), " ", 3)
 		if len(fields) != 3 {
@@ -138,12 +153,44 @@ func blobMode(mode string) fs.FileMode {
 	}
 }
 
+func checkGitVersion(output string) error {
+	required := fmt.Sprintf("git %d.%d or newer is required", minGitMajor, minGitMinor)
+	rest, ok := strings.CutPrefix(output, "git version ")
+	fields := strings.Fields(rest)
+	if !ok || len(fields) == 0 {
+		return fmt.Errorf("%s; could not read the version from %q", required, output)
+	}
+	version := fields[0]
+	majorText, rest, _ := strings.Cut(version, ".")
+	minorText, _, _ := strings.Cut(rest, ".")
+	major, majorErr := strconv.Atoi(majorText)
+	minor, minorErr := strconv.Atoi(minorText)
+	if majorErr != nil || minorErr != nil {
+		return fmt.Errorf("%s; could not read the version from %q", required, output)
+	}
+	if major < minGitMajor || major == minGitMajor && minor < minGitMinor {
+		return fmt.Errorf("%s; found %s", required, version)
+	}
+	return nil
+}
+
 func (s Store) clone(ctx context.Context) error {
-	if err := os.MkdirAll(filepath.Dir(s.Dir), 0o750); err != nil {
+	parent := filepath.Dir(s.Dir)
+	if err := os.MkdirAll(parent, 0o750); err != nil {
 		return err
 	}
-	_, err := run(ctx, "", "clone", "--quiet", "--branch", s.Branch, "--single-branch", s.Repo, s.Dir)
-	return err
+	tmp, err := os.MkdirTemp(parent, ".store-*")
+	if err != nil {
+		return err
+	}
+	defer func() { _ = os.RemoveAll(tmp) }()
+	if _, err := run(ctx, "", "clone", "--quiet", "--filter=blob:none", "--sparse", "--branch", s.Branch, "--single-branch", s.Repo, tmp); err != nil {
+		return err
+	}
+	if _, err := run(ctx, tmp, "sparse-checkout", "set", "skills"); err != nil {
+		return err
+	}
+	return os.Rename(tmp, s.Dir)
 }
 
 func (s Store) checkClean(ctx context.Context) error {
@@ -185,15 +232,20 @@ func (s Store) git(ctx context.Context, args ...string) (string, error) {
 	return run(ctx, s.Dir, args...)
 }
 
+var noLazyFetch = []string{"GIT_NO_LAZY_FETCH=1"}
+
 func run(ctx context.Context, dir string, args ...string) (string, error) {
-	out, err := output(ctx, dir, nil, args...)
+	out, err := output(ctx, dir, nil, nil, args...)
 	return strings.TrimSpace(string(out)), err
 }
 
-func output(ctx context.Context, dir string, stdin io.Reader, args ...string) ([]byte, error) {
+func output(ctx context.Context, dir string, stdin io.Reader, env []string, args ...string) ([]byte, error) {
 	cmd := exec.CommandContext(ctx, "git", args...)
 	cmd.Dir = dir
 	cmd.Stdin = stdin
+	if env != nil {
+		cmd.Env = append(os.Environ(), env...)
+	}
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
