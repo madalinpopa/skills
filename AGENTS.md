@@ -28,10 +28,12 @@ For each change:
    a commit message is required. Creating the commit is not.
 
 Config, docs and release work that gains nothing from a failing test can be a
-single commit. It still needs user review before you commit.
+single commit. It still needs user review before you commit. For every any change
+requested by user, provide the commit message. 
 
 Keep each pull request focused on one piece of work. Do not open a pull request
-until the user has reviewed all of it and asks for one.
+until the user has reviewed all of it and asks for one. When user says "ready to create PR"
+review the latest commits between `main` and `HEAD` and provide a PR title.
 
 ## Modern Go
 
