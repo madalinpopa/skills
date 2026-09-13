@@ -36,6 +36,28 @@ must be relative and stay inside the project. A global path must be absolute
 or start with `~/`. The default agent list must name at least one configured
 agent. Anything else is a config error and no command runs.
 
+### Default configuration
+
+The default values written to `~/.config/skills/config.toml` on first run are:
+
+```toml
+[store]
+repo = "https://github.com/madalinpopa/skills"
+branch = "main"
+
+# Which agents exist, and where each one keeps its skills.
+[agents.claude]
+project = ".claude/skills"
+global  = "~/.claude/skills"
+
+[agents.codex]
+project = ".agents/skills"
+global  = "~/.agents/skills"
+
+[defaults]
+agents = ["claude", "codex"]
+```
+
 ## Use it
 
 ```sh
