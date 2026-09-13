@@ -1,9 +1,11 @@
 # Skills & Technical Knowledge
 
-My personal library of AI skills, prompts, and custom instructions, plus a small
-Go CLI that installs them into any project and keeps them up to date.
+A personal library of reusable AI skills, prompts, and instructions, plus a
+Go CLI that installs skills into your projects and keeps them up to date.
+Supports Claude Code, Codex, and Gemini CLI.
 
-The skills work with Claude Code, Codex and Gemini CLI.
+Browse the [skill catalog](skills/), explore the [demo skill](skills/demo/SKILL.md),
+or use the [documentation templates](docs/templates/) for your own projects.
 
 ## Install the CLI
 
@@ -11,217 +13,98 @@ The skills work with Claude Code, Codex and Gemini CLI.
 go install github.com/madalinpopa/skills@latest
 ```
 
-Prebuilt binaries for macOS, Linux and Windows on amd64 and arm64 are attached
-to every [release](https://github.com/madalinpopa/skills/releases), with a
-checksum file next to them.
+Or download a prebuilt binary for macOS, Linux, or Windows from
+[Releases](https://github.com/madalinpopa/skills/releases). The CLI needs
+[Git](https://git-scm.com/) 2.45 or newer on your `PATH`.
 
-The CLI needs [Git](https://git-scm.com/) 2.45 or newer on your `PATH`. The
-store is a partial, sparse clone, so it downloads only what `skills/` needs.
+## Quick start
 
-## First run
-
-The first command that needs the store creates `~/.config/skills/config.toml`
-and clones this repository into `~/.config/skills/store/`. That local clone is
-the store every project installs from, so one copy serves the whole machine.
+Run these commands from a project:
 
 ```sh
-skills init      # do the first run explicitly
+skills init                 # create the config and clone the skill store
+skills ls                   # list published skills
+skills install demo         # install a skill into this project
+skills ls --local           # list this project's installed skills
+skills sync                 # fetch the latest store content
+skills update               # update installed skills from the store
+skills remove demo          # uninstall a skill
 ```
 
-`XDG_CONFIG_HOME` is honoured when set. `--dry-run` never creates the config or
-clones the store. If the store is missing, it tells you to run `skills init`.
+The store is a local clone shared across projects. `sync` refreshes that clone;
+`update` applies its content to installed skills. First-time setup also happens
+automatically when a command needs the store.
 
-The config lists the agents and where each keeps its skills. A project path
-must be relative and stay inside the project. A global path must be absolute
-or start with `~/`. The default agent list must name at least one configured
-agent. Anything else is a config error and no command runs.
+Local edits are protected: changed skills are skipped during an update. Use
+`skills diff <skill>` to inspect your edits. Add `--force` to an install, update,
+or remove command to replace or remove edited content after a backup.
 
-### Default configuration
+Use `--dry-run` to preview changes without writing, `-v` to show individual files,
+and `skills <command> --help` for all options. Exit code `3` means a skill needs
+attention; `skills version` shows the CLI version and current store commit.
 
-The default values written to `~/.config/skills/config.toml` on first run are:
+## Configuration and scope
+
+First run creates `~/.config/skills/config.toml` and a store at
+`~/.config/skills/store/`. `XDG_CONFIG_HOME` is honored when set. Configuration
+and the store are shared across projects on the machine.
+
+By default, skills are installed for both configured agents:
+
+| Agent | Project location | Global location |
+| --- | --- | --- |
+| Claude Code | `.claude/skills/` | `~/.claude/skills/` |
+| Codex | `.agents/skills/` | `~/.agents/skills/` |
+
+Gemini CLI also reads `.agents/skills/`, so `--agent codex` serves it too.
+Use `--agent` to select an agent and `--global` to install for all your projects:
+
+```sh
+skills install demo --agent codex
+skills install demo --global
+skills ls --global
+```
+
+Project scope uses the repository root, or the current directory outside a
+repository. Edit the config to change agent paths or defaults; see the
+[default configuration](docs/SPEC.md#configuration) for the complete format.
+
+## Make it your own
+
+Fork and clone this repository to maintain your own skill library. The CLI
+continues using its configured store; forking alone does not change the source.
+To install from your fork, edit the `[store]` section of your CLI config:
 
 ```toml
 [store]
-repo = "https://github.com/madalinpopa/skills"
+repo = "https://github.com/your-name/skills"
 branch = "main"
-
-# Which agents exist, and where each one keeps its skills.
-[agents.claude]
-project = ".claude/skills"
-global  = "~/.claude/skills"
-
-[agents.codex]
-project = ".agents/skills"
-global  = "~/.agents/skills"
-
-[defaults]
-agents = ["claude", "codex"]
 ```
 
-## Use it
+If you already initialized a store from another source, preserve any local work
+and move the old store directory aside. Run `skills init` to clone the configured
+fork, then install the skills you want. Existing installations retain their
+original source; changing the config does not migrate them to the fork.
 
-```sh
-skills ls                   # published skills in the store
-skills install go-review    # install into this project
-skills ls --local           # what this project has installed
-skills sync                 # fast-forward the store
-skills update               # move installed skills to the synced content
-```
+To add or update a skill, use [create-repo-skill](skills/create-repo-skill/SKILL.md).
+It guides naming, metadata, packaging, and validation in this repository and
+its forks. Skill sources live under `skills/`; [AGENTS.md](AGENTS.md#creating-and-updating-skills)
+defines how an agent installs and uses the authoring skill.
 
-Skills land in the directory each agent reads. 
-
-```
-.claude/skills/go-review/   Claude Code
-.agents/skills/go-review/   Codex (Gemini CLI reads it too)
-```
-
-The default agents are `claude` and `codex`. Use `--agent` to narrow a command.
-Gemini CLI reads the shared `.agents/skills` directory, so `--agent codex`
-covers it. To use `--agent gemini`, add an `[agents.gemini]` entry with the
-same paths to the config.
-Use `--global` to install into your home directory instead, so a skill is
-available in every project. Scope is explicit: a command never falls back from
-the project to your home directory.
-
-```sh
-skills install go-review --agent claude
-skills install go-review --global
-```
-
-## Examples
-
-Install a skill. `-v` shows the files written for each agent:
-
-```
-$ skills install demo -v
-  + demo   added
-      .agents/skills/demo/SKILL.md
-      .agents/skills/demo/references/guidelines.md
-      .claude/skills/demo/SKILL.md
-      .claude/skills/demo/references/guidelines.md
-
-  1 skill, 1 changed
-```
-
-Update after you edited a skill. The edited skill is skipped and the command
-exits 3:
-
-```
-$ skills update
-  ~ go-review        updated
-  ! demo             skipped, you edited it
-
-  2 skills, 1 changed, 1 needs attention
-  Run 'skills diff demo' to see your changes,
-  or 'skills update demo --force' to overwrite (backed up).
-```
-
-See your changes, then overwrite them:
-
-```
-$ skills diff demo
---- a/.claude/skills/demo/SKILL.md
-+++ b/.claude/skills/demo/SKILL.md
-@@ -65,3 +65,4 @@
- permission checks.
-+my local note
-
-$ skills update demo --force
-  ~ demo   updated
-      backed up to ~/.config/skills/backups/20260913-004647/.../.claude/skills/demo
-
-  1 skill, 1 changed
-```
-
-Preview a change with `--dry-run`. Nothing is written:
-
-```
-$ skills remove demo --dry-run
-  - demo   would remove
-      would back up first
-
-  1 skill, 1 would change
-```
-
-Symbols carry the meaning, so nothing is lost when color is off:
-
-```
-+  added      ~  updated      -  removed      !  needs attention
-```
-
-## Commands
-
-| command | what it does |
-| --- | --- |
-| `skills init` | create the config and clone the store |
-| `skills sync` | fast-forward the configured store branch |
-| `skills ls` | published skills in the store |
-| `skills ls --local` | skills installed in this project |
-| `skills ls --global` | skills installed in your home directory |
-| `skills install <skill>...` | install into this project |
-| `skills remove <skill>...` | uninstall from the selected scope |
-| `skills update [skill...]` | re-install installed skills from the store |
-| `skills diff <skill>` | show your edits to an installed skill |
-| `skills version` | CLI version and current store commit |
-
-```
---global      act on the home directory instead of the repository
---agent       narrow to certain agents (default: config defaults)
---force       overwrite or remove skills you have edited (backed up first)
---dry-run     show the plan, write nothing
--v            show individual files and their targets
---no-color    disable color (NO_COLOR is honoured too)
-```
-
-Exit codes: `0` success, `1` runtime error, `2` bad arguments, `3` a skill
-needs attention.
-
-## Writing a skill
-
-Use [create-repo-skill](skills/create-repo-skill/SKILL.md) to create or update a
-skill in this repository. It starts with `skill-creator` and contains the
-repository's authoring workflow, CLI frontmatter rules, and agent options.
-Install it into this project with `skills sync`, then
-`skills install create-repo-skill --agent codex` (use `claude` for Claude Code).
-For an existing installation, use `skills update create-repo-skill --agent codex`
-after syncing. Invoke the installed skill; [AGENTS.md](AGENTS.md#creating-and-updating-skills)
-defines the automatic setup workflow. Installation requires the published skill
-to be committed on the configured store branch. Local `.agents/` and `.claude/`
-installations are ignored by version control.
-
-The authoring skill also works in forks: it follows the current checkout's
-`AGENTS.md`, `docs/SPEC.md`, and `skills/` layout. Forking does not change the
-CLI's installation source. Keep the upstream store to use its published skills,
-or explicitly set `store.repo` and `store.branch` in your CLI config to install
-from your fork. An existing store clone must match that configuration; preserve
-any local work and move the old store aside before initializing a replacement.
-This store configuration is shared across projects on the machine.
-
-See its [naming and category legend](skills/create-repo-skill/references/naming.md)
-for prefixes such as `create-`, `use-`, and `review-`, plus `workflow-` for
-skills that coordinate other skills toward a larger outcome. All skill source
-files belong under `skills/<skill-name>/`.
+Publish a skill by setting `status: published` and committing and pushing it to
+your configured store branch. Then run `skills sync` and install or update it.
+Skills marked `draft` cannot be installed. Skill content changes need no CLI release.
 
 ## Development
 
-Common work runs through [Task](https://taskfile.dev):
+Use [Task](https://taskfile.dev) for local checks:
 
 ```sh
-task                     # unit tests, integration tests and lint
-task test:unit           # go test ./... (needs neither network nor Docker)
-task test:integration    # INTEGRATION=true go test ./... -count=1 (needs Docker)
-task lint                # golangci-lint run and go mod tidy -diff
-task format              # go fmt and golangci-lint fmt
-task security            # govulncheck
+task test:unit           # tests without network or Docker
+task test:integration    # integration tests; requires Docker
+task lint               # lint and dependency checks
+task format             # format Go code
 ```
 
-Releases are tags. `task release:patch`, `task release:minor` or `task release:major` creates the next
-version tag and pushes it. CI runs formatting, vet, lint and tests on every
-pull request. Pushing a `v*` tag builds and publishes the release binaries
-with GoReleaser.
-
-## Specification
-
-[docs/SPEC.md](docs/SPEC.md) is the full contract: config layout, scope rules,
-the three-way comparison that protects local edits, backups, locks, exit
-codes and the differences between agents.
+See [Taskfile.yml](Taskfile.yml) for all tasks and
+[docs/SPEC.md](docs/SPEC.md) for the CLI's full behavior contract.
