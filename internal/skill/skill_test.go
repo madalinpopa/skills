@@ -51,6 +51,49 @@ func TestParse_success(t *testing.T) {
 	}, meta)
 }
 
+func TestParse_optionalPublishingMetadata(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		source string
+		status skill.Status
+		tags   []string
+	}{
+		"absent status and tags": {
+			source: "---\nname: x\ndescription: d\n---\n",
+			status: skill.Published,
+		},
+		"explicit draft": {
+			source: "---\nname: x\ndescription: d\nstatus: draft\n---\n",
+			status: skill.Draft,
+		},
+		"empty tags list": {
+			source: "---\nname: x\ndescription: d\nstatus: published\ntags: []\n---\n",
+			status: skill.Published,
+		},
+		"tags list": {
+			source: "---\nname: x\ndescription: d\nstatus: published\ntags: [go, review]\n---\n",
+			status: skill.Published,
+			tags:   []string{"go", "review"},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			meta, err := skill.Parse([]byte(tt.source))
+
+			require.NoError(t, err)
+			assert.Equal(t, tt.status, meta.Status, "an absent status means published")
+			if len(tt.tags) == 0 {
+				assert.Empty(t, meta.Tags, "absent or empty tags mean no tags")
+			} else {
+				assert.Equal(t, tt.tags, meta.Tags)
+			}
+		})
+	}
+}
+
 func TestParse_failed(t *testing.T) {
 	t.Parallel()
 
@@ -60,8 +103,15 @@ func TestParse_failed(t *testing.T) {
 	}{
 		"missing name":         {source: "---\ndescription: d\nstatus: published\n---\n", want: "name"},
 		"missing description":  {source: "---\nname: x\nstatus: published\n---\n", want: "description"},
-		"missing status":       {source: "---\nname: x\ndescription: d\n---\n", want: "status"},
 		"unsupported status":   {source: "---\nname: x\ndescription: d\nstatus: hidden\n---\n", want: "hidden"},
+		"empty status":         {source: "---\nname: x\ndescription: d\nstatus: \"\"\n---\n", want: "status"},
+		"null status":          {source: "---\nname: x\ndescription: d\nstatus:\n---\n", want: "status"},
+		"status is a list":     {source: "---\nname: x\ndescription: d\nstatus: [published]\n---\n", want: "status"},
+		"null tags":            {source: "---\nname: x\ndescription: d\nstatus: published\ntags: null\n---\n", want: "tags"},
+		"tags is a scalar":     {source: "---\nname: x\ndescription: d\nstatus: published\ntags: go\n---\n", want: "tags"},
+		"numeric tag":          {source: "---\nname: x\ndescription: d\nstatus: published\ntags: [go, 1]\n---\n", want: "tags"},
+		"null tag":             {source: "---\nname: x\ndescription: d\nstatus: published\ntags: [go, null]\n---\n", want: "tags"},
+		"nested tag":           {source: "---\nname: x\ndescription: d\nstatus: published\ntags: [go, [review]]\n---\n", want: "tags"},
 		"no frontmatter":       {source: "# Just markdown\n", want: "frontmatter"},
 		"unclosed frontmatter": {source: "---\nname: x\n", want: "frontmatter"},
 		"malformed yaml":       {source: "---\nname: [x\n---\n", want: "yaml"},

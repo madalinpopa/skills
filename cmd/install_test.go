@@ -73,6 +73,32 @@ func TestInstall_global(t *testing.T) {
 	assert.FileExists(t, filepath.Join(home, ".agents", "skills", "go-review", ".skill-lock.json"))
 }
 
+func TestInstall_skillWithoutStoreFields(t *testing.T) {
+	source := gittest.Init(t)
+	dir := filepath.Join(source, "skills", "standard")
+	require.NoError(t, os.MkdirAll(dir, 0o750))
+	content := "---\nname: standard\ndescription: Has no store fields.\nlicense: MIT\n---\n\n# Standard\n"
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte(content), 0o600))
+	gittest.Run(t, source, "add", ".")
+	head := gittest.Commit(t, source, "add a standard skill")
+	home := configureStore(t, source)
+	var out, errOut bytes.Buffer
+
+	err := cmd.Execute(t.Context(), "", []string{"install", "--global", "standard"}, strings.NewReader(""), &out, &errOut)
+
+	require.NoError(t, err, errOut.String())
+	assert.Contains(t, out.String(), "added")
+	for _, agent := range []string{".claude", ".agents"} {
+		installed := filepath.Join(home, agent, "skills", "standard")
+		assert.Equal(t, content, string(read(t, filepath.Join(installed, "SKILL.md"))), "a skill without store fields is installed as written")
+		var lock struct {
+			Commit string `json:"commit"`
+		}
+		require.NoError(t, json.Unmarshal(read(t, filepath.Join(installed, ".skill-lock.json")), &lock))
+		assert.Equal(t, head, lock.Commit)
+	}
+}
+
 func TestInstall_usesCommittedContent(t *testing.T) {
 	source := gittest.Init(t)
 	addSkill(t, source, "go-review", "published", "Reviews Go code.", "[go]")
