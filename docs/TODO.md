@@ -11,7 +11,7 @@ current contract until each behavior change lands.
 | 1 — Simplify default agents | Done | #19 |
 | 2 — Accept optional publishing metadata | Done | #20 |
 | 3 — Verify frontmatter compatibility | Done | #21 |
-| 4 — Restrict committed reads to skills | Done | PR pending |
+| 4 — Restrict committed reads to skills | Done | #22 |
 | 5 — Optimize clone and sync safely | Next | — |
 
 ## Validation of the original items
@@ -210,7 +210,7 @@ pair naming the defect, followed by the compatibility documentation commit.
 ## Phase 4 — Restrict committed reads to skills
 
 **Budget: 2 commits. Dependencies: none; must precede phase 5.**
-**Status: done; PR pending.** `Store.Tree` now lists and reads only
+**Status: done in #22.** `Store.Tree` now lists and reads only
 `skills/` at the recorded commit. No caller needed changes.
 
 Outcome: catalog, install, update, and diff stop loading unrelated repository
