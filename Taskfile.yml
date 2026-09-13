@@ -53,25 +53,25 @@ tasks:
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   #   Release
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  next:
+  release:next:
     desc: Create the next patch release tag
     cmds:
       - task: patch
-  patch:
+  release:patch:
     desc: Create a new patch release tag
     vars:
       NEXT: {sh: 'LATEST=$(git tag --list "v[0-9]*.[0-9]*.[0-9]*" --sort=-v:refname | head -n 1); LATEST=${LATEST:-v0.0.0}; M=$(echo "$LATEST" | cut -d. -f1 | tr -d "v"); m=$(echo "$LATEST" | cut -d. -f2); p=$(echo "$LATEST" | cut -d. -f3); echo "v$M.$m.$((p + 1))"'}
     cmds:
       - task: _tag
         vars: {TAG: "{{.NEXT}}"}
-  minor:
+  release:minor:
     desc: Create a new minor release tag
     vars:
       NEXT: {sh: 'LATEST=$(git tag --list "v[0-9]*.[0-9]*.[0-9]*" --sort=-v:refname | head -n 1); LATEST=${LATEST:-v0.0.0}; M=$(echo "$LATEST" | cut -d. -f1 | tr -d "v"); m=$(echo "$LATEST" | cut -d. -f2); echo "v$M.$((m + 1)).0"'}
     cmds:
       - task: _tag
         vars: {TAG: "{{.NEXT}}"}
-  major:
+  release:major:
     desc: Create a new major release tag
     vars:
       NEXT: {sh: 'LATEST=$(git tag --list "v[0-9]*.[0-9]*.[0-9]*" --sort=-v:refname | head -n 1); LATEST=${LATEST:-v0.0.0}; M=$(echo "$LATEST" | cut -d. -f1 | tr -d "v"); echo "v$((M + 1)).0.0"'}
