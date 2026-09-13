@@ -4,8 +4,8 @@ A personal library of reusable AI skills, prompts, and instructions, plus a
 Go CLI that installs skills into your projects and keeps them up to date.
 Supports Claude Code, Codex, and Gemini CLI.
 
-Browse the [skill catalog](skills/), explore the [demo skill](skills/demo/SKILL.md),
-or use the [documentation templates](docs/templates/) for your own projects.
+Browse my [skill catalog](skills/). These skills are personal and shaped around
+my daily workflow and tools. Take ideas from them, and use any that work for you.
 
 ## Install the CLI
 
@@ -13,8 +13,8 @@ or use the [documentation templates](docs/templates/) for your own projects.
 go install github.com/madalinpopa/skills@latest
 ```
 
-Or download a prebuilt binary for macOS, Linux, or Windows from
-[Releases](https://github.com/madalinpopa/skills/releases). The CLI needs
+Or download a binary for macOS, Linux, or Windows from
+[Releases](https://github.com/madalinpopa/skills/releases). You also need
 [Git](https://git-scm.com/) 2.45 or newer on your `PATH`.
 
 ## Quick start
@@ -31,33 +31,130 @@ skills update               # update installed skills from the store
 skills remove demo          # uninstall a skill
 ```
 
-The store is a local clone shared across projects. `sync` refreshes that clone;
-`update` applies its content to installed skills. First-time setup also happens
-automatically when a command needs the store.
+The store is a local clone of your skills repository, shared by all your
+projects. `sync` pulls new changes into it. `update` copies those changes into
+your installed skills. You don't have to run `init` first: the CLI sets things
+up the first time a command needs the store.
 
-Local edits are protected: changed skills are skipped during an update. Use
-`skills diff <skill>` to inspect your edits. Add `--force` to an install, update,
-or remove command to replace or remove edited content after a backup.
+Your local edits are safe. If you changed an installed skill, `update` skips it.
+Run `skills diff <skill>` to see what you changed. Add `--force` to `install`,
+`update`, or `remove` to replace your edits; the CLI backs them up first.
 
-Use `--dry-run` to preview changes without writing, `-v` to show individual files,
-and `skills <command> --help` for all options. Exit code `3` means a skill needs
-attention; `skills version` shows the CLI version and current store commit.
+Add `--dry-run` to see what would change without writing anything, and `-v` to
+list each file. Run `skills <command> --help` for all options. Exit code `3`
+means a skill needs your attention. `skills version` shows the CLI version and
+the store commit.
+
+## Examples
+
+The output below is an example. Use a skill name from `skills ls` instead of
+`demo`, and `claude` instead of `codex` if that is your agent. `$` marks the
+command you type.
+
+Install a skill for one agent:
+
+```console
+$ skills install demo --agent codex
+  + demo   added
+
+  1 skill, 1 changed
+```
+
+Pull new changes, then update a skill you have not edited. This assumes the
+store has a newer version of `demo`:
+
+```console
+$ skills sync
+  pulled store  a1b2c3d -> e4f5a6b
+
+$ skills update demo --agent codex
+  ~ demo   updated
+
+  1 skill, 1 changed
+```
+
+If you edited the skill, the CLI keeps your version and tells you what to do:
+
+```console
+$ skills update demo --agent codex
+  ! demo   skipped, you edited it
+
+  1 skill, 0 changed, 1 needs attention
+  Run 'skills diff demo --agent codex' to see your changes,
+  or 'skills update demo --agent codex --force' to overwrite (backed up).
+```
+
+Run the `diff` command to see your edits. Use `--force` only when you want the
+store version instead.
+
+See what removing a skill would do, without changing any files:
+
+```console
+$ skills remove demo --agent codex --dry-run
+  - demo   would remove
+      would back up first
+
+  1 skill, 1 would change
+```
+
+Drop `--dry-run` to remove it for real. Add `-v` to see each file under the skill.
+
+## Use your own skills
+
+You don't need to fork this repository to have your own skill library. Create
+a Git repository with a `skills/` folder, one folder per skill:
+
+```
+skills/
+  go-review/
+    SKILL.md                the skill itself
+    agents/openai.yaml      optional, copied only for Codex
+    references/             optional, copied for every agent
+```
+
+The folder name is the skill name. The CLI reads only committed files under
+`skills/`, so the rest of the repository can hold anything you like. Look at the
+[demo skill](skills/demo/SKILL.md) for a full example.
+
+Then point the CLI at your repository in `~/.config/skills/config.toml`:
+
+```toml
+[store]
+repo = "https://github.com/your-name/your-skills"
+branch = "main"
+```
+
+If you already ran the CLI with another repository, move the old store aside
+first, since it may hold local work you want to keep:
+
+```sh
+mv ~/.config/skills/store ~/.config/skills/store.old
+skills init
+```
+
+Skills you installed from the old repository stay as they are. `install` and
+`update` skip them, even with `--force`. To switch one over, run `skills remove`
+and then `skills install` again.
+
+To publish a skill, commit and push it to your branch, then run `skills sync`.
+A skill with `status: draft` in its frontmatter is not installed; a skill with
+no status is published. Changing a skill never needs a new CLI release.
 
 ## Configuration and scope
 
-First run creates `~/.config/skills/config.toml` and a store at
-`~/.config/skills/store/`. `XDG_CONFIG_HOME` is honored when set. Configuration
-and the store are shared across projects on the machine.
+The first run creates `~/.config/skills/config.toml` and a store at
+`~/.config/skills/store/`. If `XDG_CONFIG_HOME` is set, the CLI uses it. All
+projects on your machine share the config and the store.
 
-By default, skills are installed for both configured agents:
+By default, skills are installed for both agents:
 
 | Agent | Project location | Global location |
 | --- | --- | --- |
 | Claude Code | `.claude/skills/` | `~/.claude/skills/` |
 | Codex | `.agents/skills/` | `~/.agents/skills/` |
 
-Gemini CLI also reads `.agents/skills/`, so `--agent codex` serves it too.
-Use `--agent` to select an agent and `--global` to install for all your projects:
+Gemini CLI also reads `.agents/skills/`, so `--agent codex` covers it too.
+Use `--agent` to pick one agent, and `--global` to install for all your projects:
 
 ```sh
 skills install demo --agent codex
@@ -65,46 +162,23 @@ skills install demo --global
 skills ls --global
 ```
 
-Project scope uses the repository root, or the current directory outside a
-repository. Edit the config to change agent paths or defaults; see the
-[default configuration](docs/SPEC.md#configuration) for the complete format.
+In a project, skills go into the repository root. Outside a repository, they go
+into the current folder. Edit the config to change agent paths or defaults. The
+[default configuration](docs/SPEC.md#configuration) shows the full format.
 
-## Make it your own
+## Contributing
 
-Fork and clone this repository to maintain your own skill library. The CLI
-continues using its configured store; forking alone does not change the source.
-To install from your fork, edit the `[store]` section of your CLI config:
-
-```toml
-[store]
-repo = "https://github.com/your-name/skills"
-branch = "main"
-```
-
-If you already initialized a store from another source, preserve any local work
-and move the old store directory aside. Run `skills init` to clone the configured
-fork, then install the skills you want. Existing installations retain their
-original source; changing the config does not migrate them to the fork.
-
-To add or update a skill, use [create-repo-skill](skills/create-repo-skill/SKILL.md).
-It guides naming, metadata, packaging, and validation in this repository and
-its forks. Skill sources live under `skills/`; [AGENTS.md](AGENTS.md#creating-and-updating-skills)
-defines how an agent installs and uses the authoring skill.
-
-Publish a skill by setting `status: published` and committing and pushing it to
-your configured store branch. Then run `skills sync` and install or update it.
-Skills marked `draft` cannot be installed. Skill content changes need no CLI release.
-
-## Development
+Fork this repository only if you want to work on the CLI itself.
+[docs/SPEC.md](docs/SPEC.md) describes how the CLI behaves, and
+[AGENTS.md](AGENTS.md) describes how changes are made.
 
 Use [Task](https://taskfile.dev) for local checks:
 
 ```sh
 task test:unit           # tests without network or Docker
 task test:integration    # integration tests; requires Docker
-task lint               # lint and dependency checks
-task format             # format Go code
+task lint                # lint and dependency checks
+task format              # format Go code
 ```
 
-See [Taskfile.yml](Taskfile.yml) for all tasks and
-[docs/SPEC.md](docs/SPEC.md) for the CLI's full behavior contract.
+See [Taskfile.yml](Taskfile.yml) for all tasks.
