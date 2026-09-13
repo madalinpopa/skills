@@ -156,6 +156,7 @@
     function paint(cmdSoFar, showCaret) {
       body.innerHTML =
         typed + '<span class="p">$ </span><span class="c">' + esc(cmdSoFar) + "</span>" + (showCaret ? '<span class="caret"></span>' : "");
+      body.scrollTop = body.scrollHeight;
     }
 
     (async function () {

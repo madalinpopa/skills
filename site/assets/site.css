@@ -1163,6 +1163,11 @@ th {
     grid-template-columns: 1fr;
   }
 
+  .term-body {
+    height: 15.5em;
+    overflow-y: hidden;
+  }
+
   .edge {
     grid-auto-flow: column;
     padding: 4px 0;
@@ -1247,6 +1252,10 @@ th {
   .brand .cursor,
   .term .caret {
     animation: none;
+  }
+
+  .term-body {
+    height: auto;
   }
 
   .btn:hover {
