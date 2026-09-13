@@ -1,8 +1,7 @@
-# Design
+# Specification
 
-The intended behavior of the `skills` CLI and the reasons behind it. The
-current binary implements this contract; change the document when the behavior
-changes.
+The behavior of the `skills` CLI and the reasons behind it. The binary
+implements this contract; change the document when the behavior changes.
 
 ## Goal
 

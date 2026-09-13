@@ -1,6 +1,6 @@
 # Agent instructions
 
-`skills` is a Go CLI. [docs/DESIGN.md](docs/DESIGN.md) is the source of truth
+`skills` is a Go CLI. [docs/SPEC.md](docs/SPEC.md) is the source of truth
 for how it works. Read the relevant part of it before you change any behavior.
 
 No AI LLM tool may append AI attribution (such as Co-Authored-By trailers or generated-by signatures)
@@ -13,7 +13,7 @@ Each change that adds or changes behavior has two commits:
 
 For each change:
 
-1. Look at the current code and re-read the relevant design section.
+1. Look at the current code and re-read the relevant spec section.
 2. Check the current official docs for every external library you touch. Do not
    rely on remembered APIs or old examples.
 3. Write only the tests this change needs. Run them and show that they fail for
@@ -21,7 +21,7 @@ For each change:
 4. Stop. Show the user the test changes, the failure output and a proposed
    commit message.
 5. Do not write the implementation until the user says to go ahead.
-6. Write the smallest clear code that passes the tests and fits the design.
+6. Write the smallest clear code that passes the tests and fits the spec.
 7. Run the verification steps below. Stop again and show the user the changes,
    the results and a proposed commit message.
 8. Do not create a Git or Jujutsu commit unless the user asks for it. Proposing

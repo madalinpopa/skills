@@ -259,8 +259,8 @@ golangci-lint run    # the lint config lives in .golangci.yml
 CI runs formatting, vet, lint and tests on every pull request. Pushing a `v*`
 tag builds and publishes the release binaries with GoReleaser.
 
-## Design
+## Specification
 
-[docs/DESIGN.md](docs/DESIGN.md) covers the whole design and the reasoning: the
+[docs/SPEC.md](docs/SPEC.md) covers the whole contract and the reasoning: the
 store and config layout, how the three-way comparison protects local edits, what
 each agent supports and where they differ, and how releases work.
