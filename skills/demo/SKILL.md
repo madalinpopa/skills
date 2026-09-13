@@ -59,10 +59,11 @@ resource is missing, report its path rather than inventing replacement content.
 
 ## Store metadata
 
-`status`, `tags`, and `x-claude` are this repository's source extensions.
-Installation removes `status` and `tags`. For Claude it lifts `x-claude` fields
-into frontmatter; for every other agent it drops that block. The demo is
-explicitly invoked in Claude because `disable-model-invocation` is true.
+`status`, `tags`, and `x-claude` are this repository's optional source
+extensions. A skill without them is published. Installation removes `status`
+and `tags`. For Claude it lifts `x-claude` fields into frontmatter; for every
+other agent it drops that block. The demo is explicitly invoked in Claude
+because `disable-model-invocation` is true.
 
 The other fields demonstrate the Agent Skills specification. `allowed-tools`
 pre-approves reading where supported; script execution uses the client's normal
