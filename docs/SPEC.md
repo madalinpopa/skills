@@ -92,6 +92,11 @@ skills/
     references/             optional, copied to both
 ```
 
+The CLI reads only committed files under `skills/`, at the commit it installs
+from or compares against. It never reads files at the repository root or in
+other directories, so the store repository can hold anything else. A commit
+without `skills/` is an empty store. A commit that does not exist is an error.
+
 The skill's name is the directory name. There is no per-agent copy: the
 differences between agents are small enough to express as data in one file, and
 the CLI applies them on install. See [Skill metadata](#skill-metadata).
