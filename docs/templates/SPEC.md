@@ -185,12 +185,24 @@ Keep concise findings and direct source links. Verify sources when filling out
 this section; record versions and review dates so later readers can assess
 freshness. Distinguish verified facts from assumptions and proposed decisions.
 
+Define the questions before searching. Stop when the important questions have
+evidence-backed answers; record remaining uncertainty. If searches find no
+suitable alternative, describe that result and the search scope rather than
+claiming no alternatives exist.
+
+- **Research questions**: [Decisions to resolve, such as whether an existing tool
+  meets the goal, which dependency fits the constraints, or which conventions apply]
+- **Search scope**: [Relevant queries, sources searched, and any limitations]
+
 ### Documentation and specifications
 
 Research the latest official documentation for relevant specifications,
 standards, libraries, frameworks, runtimes, and services. Check applicability
 to the versions selected for this project. Link to specific sections rather
 than copying documentation; reference existing dependency entries where useful.
+
+For CLI projects, consider the [Command Line Interface Guidelines](https://clig.dev/)
+for help, output, errors, configuration, and scripting behavior.
 
 | Topic | Official source / section | Version / revision | Relevance and findings | Last checked |
 | --- | --- | --- | --- | --- |
@@ -202,6 +214,8 @@ Research existing tools serving the same users or solving a similar problem.
 Use both GitHub search for public repositories and regular web search to find
 relevant tools and applications.
 Use official product documentation or repositories to verify comparisons.
+Start with a shortlist of 3–5 relevant tools, or fewer if fewer are found.
+Explain why each matters; expand only when a research question remains unresolved.
 Summarize what already exists, where it differs from this application's goal,
 and what we can learn or reuse without expanding the agreed scope.
 
@@ -209,8 +223,15 @@ and what we can learn or reuse without expanding the agreed scope.
 | --- | --- | --- | --- | --- |
 | [Name] | [Direct link] | [Who it serves and what it solves] | [Strengths, gaps for our use case, or useful approaches] | [YYYY-MM-DD] |
 
+For each shortlisted repository, record reuse suitability in concise notes:
+declared license, maintenance status, supported platforms, and integration
+options, with supporting links. Distinguish documented claims from behavior
+actually tested; mark unknown details as unverified.
+
 ### Findings and open questions
 
 - **Implications**: [How the evidence informs the goal, scope, or implementation]
 - **Proposed decisions**: [What to adopt, reuse, or avoid, with source references]
+- **Recommendation**: [Use an existing tool / extend or integrate one / build this application]
+- **Reason**: [Evidence, unmet requirements, and tradeoffs supporting the recommendation]
 - **Unresolved questions**: [What remains unverified and how to investigate it]
