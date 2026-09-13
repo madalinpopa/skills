@@ -9,14 +9,27 @@ current when agreed behavior changes; distinguish proposals from decisions.
 Replace placeholders with project-specific details. Use the CLI examples for
 command-line applications or the web alternatives for web applications. Remove
 unused alternatives and mark unresolved decisions as pending rather than
-inventing requirements.
+inventing requirements. Keep only applicable prompts; mark relevant unsupported
+behavior as a non-goal. A prompt about retries, concurrency, or recovery does
+not require adding that capability.
 
 ## Goal
 
 - **Problem**: [What is difficult or missing today?]
 - **Outcome**: [What should the application enable or improve?]
-- **Success criteria**: [Observable conditions that demonstrate the goal is met]
+- **Success criteria**: [Observable user or product outcomes that demonstrate the goal is met]
 - **Non-goals**: [Related problems this application will not address]
+
+### Behavioral acceptance
+
+Define verifiable requirements for the agreed scope. Link each to its command
+or feature contract and a representative scenario below. Keep execution
+checkpoints and test evidence in feature/phase documents when used; link to
+them instead of duplicating their progress here.
+
+| Requirement | Observable acceptance condition | Contract / scenario |
+| --- | --- | --- |
+| [Short name or ID] | [Given an input/state, the required result and side effects] | [Links to relevant sections] |
 
 ## User
 
@@ -35,11 +48,29 @@ Keep planned capabilities clearly separate from the agreed scope.
 | --- | --- | --- | --- |
 | [Command syntax or feature name] | [User need] | [Required/optional input and defaults] | [Output and state changes] |
 
+### Contract: [Command / feature]
+
+Repeat for capabilities whose rules need more detail than the overview table.
+Link to shared rules below rather than repeating them for each capability.
+
+- **Preconditions**: [Required state, configuration, permissions, or dependencies]
+- **Input rules**: [Valid values, missing versus empty input, and conflicting options]
+- **Selection and scope**: [Which items/targets are affected; omitted selection, unknown items, and no matches]
+- **Result**: [Required output and state changes, including when no change is needed]
+- **Repeated execution**: [Result when the same action is repeated; whether effects can be duplicated]
+- **Failure rules**: [Feature-specific errors and links to shared failure/recovery guarantees]
+
 ## Usage and Outputs / Outcomes
 
 Use short stories that demonstrate the commands or features above. Include
 representative success and failure cases. State relevant prerequisites and
 observable side effects; examples should agree with the defined behavior.
+
+Include empty results, repeated actions, conflicts, and partial success where
+they affect agreed behavior. State which output details are contractual (such
+as fields, streams, and exit codes) and which are illustrative (such as sample
+names or decorative spacing). Do the same for web outcomes where wording or
+presentation matters. Link scenarios to the requirements they demonstrate.
 
 ### CLI: [User completes a task]
 
@@ -126,9 +157,45 @@ Record supported versions and link to official documentation for chosen APIs.
 - **Execution flow**: [How a command/request moves from input to outcome]
 - **Boundaries**: [Responsibilities and allowed dependency directions]
 - **State and integrations**: [Who owns persistence and external interactions]
-- **Failure handling**: [How errors, cancellation, and partial work are handled]
 
 [Add a small diagram only when it clarifies these relationships.]
+
+### State and invariants
+
+Describe the state needed by the agreed behavior, including user-owned data
+the application touches. State rules independently of the storage mechanism.
+
+- **Authoritative data**: [Source of truth; how derived or cached data relates to it]
+- **Identity and ownership**: [How items are identified; what the application may change and what it must preserve]
+- **Lifecycle**: [Valid states and allowed transitions, including creation and deletion]
+- **Invariants**: [Rules that must hold across operations, such as uniqueness or target containment]
+- **Invalid existing state**: [How missing, malformed, or incompatible state is reported and handled]
+- **Concurrent access**: [Supported overlap between operations, or explicit limits and assumptions]
+
+### Failure and recovery
+
+Define shared observable guarantees here; keep exceptions in the relevant
+command/feature contract. Distinguish expected validation or conflict failures
+from unexpected failures after work begins. State limits explicitly, including
+when rollback or recovery is unsupported.
+
+- **Validation before changes**: [What is checked before side effects, and across which selected items]
+- **Completion boundary**: [Which changes must succeed or fail together, and where partial progress is possible]
+- **Continuation**: [Which failures stop processing and which allow unrelated items to continue]
+- **Interruption**: [State and reporting guarantees on cancellation, timeout, or process termination, where applicable]
+- **Reporting**: [How completed, skipped, and failed work is distinguished; error/exit status when outcomes are mixed]
+- **Recovery and retry**: [State left behind, available recovery steps, and when repeating an action is safe]
+
+### Configuration and initialization
+
+Keep this section when configuration or first-run setup affects behavior.
+
+- **Sources and precedence**: [Supported flags, environment variables, files, and defaults, in precedence order]
+- **Value rules**: [Required values; missing, empty, and invalid values; treatment of unknown keys]
+- **Path resolution**: [Base for relative paths, supported expansion, and local/global scope where applicable]
+- **First run**: [What is created or fetched, when initialization happens, and which operations trigger it]
+- **Read-only operations**: [Whether inspection/help/preview operations initialize or change state, and whether they access the network]
+- **Initialization failure**: [State left behind and how setup can be retried; reference shared recovery rules]
 
 ### Project layout
 
@@ -164,8 +231,8 @@ does not automatically require a separate package, service, or database.
 ### Additional details
 
 Keep only topics relevant to this application that are not covered above:
-configuration sources and precedence, output formats, logging, migrations,
-verification strategy, or other cross-cutting behavior.
+output formats, logging, migrations, verification strategy, or other
+cross-cutting behavior.
 
 - **[Topic]**: [Required behavior and rationale]
 - **Pending decisions**: [Question, impact, and what is needed to resolve it]
