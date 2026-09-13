@@ -178,3 +178,37 @@ applies and where to find it; do not assume it is installed or enabled.
 | Skill | When to use it | Purpose | Source / availability |
 | --- | --- | --- | --- |
 | [Skill name] | [Specific task or trigger] | [How it helps] | [Path/link and availability] |
+
+## Research
+
+Keep concise findings and direct source links. Verify sources when filling out
+this section; record versions and review dates so later readers can assess
+freshness. Distinguish verified facts from assumptions and proposed decisions.
+
+### Documentation and specifications
+
+Research the latest official documentation for relevant specifications,
+standards, libraries, frameworks, runtimes, and services. Check applicability
+to the versions selected for this project. Link to specific sections rather
+than copying documentation; reference existing dependency entries where useful.
+
+| Topic | Official source / section | Version / revision | Relevance and findings | Last checked |
+| --- | --- | --- | --- | --- |
+| [Specification, library, or other topic] | [Direct link] | [Applicable version] | [Supported behavior, constraint, or decision] | [YYYY-MM-DD] |
+
+### Similar tools and applications
+
+Research existing tools serving the same users or solving a similar problem.
+Use official product documentation or repositories to verify comparisons.
+Summarize what already exists, where it differs from this application's goal,
+and what we can learn or reuse without expanding the agreed scope.
+
+| Tool / application | Official website / repository | Users and overlapping capabilities | Relevant differences and lessons | Last checked |
+| --- | --- | --- | --- | --- |
+| [Name] | [Direct link] | [Who it serves and what it solves] | [Strengths, gaps for our use case, or useful approaches] | [YYYY-MM-DD] |
+
+### Findings and open questions
+
+- **Implications**: [How the evidence informs the goal, scope, or implementation]
+- **Proposed decisions**: [What to adopt, reuse, or avoid, with source references]
+- **Unresolved questions**: [What remains unverified and how to investigate it]
