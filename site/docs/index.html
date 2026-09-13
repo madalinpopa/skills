@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Docs · skills CLI</title>
+  <meta name="description" content="Every command, flag, and file the skills CLI uses: install, update, diff, remove, sync, configuration, skill metadata, and exit codes.">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/site.css">
+  <script>
+    try {
+      var t = localStorage.getItem("theme");
+      if (t) document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="../">skills<span class="cursor"></span></a>
+    <nav class="nav-links" aria-label="Site">
+      <a href="../#why" class="hide-sm">Why</a>
+      <a href="../#start" class="hide-sm">Get started</a>
+      <a href="./" aria-current="page">Docs</a>
+      <a href="https://github.com/madalinpopa/skills" rel="noopener">GitHub</a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap docs">
+
+  <button class="btn btn-secondary sidebar-toggle" type="button" data-sidebar-toggle aria-expanded="true">☰ Contents</button>
+
+  <aside class="sidebar" aria-label="Documentation contents">
+    <h4>Start</h4>
+    <ul>
+      <li><a href="#install">Install</a></li>
+      <li><a href="#quick-start">Quick start</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
+    </ul>
+    <h4>Commands</h4>
+    <ul>
+      <li><a href="#cmd-init"><code>init</code></a></li>
+      <li><a href="#cmd-sync"><code>sync</code></a></li>
+      <li><a href="#cmd-ls"><code>ls</code></a></li>
+      <li><a href="#cmd-install"><code>install</code></a></li>
+      <li><a href="#cmd-update"><code>update</code></a></li>
+      <li><a href="#cmd-remove"><code>remove</code></a></li>
+      <li><a href="#cmd-diff"><code>diff</code></a></li>
+      <li><a href="#cmd-version"><code>version</code></a></li>
+      <li><a href="#flags">Global flags</a></li>
+    </ul>
+    <h4>Reference</h4>
+    <ul>
+      <li><a href="#scope">Scope and agents</a></li>
+      <li><a href="#configuration">Configuration</a></li>
+      <li><a href="#own-store">Your own store</a></li>
+      <li><a href="#metadata">Skill metadata</a></li>
+      <li><a href="#updates">How updates decide</a></li>
+      <li><a href="#conflicts">Conflicts and backups</a></li>
+      <li><a href="#output">Output and exit codes</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+
+    <section id="install">
+      <div class="kicker">start</div>
+      <h2>Install <a class="anchor" href="#install">#</a></h2>
+      <p>Install with Go, or download a binary for macOS, Linux, or Windows from
+        <a href="https://github.com/madalinpopa/skills/releases" rel="noopener">Releases</a>.</p>
+      <div class="code" data-lang="sh"><pre><span class="p">$ </span>go install github.com/madalinpopa/skills@latest</pre></div>
+      <p>The CLI shells out to Git. It needs Git 2.45 or newer on your <code>PATH</code> and checks the
+        version before every command that touches the store. An older Git is an error that names the version found.</p>
+      <div class="callout">
+        <p><strong>No setup step.</strong> The first command that needs the store writes a default config and clones it.
+          <code>skills init</code> does the same thing explicitly. Only the first run needs network access.</p>
+      </div>
+    </section>
+
+    <section id="quick-start">
+      <h2>Quick start <a class="anchor" href="#quick-start">#</a></h2>
+      <p>Run these from inside a project. Use a name from <code>skills ls</code> instead of <code>demo</code>.</p>
+      <div class="code" data-lang="sh"><pre><span class="p">$ </span>skills init                 <span class="m"># create the config and clone the store</span>
+<span class="p">$ </span>skills ls                   <span class="m"># list published skills</span>
+<span class="p">$ </span>skills install demo         <span class="m"># install a skill into this project</span>
+<span class="p">$ </span>skills ls --local           <span class="m"># list this project's installed skills</span>
+<span class="p">$ </span>skills sync                 <span class="m"># fetch the latest store content</span>
+<span class="p">$ </span>skills update               <span class="m"># update installed skills from the store</span>
+<span class="p">$ </span>skills remove demo          <span class="m"># uninstall a skill</span></pre></div>
+      <p>Add <code>--dry-run</code> to any writing command to see the plan without touching disk, and <code>-v</code>
+        to list each file. Run <code>skills &lt;command&gt; --help</code> for all options.</p>
+    </section>
+
+    <section id="how-it-works">
+      <h2>How it works <a class="anchor" href="#how-it-works">#</a></h2>
+      <div class="code" data-lang="flow"><pre>github repo          ~/.config/skills/store      a project
+(the store)    ---&gt;  (local clone)         ---&gt;  .claude/skills/
+                       skills sync               .agents/skills/
+                                                 skills install</pre></div>
+      <ul>
+        <li><strong>The store</strong> is a Git clone of your skills repository, kept under your config directory. One copy serves every project on the machine.</li>
+        <li><strong>The config</strong> says where the store came from and which agents exist.</li>
+        <li><strong>The installs</strong> are copies of individual skills inside a project, or in your home directory with <code>--global</code>.</li>
+      </ul>
+      <p>A new store is a partial, sparse clone: it keeps the full commit history but downloads file contents only as needed,
+        and checks out only <code>skills/</code>. Reading a commit never reaches the network, so <code>ls</code>,
+        <code>install</code>, <code>update</code>, <code>diff</code> and dry runs work offline once the content is there.</p>
+      <h3>Layout</h3>
+      <div class="code" data-lang="fs"><pre>~/.config/skills/config.toml     what the store is, which agents exist
+~/.config/skills/store/          git clone of the skills repository
+~/.config/skills/backups/        timestamped copies taken before --force or remove</pre></div>
+      <p><code>XDG_CONFIG_HOME</code> is honoured when set.</p>
+    </section>
+
+    <section id="cmd-init">
+      <div class="kicker">commands</div>
+      <div class="cmd-head"><h2><code>init</code> <a class="anchor" href="#cmd-init">#</a></h2><span class="summary">Create the config and clone the store</span></div>
+      <div class="usage">skills init</div>
+      <p>Writes a default config if none exists and clones the configured branch into the store.
+        Running it is optional: every command that needs the store does this on first use.</p>
+      <p>The clone is made in a temporary directory and moved into place only after setup succeeds,
+        so a failed first run never leaves a half-made store.</p>
+    </section>
+
+    <section id="cmd-sync">
+      <div class="cmd-head"><h2><code>sync</code> <a class="anchor" href="#cmd-sync">#</a></h2><span class="summary">Fast-forward the configured store branch</span></div>
+      <div class="usage">skills sync [--dry-run]</div>
+      <p>Pulls new commits into the store with a fast-forward only. It never creates a merge commit and never resets a
+        dirty or divergent store. It does not touch installed skills, so syncing never rewrites a project by surprise.
+        <code>update</code> is the command that moves installed skills to the synced content.</p>
+      <div class="code" data-lang="console"><pre><span class="p">$ </span>skills sync
+  <span class="m">pulled store</span>  a1b2c3d -&gt; e4f5a6b</pre></div>
+      <p>With <code>--dry-run</code>, <code>sync</code> only queries the remote branch head and reports both heads.
+        It fetches nothing and writes nothing. A remote query failure exits 1 and is never reported as up to date.</p>
+    </section>
+
+    <section id="cmd-ls">
+      <div class="cmd-head"><h2><code>ls</code> <a class="anchor" href="#cmd-ls">#</a></h2><span class="summary">List published skills in the store, or installed skills</span></div>
+      <div class="usage">skills ls [--local | --global]</div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>flag</th><th>lists</th></tr></thead>
+        <tbody>
+          <tr><td><em>none</em></td><td>published skills in the store, with their tags</td></tr>
+          <tr><td><code>--local</code></td><td>skills installed at the repository root, with the agents they are installed for</td></tr>
+          <tr><td><code>--global</code></td><td>skills installed in the home directories</td></tr>
+        </tbody>
+      </table></div>
+      <div class="code" data-lang="console"><pre><span class="p">$ </span>skills ls
+  go-review        Reviews Go code for correctness and idiom     <span class="m">go, review</span>
+  django-testing   Writes and structures Django tests            <span class="m">python, django</span>
+
+<span class="p">$ </span>skills ls --local
+  go-review        Reviews Go code for correctness and idiom     <span class="m">agents, claude</span></pre></div>
+      <p><code>--local</code> and <code>--global</code> cannot be combined and list only the default agents' installs.
+        Drafts never appear in the store listing. Installed listings show the directory name and mark an unreadable
+        description instead of hiding the skill.</p>
+    </section>
+
+    <section id="cmd-install">
+      <div class="cmd-head"><h2><code>install</code> <a class="anchor" href="#cmd-install">#</a></h2><span class="summary">Install skills at the repository root</span></div>
+      <div class="usage">skills install <span class="arg">&lt;skill&gt;...</span> [--agent name...] [--global] [--force] [--dry-run] [-v]</div>
+      <p>Writes a copy of each skill for every selected agent, with a <code>.skill-lock.json</code> beside it.
+        Defaults to the current repository root and the agents listed under <code>defaults.agents</code> in the config.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>flag</th><th>effect</th></tr></thead>
+        <tbody>
+          <tr><td><code>--agent</code></td><td>narrow to certain agents; repeatable</td></tr>
+          <tr><td><code>--global</code></td><td>write to the home directories instead of the repository</td></tr>
+          <tr><td><code>--force</code></td><td>overwrite skills you have edited or did not install, backed up first</td></tr>
+        </tbody>
+      </table></div>
+      <div class="code" data-lang="console"><pre><span class="p">$ </span>skills install demo --agent codex
+  <span class="g">+</span> demo   <span class="g">added</span>
+
+  1 skill, 1 changed</pre></div>
+      <p>An identical unmanaged copy already on disk is adopted by writing its lock. Different unmanaged content needs
+        <code>--force</code> and gets a backup. A name missing from the store is a selection error: all missing names are
+        reported, nothing is written, and the exit code is 1.</p>
+      <div class="callout warn">
+        <p><strong>Foreign installs stay untouched.</strong> If a lock's <code>source</code> differs from the configured store,
+          the skill is left alone and reported as needing attention, even with <code>--force</code>. Run <code>remove</code>
+          and then <code>install</code> to switch it over.</p>
+      </div>
+    </section>
+
+    <section id="cmd-update">
+      <div class="cmd-head"><h2><code>update</code> <a class="anchor" href="#cmd-update">#</a></h2><span class="summary">Re-install installed skills from the store</span></div>
+      <div class="usage">skills update <span class="arg">[skill...]</span> [--agent name...] [--global] [--force] [--dry-run] [-v]</div>
+      <p>With no names, refreshes every managed skill in the selected scope and agents. It updates only targets where a
+        skill is already installed; use <code>install</code> to add a target. A skill installed for a non-default agent
+        needs that agent selected again with <code>--agent</code>.</p>
+      <div class="code" data-lang="console"><pre><span class="p">$ </span>skills update
+  <span class="cy">~</span> go-review        <span class="cy">updated</span>
+  <span class="a">!</span> sql-review       <span class="a">skipped, you edited it</span>
+
+  2 skills, 1 changed, 1 needs attention
+  <span class="m">Run 'skills diff sql-review' to see your changes,</span>
+  <span class="m">or 'skills update sql-review --force' to overwrite (backed up).</span></pre></div>
+      <p>Unchanged skills print nothing but count in the summary. <code>-v</code> lists the paths under each skill,
+        which is where the agents become visible:</p>
+      <div class="code" data-lang="console"><pre><span class="p">$ </span>skills update -v
+  <span class="cy">~</span> go-review        <span class="cy">updated</span>
+      .claude/skills/go-review/SKILL.md
+      .agents/skills/go-review/SKILL.md</pre></div>
+      <p>If an installed skill disappears from the store or becomes a draft, <code>update</code> reports it as unavailable
+        and leaves it installed. Only an explicit <code>remove</code> uninstalls a skill.</p>
+    </section>
+
+    <section id="cmd-remove">
+      <div class="cmd-head"><h2><code>remove</code> <a class="anchor" href="#cmd-remove">#</a></h2><span class="summary">Uninstall skills from the selected scope</span></div>
+      <div class="usage">skills remove <span class="arg">&lt;skill&gt;...</span> [--agent name...] [--global] [--force] [--dry-run] [-v]</div>
+      <p>No confirmation prompt: typing the command is the confirmation. It acts only on the selected scope and needs
+        <code>--global</code> to remove a global installation. Every successful removal is backed up first and the exact
+        backup path is printed.</p>
+      <div class="code" data-lang="console"><pre><span class="p">$ </span>skills remove demo --agent codex --dry-run
+  <span class="m">-</span> demo   <span class="m">would remove</span>
+      would back up first
+
+  1 skill, 1 would change</pre></div>
+      <p>An edited skill is a conflict unless <code>--force</code> is present. Added, modified or deleted tracked content,
+        added local-only files, and changed executable bits all count as edits. A valid lock is enough to attempt removal
+        even if <code>SKILL.md</code> is missing or malformed.</p>
+    </section>
+
+    <section id="cmd-diff">
+      <div class="cmd-head"><h2><code>diff</code> <a class="anchor" href="#cmd-diff">#</a></h2><span class="summary">Show your edits to an installed skill</span></div>
+      <div class="usage">skills diff <span class="arg">&lt;skill&gt;</span> [--agent name...] [--global]</div>
+      <p>Compares each selected installation against the commit recorded in its lock, using the same agent transform.
+        It compares against what was installed, not the latest store head, so the output is exactly your edits.</p>
+      <p>Additions, deletions and malformed local frontmatter are shown as content. Executable-bit changes are shown
+        on POSIX systems. No differences means no output. Both outcomes exit 0.</p>
+      <p>A missing recorded commit or a foreign source produces an explanation and exit 1. The CLI never substitutes a
+        different base. If a fresh sparse store lacks the recorded commit's content, the error names the commit and gives
+        the <code>git archive</code> command that downloads it.</p>
+    </section>
+
+    <section id="cmd-version">
+      <div class="cmd-head"><h2><code>version</code> <a class="anchor" href="#cmd-version">#</a></h2><span class="summary">Show the CLI version and the current store commit</span></div>
+      <div class="usage">skills version</div>
+      <p>The CLI version and the store commit are separate facts, and this prints both. An absent store is reported,
+        not created.</p>
+    </section>
+
+    <section id="flags">
+      <h2>Global flags <a class="anchor" href="#flags">#</a></h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>flag</th><th>meaning</th><th>applies to</th></tr></thead>
+        <tbody>
+          <tr><td><code>--global</code></td><td>act on the home directories instead of the repository</td><td><code>install</code>, <code>update</code>, <code>remove</code>, <code>diff</code>, <code>ls</code></td></tr>
+          <tr><td><code>--agent &lt;name&gt;...</code></td><td>narrow to certain agents (default: config defaults)</td><td><code>install</code>, <code>update</code>, <code>remove</code>, <code>diff</code></td></tr>
+          <tr><td><code>--force</code></td><td>overwrite skills you have edited, backed up first</td><td><code>install</code>, <code>update</code>, <code>remove</code></td></tr>
+          <tr><td><code>--dry-run</code></td><td>show the plan, write nothing</td><td>every command</td></tr>
+          <tr><td><code>-v</code>, <code>--verbose</code></td><td>show individual files and their targets</td><td>every command</td></tr>
+          <tr><td><code>--no-color</code></td><td>disable color; <code>NO_COLOR</code> is honoured too</td><td>every command</td></tr>
+        </tbody>
+      </table></div>
+      <p><code>--dry-run</code> never creates the config, clones the store, writes a backup or creates a target directory.
+        If a plan cannot be calculated because the store is not initialised, it says so and points at <code>skills init</code>.</p>
+    </section>
+
+    <section id="scope">
+      <div class="kicker">reference</div>
+      <h2>Scope and agents <a class="anchor" href="#scope">#</a></h2>
+      <p>Project scope means the root of the current Git repository, no matter which subdirectory you run from.
+        Outside a repository the CLI warns and uses the current directory. <code>--global</code> uses your home
+        directories instead. Nothing else changes: same skill, same lock, different parent path.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>agent</th><th>project</th><th>global</th></tr></thead>
+        <tbody>
+          <tr><td>Claude Code</td><td><code>.claude/skills/</code></td><td><code>~/.claude/skills/</code></td></tr>
+          <tr><td>Codex</td><td><code>.agents/skills/</code></td><td><code>~/.agents/skills/</code></td></tr>
+          <tr><td>Gemini CLI</td><td><code>.agents/skills/</code> (reads the Codex directory)</td><td><code>~/.agents/skills/</code></td></tr>
+        </tbody>
+      </table></div>
+      <p>Gemini CLI reads <code>.agents/skills/</code> too, so <code>--agent codex</code> already covers it. To select it by
+        name, add an <code>[agents.gemini]</code> entry with the same paths.</p>
+      <p>Scope is always explicit and never falls back. If a name is missing locally but present in the global
+        directories, <code>update</code>, <code>remove</code> and <code>diff</code> print a <code>--global</code> hint.
+        The hint never changes the scope or performs the operation.</p>
+    </section>
+
+    <section id="configuration">
+      <h2>Configuration <a class="anchor" href="#configuration">#</a></h2>
+      <p>The first run writes this file to <code>~/.config/skills/config.toml</code>. Every project on the machine shares it.</p>
+      <div class="code" data-lang="toml"><pre><span class="k">[store]</span>
+repo = <span class="s">"https://github.com/madalinpopa/skills"</span>
+branch = <span class="s">"main"</span>
+
+<span class="m"># Which agents exist, and where each one keeps its skills.</span>
+<span class="k">[agents.claude]</span>
+project = <span class="s">".claude/skills"</span>
+global  = <span class="s">"~/.claude/skills"</span>
+
+<span class="k">[agents.codex]</span>
+project = <span class="s">".agents/skills"</span>
+global  = <span class="s">"~/.agents/skills"</span>
+
+<span class="k">[defaults]</span>
+agents = [<span class="s">"claude"</span>, <span class="s">"codex"</span>]</pre></div>
+      <ul>
+        <li>The agent name <code>claude</code> selects the Claude transform. Every other name uses the shared transform, so a custom alias can reuse the Codex format.</li>
+        <li><code>defaults.agents</code> is used when <code>--agent</code> is absent. It must be nonempty and name defined agents. An explicit <code>--agent</code> may select any configured name.</li>
+        <li>Project paths must be relative and stay inside the project root. Global paths must be absolute or start with <code>~/</code>.</li>
+        <li>Several agents may share one directory. Installs are de-duplicated by resolved path, so the files are written once.</li>
+      </ul>
+    </section>
+
+    <section id="own-store">
+      <h2>Your own store <a class="anchor" href="#own-store">#</a></h2>
+      <p>You do not need to fork anything. Create a Git repository with a <code>skills/</code> folder, one folder per skill.</p>
+      <div class="code" data-lang="layout"><pre>skills/
+  go-review/
+    SKILL.md              <span class="m">the skill itself</span>
+    agents/openai.yaml    <span class="m">optional, copied only for Codex</span>
+    references/           <span class="m">optional, copied for every agent</span></pre></div>
+      <p>The folder name is the skill name. The CLI reads only committed files under <code>skills/</code>, at the commit
+        it installs from. Uncommitted or untracked files are never installed. The rest of the repository can hold anything.</p>
+      <h3>Point the CLI at it</h3>
+      <div class="code" data-lang="toml"><pre><span class="k">[store]</span>
+repo = <span class="s">"https://github.com/your-name/your-skills"</span>
+branch = <span class="s">"main"</span></pre></div>
+      <p>Any URL that <code>git clone</code> accepts works, including SSH and private repositories. The CLI reuses your
+        existing Git credentials.</p>
+      <h3>Switching from another repository</h3>
+      <p>If you already ran the CLI with a different store, move the old one aside first. It may hold local work you want to keep.</p>
+      <div class="code" data-lang="sh"><pre><span class="p">$ </span>mv ~/.config/skills/store ~/.config/skills/store.old
+<span class="p">$ </span>skills init</pre></div>
+      <p>Skills installed from the old repository stay as they are. <code>install</code> and <code>update</code> skip them,
+        even with <code>--force</code>. To move one over, run <code>skills remove</code> and then <code>skills install</code>.</p>
+      <h3>Publishing</h3>
+      <p>Commit and push a skill to your branch, then run <code>skills sync</code>. A skill with <code>status: draft</code>
+        in its frontmatter is invisible and cannot be installed. A skill with no status is published.
+        Changing a skill never needs a new CLI release.</p>
+    </section>
+
+    <section id="metadata">
+      <h2>Skill metadata <a class="anchor" href="#metadata">#</a></h2>
+      <p>One <code>SKILL.md</code> serves every agent. Its frontmatter may carry three fields the agents never see;
+        the CLI resolves them on install. All three are optional, so a standard
+        <a href="https://agentskills.io/specification" rel="noopener">Agent Skills</a> file installs without them.</p>
+      <div class="code" data-lang="markdown"><pre>---
+name: go-review
+description: Reviews Go code for correctness and idiom. Use when...
+status: published
+tags: [go, review, testing]
+x-claude:
+  disable-model-invocation: true
+  allowed-tools: Bash(go test *)
+---
+
+# Go review
+...</pre></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>field</th><th>purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>status</code></td><td><code>published</code> or <code>draft</code>. Omitted means published. A draft is invisible to <code>ls</code> and cannot be installed.</td></tr>
+          <tr><td><code>tags</code></td><td>a list of strings shown by <code>ls</code>. Omitted or empty means no tags.</td></tr>
+          <tr><td><code>x-claude</code></td><td>frontmatter only Claude should see. Lifted to the top level for Claude, dropped for everyone else.</td></tr>
+        </tbody>
+      </table></div>
+      <h3>What install writes</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th></th><th><code>.claude/skills/</code></th><th><code>.agents/skills/</code></th></tr></thead>
+        <tbody>
+          <tr><td><code>status</code>, <code>tags</code></td><td>stripped</td><td>stripped</td></tr>
+          <tr><td><code>x-claude</code></td><td>lifted to the top level</td><td>dropped</td></tr>
+          <tr><td>everything else</td><td>passed through</td><td>passed through</td></tr>
+          <tr><td><code>agents/openai.yaml</code></td><td>not copied</td><td>copied</td></tr>
+          <tr><td>other files</td><td>copied</td><td>copied</td></tr>
+        </tbody>
+      </table></div>
+      <p>The CLI requires a nonempty <code>name</code> and <code>description</code>, and the name must match the folder.
+        Unknown fields pass through untouched. Standard fields such as <code>license</code>, <code>compatibility</code>,
+        <code>metadata</code> and <code>allowed-tools</code> stay at the top level. Claude-only fields such as
+        <code>model</code>, <code>effort</code> or <code>hooks</code> belong under <code>x-claude</code> if you want to keep
+        them out of the shared copy.</p>
+      <div class="callout">
+        <p><strong>Two names, one skill.</strong> Claude Code takes the command name from the directory, while Codex and
+          Gemini take it from the <code>name</code> field. Keep them identical or one skill answers to two names.</p>
+      </div>
+    </section>
+
+    <section id="updates">
+      <h2>How install and update decide <a class="anchor" href="#updates">#</a></h2>
+      <p>For every file of every skill, the CLI compares three states: content hash and, on POSIX, the executable flag.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>state</th><th>meaning</th></tr></thead>
+        <tbody>
+          <tr><td><strong>want</strong></td><td>what the store holds for that agent, with store-only fields stripped</td></tr>
+          <tr><td><strong>have</strong></td><td>what is on disk now</td></tr>
+          <tr><td><strong>base</strong></td><td>what the CLI last wrote, recorded in <code>.skill-lock.json</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>condition</th><th>result</th></tr></thead>
+        <tbody>
+          <tr><td>wanted by the store, not on disk</td><td>add</td></tr>
+          <tr><td><code>have</code> equals <code>want</code></td><td>nothing to do</td></tr>
+          <tr><td><code>have</code> equals <code>base</code></td><td>update, you never touched it</td></tr>
+          <tr><td>anything else</td><td>conflict, this is your edit</td></tr>
+        </tbody>
+      </table></div>
+      <p>The first row deliberately restores a deleted tracked file if the store still has it. Files you added yourself
+        are never tracked and never removed. A skill is the unit of conflict checking: one conflict skips the whole skill
+        across all its agent targets, and other skills proceed.</p>
+      <h3>The per-skill lock</h3>
+      <div class="code" data-lang="json"><pre>{
+  <span class="cy">"name"</span>: <span class="s">"go-review"</span>,
+  <span class="cy">"source"</span>: <span class="s">"https://github.com/madalinpopa/skills"</span>,
+  <span class="cy">"commit"</span>: <span class="s">"a1b2c3d4e5f678901234567890abcdef12345678"</span>,
+  <span class="cy">"installed"</span>: <span class="s">"2026-09-12T18:40:00Z"</span>,
+  <span class="cy">"files"</span>: { <span class="s">"SKILL.md"</span>: <span class="s">"&lt;sha256&gt;"</span> },
+  <span class="cy">"executable"</span>: { <span class="s">"SKILL.md"</span>: false }
+}</pre></div>
+      <p>There is no central index. Installed skills are found by scanning the agents' directories for this file.
+        Delete the skill directory and the state goes with it. Copy it to another project and the record goes along.</p>
+    </section>
+
+    <section id="conflicts">
+      <h2>Conflicts and backups <a class="anchor" href="#conflicts">#</a></h2>
+      <p>A skill you edited is never overwritten silently. The CLI skips the whole skill, says so, carries on with the
+        others, and exits with code 3 so scripts can tell partial completion from success.</p>
+      <p><code>--force</code> overwrites only after copying the old content into a timestamped directory under
+        <code>~/.config/skills/backups/</code>. Enough of the target path is preserved to tell where the backup came from,
+        and the exact path is printed. Backups never overwrite an earlier backup, even two in the same second.</p>
+      <div class="callout warn">
+        <p><strong>Force is not a bypass.</strong> It resolves content conflicts using the store version. It does not
+          touch malformed locks, skills from another source, or symlinks and other unsupported files inside a skill.
+          Those need manual attention.</p>
+      </div>
+    </section>
+
+    <section id="output">
+      <h2>Output and exit codes <a class="anchor" href="#output">#</a></h2>
+      <p>One line per skill, not per file. A skill installed for two agents prints one line. Symbols carry the meaning,
+        so nothing is lost when color is off.</p>
+      <div class="symbols">
+        <div class="plus"><b>+</b> added</div>
+        <div class="tilde"><b>~</b> updated</div>
+        <div class="minus"><b>-</b> removed</div>
+        <div class="bang"><b>!</b> needs attention</div>
+      </div>
+      <p>Dry-run lines read <code>would add</code>, <code>would update</code> and <code>would remove</code>, and the summary
+        says <code>N would change</code>. Results go to stdout; warnings and diagnostics go to stderr. Color is used only
+        when stdout is a terminal, and <code>NO_COLOR</code> disables it.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>code</th><th>meaning</th></tr></thead>
+        <tbody>
+          <tr><td><span class="exit-code">0</span></td><td>every requested operation completed</td></tr>
+          <tr><td><span class="exit-code">1</span></td><td>runtime error, or a requested name was not found</td></tr>
+          <tr><td><span class="exit-code">2</span></td><td>invalid command, flag or agent name</td></tr>
+          <tr><td><span class="exit-code">3</span></td><td>attention required: a skill was skipped or installed state needs repair</td></tr>
+        </tbody>
+      </table></div>
+      <p>A runtime error takes precedence over attention. The full behavior contract lives in
+        <a href="https://github.com/madalinpopa/skills/blob/main/docs/SPEC.md" rel="noopener">docs/SPEC.md</a>.</p>
+    </section>
+
+  </main>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <a class="brand" href="../">skills<span class="cursor"></span></a>
+    <span>MIT licensed. Built in Go. Shells out to Git.</span>
+    <nav aria-label="Footer">
+      <a href="../">Home</a>
+      <a href="https://github.com/madalinpopa/skills" rel="noopener">GitHub</a>
+      <a href="https://github.com/madalinpopa/skills/releases" rel="noopener">Releases</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="../assets/site.js"></script>
+</body>
+</html>
