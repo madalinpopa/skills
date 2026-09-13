@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.yaml.in/yaml/v3"
 
 	"github.com/madalinpopa/skills/internal/skill"
 )
@@ -304,6 +305,142 @@ func TestTransform_preservesAliasesToStoreMetadata(t *testing.T) {
 			require.NoError(t, err, "stripping tags must not leave an undefined YAML alias")
 			assert.Equal(t, before.Description, after.Description)
 			assert.NotContains(t, string(out), "tags:")
+		})
+	}
+}
+
+const compatibilityBody = "\n# Body\n\nKeep --- and `x-claude:` as text.\n---\n"
+
+const standardFields = `---
+name: pdf-processing
+description: Extracts PDF text. Use when handling PDFs.
+license: Apache-2.0
+compatibility: Requires Python 3.14+ and uv
+metadata:
+  author: example-org
+  version: "1.0"
+allowed-tools: Bash(git:*) Bash(jq:*) Read
+---
+` + compatibilityBody
+
+const nativeClaudeFields = `---
+name: release-notes
+description: Drafts release notes. Use when preparing a release.
+when_to_use: The user asks for a changelog.
+argument-hint: "[version]"
+allowed-tools:
+  - Read
+  - Bash(git log *)
+model: inherit
+effort: high
+context: fork
+agent: Explore
+paths:
+  - "CHANGELOG.md"
+hooks:
+  PreToolUse:
+    - matcher: Bash
+      hooks:
+        - type: command
+          command: ./scripts/check.sh
+          timeout: 30
+x-future-extension:
+  enabled: true
+  ratio: 0.5
+---
+` + compatibilityBody
+
+const scopedClaudeFields = `---
+name: deploy
+description: Deploys the service. Use when the user asks to deploy.
+status: published
+tags: [ops]
+allowed-tools: Read
+x-claude:
+  disable-model-invocation: true
+  user-invocable: false
+  shell: bash
+  hooks:
+    Stop:
+      - hooks:
+          - type: command
+            command: echo done
+---
+` + compatibilityBody
+
+func TestTransform_preservesFrontmatterValues(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		source string
+		agent  string
+		lifted bool
+	}{
+		"standard fields for claude":      {source: standardFields, agent: "claude"},
+		"standard fields for shared":      {source: standardFields, agent: "codex"},
+		"native claude fields for claude": {source: nativeClaudeFields, agent: "claude"},
+		"native claude fields for shared": {source: nativeClaudeFields, agent: "codex"},
+		"scoped claude fields for claude": {source: scopedClaudeFields, agent: "claude", lifted: true},
+		"scoped claude fields for shared": {source: scopedClaudeFields, agent: "codex"},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			want := frontmatterValues(t, tt.source)
+			scoped, _ := want["x-claude"].(map[string]any)
+			delete(want, "status")
+			delete(want, "tags")
+			delete(want, "x-claude")
+			if tt.lifted {
+				maps.Copy(want, scoped)
+			}
+
+			out, err := skill.Transform([]byte(tt.source), tt.agent)
+
+			require.NoError(t, err)
+			assert.Equal(t, want, frontmatterValues(t, string(out)), "retained values keep their YAML types")
+			assert.True(t, strings.HasSuffix(string(out), "---\n"+compatibilityBody), "the body is preserved byte for byte")
+		})
+	}
+}
+
+func frontmatterValues(t *testing.T, source string) map[string]any {
+	t.Helper()
+	front, _, found := strings.Cut(strings.TrimPrefix(source, "---\n"), "\n---\n")
+	require.True(t, found)
+	var values map[string]any
+	require.NoError(t, yaml.Unmarshal([]byte(front), &values))
+	return values
+}
+
+func TestTransform_rejectsNestedDuplicateKeys(t *testing.T) {
+	t.Parallel()
+
+	tests := map[string]struct {
+		source string
+		want   string
+	}{
+		"metadata": {
+			source: "---\nname: x\ndescription: d\nmetadata:\n  author: a\n  author: b\n---\n# x\n",
+			want:   "author",
+		},
+		"native hooks": {
+			source: "---\nname: x\ndescription: d\nhooks:\n  Stop: []\n  Stop: []\n---\n# x\n",
+			want:   "Stop",
+		},
+		"scoped hooks": {
+			source: "---\nname: x\ndescription: d\nx-claude:\n  hooks:\n    Stop: []\n    Stop: []\n---\n# x\n",
+			want:   "Stop",
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			_, err := skill.Transform([]byte(tt.source), "claude")
+
+			require.Error(t, err, "emitted frontmatter must not contain duplicate keys")
+			assert.ErrorContains(t, err, tt.want)
 		})
 	}
 }
