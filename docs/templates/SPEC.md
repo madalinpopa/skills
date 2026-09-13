@@ -199,6 +199,8 @@ than copying documentation; reference existing dependency entries where useful.
 ### Similar tools and applications
 
 Research existing tools serving the same users or solving a similar problem.
+Use both GitHub search for public repositories and regular web search to find
+relevant tools and applications.
 Use official product documentation or repositories to verify comparisons.
 Summarize what already exists, where it differs from this application's goal,
 and what we can learn or reuse without expanding the agreed scope.
