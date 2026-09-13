@@ -80,6 +80,18 @@ The store is a clone rather than a cache: everything else depends on it. Version
 one tracks a branch and updates it by fast-forward only. Tags and commit pinning
 can be added later if there is a concrete need.
 
+The CLI needs Git 2.45 or newer and checks the version before every command
+that uses the store. An older Git is an error that names the version found;
+there is no fallback.
+
+A new store is a partial, sparse clone of the configured branch. It keeps the
+full commit history but downloads file contents only as needed, and it checks
+out only `skills/` plus the files at the repository root. If the server
+ignores the filter, the clone downloads everything but stays sparse. The clone
+is made in a temporary directory and moved into place only after setup
+succeeds, so a failed setup never leaves a half-made store. An existing store,
+including an older full clone, is used as it is and never converted.
+
 ### Store layout
 
 One directory per skill, one `SKILL.md` inside it:

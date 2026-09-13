@@ -26,8 +26,17 @@ type Result struct {
 	New string
 }
 
+const minGitMajor, minGitMinor = 2, 45
+
 func (s Store) Init(ctx context.Context) error {
-	_, err := os.Stat(s.Dir)
+	version, err := run(ctx, "", "version")
+	if err != nil {
+		return err
+	}
+	if err = checkGitVersion(version); err != nil {
+		return err
+	}
+	_, err = os.Stat(s.Dir)
 	if errors.Is(err, os.ErrNotExist) {
 		return s.clone(ctx)
 	}
@@ -138,12 +147,44 @@ func blobMode(mode string) fs.FileMode {
 	}
 }
 
+func checkGitVersion(output string) error {
+	required := fmt.Sprintf("git %d.%d or newer is required", minGitMajor, minGitMinor)
+	rest, ok := strings.CutPrefix(output, "git version ")
+	fields := strings.Fields(rest)
+	if !ok || len(fields) == 0 {
+		return fmt.Errorf("%s; could not read the version from %q", required, output)
+	}
+	version := fields[0]
+	majorText, rest, _ := strings.Cut(version, ".")
+	minorText, _, _ := strings.Cut(rest, ".")
+	major, majorErr := strconv.Atoi(majorText)
+	minor, minorErr := strconv.Atoi(minorText)
+	if majorErr != nil || minorErr != nil {
+		return fmt.Errorf("%s; could not read the version from %q", required, output)
+	}
+	if major < minGitMajor || major == minGitMajor && minor < minGitMinor {
+		return fmt.Errorf("%s; found %s", required, version)
+	}
+	return nil
+}
+
 func (s Store) clone(ctx context.Context) error {
-	if err := os.MkdirAll(filepath.Dir(s.Dir), 0o750); err != nil {
+	parent := filepath.Dir(s.Dir)
+	if err := os.MkdirAll(parent, 0o750); err != nil {
 		return err
 	}
-	_, err := run(ctx, "", "clone", "--quiet", "--branch", s.Branch, "--single-branch", s.Repo, s.Dir)
-	return err
+	tmp, err := os.MkdirTemp(parent, ".store-*")
+	if err != nil {
+		return err
+	}
+	defer func() { _ = os.RemoveAll(tmp) }()
+	if _, err := run(ctx, "", "clone", "--quiet", "--filter=blob:none", "--sparse", "--branch", s.Branch, "--single-branch", s.Repo, tmp); err != nil {
+		return err
+	}
+	if _, err := run(ctx, tmp, "sparse-checkout", "set", "skills"); err != nil {
+		return err
+	}
+	return os.Rename(tmp, s.Dir)
 }
 
 func (s Store) checkClean(ctx context.Context) error {
