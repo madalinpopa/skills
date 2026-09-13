@@ -43,6 +43,62 @@ Use `--dry-run` to preview changes without writing, `-v` to show individual file
 and `skills <command> --help` for all options. Exit code `3` means a skill needs
 attention; `skills version` shows the CLI version and current store commit.
 
+## Examples
+
+These terminal examples show representative output. Replace `demo` with a name
+from `skills ls`, and `codex` with `claude` when needed. `$` marks the command
+you type; output depends on your installed skills and store content.
+
+Install a skill for one agent:
+
+```console
+$ skills install demo --agent codex
+  + demo   added
+
+  1 skill, 1 changed
+```
+
+Fetch published changes, then apply them to an unedited installation. This
+example assumes the store has a newer version of `demo`:
+
+```console
+$ skills sync
+  pulled store  a1b2c3d -> e4f5a6b
+
+$ skills update demo --agent codex
+  ~ demo   updated
+
+  1 skill, 1 changed
+```
+
+If you edited the installed skill, the CLI keeps your version and shows what
+to do next:
+
+```console
+$ skills update demo --agent codex
+  ! demo   skipped, you edited it
+
+  1 skill, 0 changed, 1 needs attention
+  Run 'skills diff demo --agent codex' to see your changes,
+  or 'skills update demo --agent codex --force' to overwrite (backed up).
+```
+
+Run the suggested `diff` command to inspect your edits. Use the suggested
+`--force` command only when you want to replace them with the store version.
+
+Preview removal of an unedited skill without changing files:
+
+```console
+$ skills remove demo --agent codex --dry-run
+  - demo   would remove
+      would back up first
+
+  1 skill, 1 would change
+```
+
+Remove `--dry-run` to apply the removal. Add `-v` to an install, update, or
+remove command to see individual file paths beneath each skill.
+
 ## Configuration and scope
 
 First run creates `~/.config/skills/config.toml` and a store at
