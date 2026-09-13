@@ -91,7 +91,7 @@ only to fill a slot.
   logic.
 - Avoid overlap. Each behavior gets one main test at the lowest useful layer.
   Integration tests cover only what unit tests cannot prove.
-- Follow Arrange, Act, Assert, with spacing that makes the three parts easy to
+- Follow Arrange, Act, Assert, with comments and spacing that makes the three parts easy to
   see.
 - Use Testify consistently: `require` for setup that later checks depend on,
   `assert` for independent checks.
