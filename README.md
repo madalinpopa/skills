@@ -12,7 +12,7 @@ my daily workflow and tools. Take ideas from them, and use any that work for you
 On macOS, install with Homebrew:
 
 ```sh
-brew install madalinpopa/tap/skills
+brew install --cask madalinpopa/tap/skills
 ```
 
 Or install with Go:
