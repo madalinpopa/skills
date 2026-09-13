@@ -377,6 +377,61 @@ func TestTree_rejectsSymlinks(t *testing.T) {
 	assert.ErrorContains(t, err, "link.md", "a source symlink is rejected, not silently dropped")
 }
 
+func TestTree_readsOnlySkillsDirectory(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	for name, data := range map[string]string{
+		"skills/go-review/SKILL.md":            "# go review\n",
+		"skills/go-review/references/style.md": "# style\n",
+		"skills-old/legacy/SKILL.md":           "# legacy\n",
+		"docs/guide.md":                        "# guide\n",
+	} {
+		file := filepath.Join(source, filepath.FromSlash(name))
+		require.NoError(t, os.MkdirAll(filepath.Dir(file), 0o750))
+		require.NoError(t, os.WriteFile(file, []byte(data), 0o600))
+	}
+	gittest.Run(t, source, "add", ".")
+	head := gittest.Commit(t, source, "skills and other content")
+	s := newStore(t, source, "main")
+	require.NoError(t, s.Init(t.Context()))
+
+	tree, err := s.Tree(t.Context(), head)
+
+	require.NoError(t, err)
+	assert.Equal(t, []string{
+		"skills/go-review/SKILL.md",
+		"skills/go-review/references/style.md",
+	}, treePaths(t, tree), "root files, other directories and similarly named siblings are not read")
+}
+
+func TestTree_withoutSkillsDirectory(t *testing.T) {
+	t.Parallel()
+	s := newStore(t, gittest.Init(t), "main")
+	require.NoError(t, s.Init(t.Context()))
+	head, err := s.Commit(t.Context())
+	require.NoError(t, err)
+
+	tree, err := s.Tree(t.Context(), head)
+
+	require.NoError(t, err, "a valid commit without skills is an empty store, not an error")
+	assert.Empty(t, treePaths(t, tree))
+	_, err = fs.ReadDir(tree, "skills")
+	assert.ErrorIs(t, err, fs.ErrNotExist)
+}
+
+func treePaths(t *testing.T, fsys fs.FS) []string {
+	t.Helper()
+	var paths []string
+	err := fs.WalkDir(fsys, ".", func(path string, entry fs.DirEntry, err error) error {
+		if err == nil && !entry.IsDir() {
+			paths = append(paths, path)
+		}
+		return err
+	})
+	require.NoError(t, err)
+	return paths
+}
+
 func TestTree_unknownCommit(t *testing.T) {
 	t.Parallel()
 	s := newStore(t, gittest.Init(t), "main")

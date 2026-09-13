@@ -1,8 +1,18 @@
 # Implementation TODO
 
 Validated against the current code, tests, [SPEC.md](SPEC.md), and official
-references on 2026-09-13. All phases are pending. This is the proposed plan;
-the spec remains the current contract until each behavior change lands.
+references on 2026-09-13. This is the proposed plan; the spec remains the
+current contract until each behavior change lands.
+
+## Progress
+
+| Phase | Status | Pull request |
+| --- | --- | --- |
+| 1 — Simplify default agents | Done | #19 |
+| 2 — Accept optional publishing metadata | Done | #20 |
+| 3 — Verify frontmatter compatibility | Done | #21 |
+| 4 — Restrict committed reads to skills | Done | PR pending |
+| 5 — Optimize clone and sync safely | Next | — |
 
 ## Validation of the original items
 
@@ -75,29 +85,30 @@ tests honestly; do not manufacture a failure or unnecessary implementation.
 ## Phase 1 — Simplify default agents
 
 **Budget: 2 commits. Dependencies: none.**
+**Status: done in #19.**
 
 Outcome: new configs offer `claude` and `codex`; Gemini continues to read the
 shared target, and existing explicit agent configurations keep working.
 
-- [ ] Update the smallest useful tests in `internal/config/config_test.go`
+- [x] Update the smallest useful tests in `internal/config/config_test.go`
   and existing unknown-agent assertions in `internal/install/targets_test.go`
   and `cmd/install_test.go`. Verify both fresh defaults and written TOML omit
   Gemini, and available-agent diagnostics reflect the resulting map.
-- [ ] Preserve de-duplication coverage by defining two custom shared agents in
+- [x] Preserve de-duplication coverage by defining two custom shared agents in
   the target fixture. Replace the redundant Gemini transform case in
   `internal/skill/skill_test.go` with a custom shared-agent case.
-- [ ] Verify an existing config explicitly defining `gemini` still loads and
+- [x] Verify an existing config explicitly defining `gemini` still loads and
   remains byte-for-byte unchanged during initialization. Keep such names as
   ordinary configured agents; do not reject or silently rewrite them.
-- [ ] After test review, remove Gemini from both `Default` and `defaultTOML`
+- [x] After test review, remove Gemini from both `Default` and `defaultTOML`
   in `internal/config/config.go`. Keep path selection and transform dispatch
   generic; no special-case implementation is needed in install or skill.
-- [ ] Update SPEC Configuration / Agents and targets, README, and demo wording.
+- [x] Update SPEC Configuration / Agents and targets, README, and demo wording.
   Use shared-agent terminology for redundant examples; retain a compatibility
   note that `--agent codex` selects the shared path, while `--agent gemini`
   requires an explicit config entry after this change. Installs/locks need
   no migration.
-- [ ] Acceptance: fresh defaults contain two agents, custom aliases still
+- [x] Acceptance: fresh defaults contain two agents, custom aliases still
   de-duplicate, existing configs survive, and diagnostics are accurate.
   Run common implementation verification below.
 
@@ -111,31 +122,32 @@ Proposed commits:
 ## Phase 2 — Accept optional publishing metadata
 
 **Budget: 2 commits. Dependencies: none; recommended after phase 1.**
+**Status: done in #20.**
 
 Outcome: a standard skill can be listed and installed without adding this
 repository's publishing fields.
 
-- [ ] Replace the missing-status failure expectation in
+- [x] Replace the missing-status failure expectation in
   `internal/skill/skill_test.go`. Cover absent status, explicit published/draft,
   and invalid explicit values, including empty/null. Only absence defaults to
   published; malformed or unsupported explicit values remain errors.
-- [ ] Cover absent tags and an empty string list as no tags, a valid list, and
+- [x] Cover absent tags and an empty string list as no tags, a valid list, and
   invalid explicit shapes/types. Proposed rule: reject null and non-string
   elements rather than coercing bad metadata. Do not require an allocated empty
   slice when its representation has no user-visible effect.
-- [ ] Extend catalog coverage to include a status-free skill while retaining
+- [x] Extend catalog coverage to include a status-free skill while retaining
   draft exclusion. Add one command-level install case using a local external
   repository without status/tags; verify installed files and lock. Keep parser
   edge cases at the skill layer.
-- [ ] After test review, update source validation in
+- [x] After test review, update source validation in
   `internal/skill/skill.go` to distinguish absence from invalid explicit
   values. Keep installed-content handling in `Describe` separate from source
   publishing rules; damaged local metadata must not block diff or removal.
-- [ ] Update SPEC Skill metadata / Drafts / Releases and demo authoring guidance.
+- [x] Update SPEC Skill metadata / Drafts / Releases and demo authoring guidance.
   Omitting status publishes a valid skill, so work in progress must explicitly
   use `status: draft`. Retain explicit statuses in existing repository skills
   for clarity.
-- [ ] Acceptance: status-free skills list/install, explicit drafts stay
+- [x] Acceptance: status-free skills list/install, explicit drafts stay
   unavailable, invalid metadata reports its source path, and installed output
   strips store fields. No lock migration is needed. Run common verification,
   including existing damaged-installation tests.
@@ -151,33 +163,37 @@ Proposed commits:
 
 **Budget: 1 commit if current behavior passes; up to 3 if a defect is exposed.**
 **Dependency: phase 2 for fixtures without status.**
+**Status: done in #21.** The fixtures passed, but they exposed one defect:
+duplicate keys inside nested mappings such as `metadata` and `hooks` were
+accepted and copied into installed files. It was fixed with a
+`test(skill)` / `fix(skill)` pair, followed by the documentation commit.
 
 Outcome: compatibility has explicit evidence and limits, without duplicating
 vendor parsers or changing metadata handling that already works.
 
-- [ ] Add representative fixtures in `internal/skill/skill_test.go`: standard
+- [x] Add representative fixtures in `internal/skill/skill_test.go`: standard
   optional fields with author/version metadata; native top-level Claude fields
   with scalar/list/nested mapping values; and scoped `x-claude` settings with
   invocation controls and hooks. Include an unknown future extension.
-- [ ] Verify retained YAML values/types for Claude and shared destinations and
+- [x] Verify retained YAML values/types for Claude and shared destinations and
   unchanged body bytes. Include scalar/list forms of `allowed-tools` accepted
   by Claude. Avoid incidental formatting assertions or treating every
   Claude-specific field as standard-compatible.
-- [ ] Reuse existing duplicate/reserved-key, collision, alias, CRLF,
+- [x] Reuse existing duplicate/reserved-key, collision, alias, CRLF,
   deterministic-output, and sidecar tests. Add only uncovered meaningful cases.
   Duplicate keys remain errors, not a compatibility feature to permit.
-- [ ] If the fixtures pass, keep parser/transforms unchanged. If they reveal a
+- [x] If the fixtures pass, keep parser/transforms unchanged. If they reveal a
   concrete value-loss or validation defect, isolate the smallest failing case,
   stop for review, then make a local fix in its own implementation commit.
-- [ ] Update SPEC Skill metadata / Agent differences and demo guidance to
+- [x] Update SPEC Skill metadata / Agent differences and demo guidance to
   distinguish standard, Claude, and store fields. Native top-level Claude
   fields pass through to shared output too; `x-claude` enables selective
   exclusion. There is no configurable transform mechanism to document or add.
-- [ ] Explain the identity boundary: metadata-less Claude skills need
+- [x] Explain the identity boundary: metadata-less Claude skills need
   name/description before import. Do not claim full Claude import or complete
   standards validation. Preserving YAML does not prove destination runtime
   support for every retained setting.
-- [ ] Acceptance: representative fields survive according to transform policy,
+- [x] Acceptance: representative fields survive according to transform policy,
   malformed mappings remain rejected, and documentation matches these limits.
   Run `go test ./internal/skill` and `go test ./...`; use all common verification
   if implementation changes are needed.
@@ -194,28 +210,30 @@ pair naming the defect, followed by the compatibility documentation commit.
 ## Phase 4 — Restrict committed reads to skills
 
 **Budget: 2 commits. Dependencies: none; must precede phase 5.**
+**Status: done; PR pending.** `Store.Tree` now lists and reads only
+`skills/` at the recorded commit. No caller needed changes.
 
 Outcome: catalog, install, update, and diff stop loading unrelated repository
 content or causing its download in a partial clone.
 
-- [ ] Extend `internal/store/store_test.go` with skills, unrelated directories,
+- [x] Extend `internal/store/store_test.go` with skills, unrelated directories,
   root files, and a similarly named sibling directory. Assert `Store.Tree`
   exposes only paths below the exact `skills/` directory, preserving the
   `skills/<name>/...` path shape expected by callers.
-- [ ] Retain recorded-commit, executable-bit, symlink rejection,
+- [x] Retain recorded-commit, executable-bit, symlink rejection,
   committed-content, checkout-conversion, and unknown-commit tests. Cover an
   empty/missing skills tree without hiding an invalid commit as an empty store.
-- [ ] After test review, narrow tree enumeration and blob reads in
+- [x] After test review, narrow tree enumeration and blob reads in
   `internal/store/store.go` before requesting object content. This belongs at
   the store boundary; loading everything then filtering in commands would
   leave the download problem intact.
-- [ ] Trace `cmd/install.go:openStore` through catalog and install requests,
+- [x] Trace `cmd/install.go:openStore` through catalog and install requests,
   its update caller, and `cmd/diff.go:diffSkill` against the narrowed filesystem.
   Preserve lock commit identity and committed bytes; keep mutable checkout
   content out of installations.
-- [ ] Update SPEC Store layout and committed-content rules. This phase needs
+- [x] Update SPEC Store layout and committed-content rules. This phase needs
   no config, lock, installed-file, or existing-clone migration.
-- [ ] Acceptance: outside content is absent from returned trees; existing
+- [x] Acceptance: outside content is absent from returned trees; existing
   command behavior and historical diff remain correct. Run common verification
   and `task test:integration` for the Git boundary, accurately describing what
   coverage that task currently provides.

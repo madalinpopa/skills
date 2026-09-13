@@ -82,7 +82,7 @@ func (s Store) Commit(ctx context.Context) (string, error) {
 }
 
 func (s Store) Tree(ctx context.Context, commit string) (fs.FS, error) {
-	listing, err := output(ctx, s.Dir, nil, "ls-tree", "-r", "-z", commit)
+	listing, err := output(ctx, s.Dir, nil, "ls-tree", "-r", "-z", "--full-tree", commit, "--", "skills")
 	if err != nil {
 		return nil, fmt.Errorf("commit %s: %w", commit, err)
 	}
