@@ -11,8 +11,8 @@ current contract until each behavior change lands.
 | 1 — Simplify default agents | Done | #19 |
 | 2 — Accept optional publishing metadata | Done | #20 |
 | 3 — Verify frontmatter compatibility | Done | #21 |
-| 4 — Restrict committed reads to skills | Next | — |
-| 5 — Optimize clone and sync safely | Pending, needs phase 4 | — |
+| 4 — Restrict committed reads to skills | Done | PR pending |
+| 5 — Optimize clone and sync safely | Next | — |
 
 ## Validation of the original items
 
@@ -210,28 +210,30 @@ pair naming the defect, followed by the compatibility documentation commit.
 ## Phase 4 — Restrict committed reads to skills
 
 **Budget: 2 commits. Dependencies: none; must precede phase 5.**
+**Status: done; PR pending.** `Store.Tree` now lists and reads only
+`skills/` at the recorded commit. No caller needed changes.
 
 Outcome: catalog, install, update, and diff stop loading unrelated repository
 content or causing its download in a partial clone.
 
-- [ ] Extend `internal/store/store_test.go` with skills, unrelated directories,
+- [x] Extend `internal/store/store_test.go` with skills, unrelated directories,
   root files, and a similarly named sibling directory. Assert `Store.Tree`
   exposes only paths below the exact `skills/` directory, preserving the
   `skills/<name>/...` path shape expected by callers.
-- [ ] Retain recorded-commit, executable-bit, symlink rejection,
+- [x] Retain recorded-commit, executable-bit, symlink rejection,
   committed-content, checkout-conversion, and unknown-commit tests. Cover an
   empty/missing skills tree without hiding an invalid commit as an empty store.
-- [ ] After test review, narrow tree enumeration and blob reads in
+- [x] After test review, narrow tree enumeration and blob reads in
   `internal/store/store.go` before requesting object content. This belongs at
   the store boundary; loading everything then filtering in commands would
   leave the download problem intact.
-- [ ] Trace `cmd/install.go:openStore` through catalog and install requests,
+- [x] Trace `cmd/install.go:openStore` through catalog and install requests,
   its update caller, and `cmd/diff.go:diffSkill` against the narrowed filesystem.
   Preserve lock commit identity and committed bytes; keep mutable checkout
   content out of installations.
-- [ ] Update SPEC Store layout and committed-content rules. This phase needs
+- [x] Update SPEC Store layout and committed-content rules. This phase needs
   no config, lock, installed-file, or existing-clone migration.
-- [ ] Acceptance: outside content is absent from returned trees; existing
+- [x] Acceptance: outside content is absent from returned trees; existing
   command behavior and historical diff remain correct. Run common verification
   and `task test:integration` for the Git boundary, accurately describing what
   coverage that task currently provides.
