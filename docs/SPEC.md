@@ -456,7 +456,9 @@ and non-string elements are errors rather than coerced. If present, `x-claude`
 is a mapping with unique string keys. Reject `name`, `description`, `status`,
 `tags` and `x-claude` inside that mapping, and keys colliding with existing
 top-level fields. Do not maintain a vendor-specific allowlist of every possible
-extension key. Emitted frontmatter must remain valid with no duplicate keys.
+extension key. Every mapping in the frontmatter, including nested values such
+as `metadata` and `hooks`, must have unique keys. Emitted frontmatter must
+remain valid with no duplicate keys.
 
 Store frontmatter accepts LF and CRLF line endings; rewrites produce stable
 frontmatter while preserving body bytes. Invalid source metadata is a runtime

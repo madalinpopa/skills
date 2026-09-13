@@ -220,6 +220,28 @@ func validate(mapping *yaml.Node) error {
 			}
 		}
 	}
+	return uniqueKeys(mapping)
+}
+
+func uniqueKeys(node *yaml.Node) error {
+	if node.Kind == yaml.MappingNode {
+		seen := map[string]bool{}
+		for i := 0; i < len(node.Content); i += 2 {
+			key := node.Content[i]
+			if key.Kind != yaml.ScalarNode {
+				continue
+			}
+			if seen[key.Value] {
+				return fmt.Errorf("duplicate key %q", key.Value)
+			}
+			seen[key.Value] = true
+		}
+	}
+	for _, child := range node.Content {
+		if err := uniqueKeys(child); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
