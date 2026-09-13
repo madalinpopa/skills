@@ -9,6 +9,14 @@ my daily workflow and tools. Take ideas from them, and use any that work for you
 
 ## Install the CLI
 
+On macOS, install with Homebrew:
+
+```sh
+brew install madalinpopa/tap/skills
+```
+
+Or install with Go:
+
 ```sh
 go install github.com/madalinpopa/skills@latest
 ```

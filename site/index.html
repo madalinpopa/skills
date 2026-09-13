@@ -242,7 +242,7 @@
       <div class="split">
         <div>
           <ol class="steps">
-            <li><div><strong>Install the CLI.</strong> Use <code>go install</code>, or grab a binary for macOS, Linux, or Windows from <a href="https://github.com/madalinpopa/skills/releases" rel="noopener">Releases</a>.</div></li>
+            <li><div><strong>Install the CLI.</strong> Use Homebrew on macOS, <code>go install</code>, or grab a binary for macOS, Linux, or Windows from <a href="https://github.com/madalinpopa/skills/releases" rel="noopener">Releases</a>.</div></li>
             <li><div><strong>Point it at your repo.</strong> Edit <code>~/.config/skills/config.toml</code>, or skip this step to try the demo store first.</div></li>
             <li><div><strong>Install a skill in a project.</strong> The first command that needs the store clones it. You never run setup by hand.</div></li>
             <li><div><strong>Keep it current.</strong> <code>sync</code> pulls your repo, <code>update</code> moves installed skills to it. Two steps, on purpose.</div></li>
@@ -251,7 +251,7 @@
         </div>
 
         <div class="code" data-lang="sh">
-<pre><span class="p">$ </span>go install github.com/madalinpopa/skills@latest
+<pre><span class="p">$ </span>brew install madalinpopa/tap/skills   <span class="m"># or: go install github.com/madalinpopa/skills@latest</span>
 
 <span class="p">$ </span>cd ~/code/my-project
 <span class="p">$ </span>skills ls                  <span class="m"># what the store offers</span>

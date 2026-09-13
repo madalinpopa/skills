@@ -37,3 +37,23 @@ changelog:
 
 release:
   prerelease: auto
+
+homebrew_casks:
+  - name: skills
+    binaries:
+      - skills
+    homepage: https://github.com/madalinpopa/skills
+    description: Install agent skills into your projects and keep them up to date
+    license: MIT
+    repository:
+      owner: madalinpopa
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    commit_msg_template: "skills {{ .Tag }}"
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/skills"]
+          end
