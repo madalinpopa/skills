@@ -515,6 +515,89 @@ func treePaths(t *testing.T, fsys fs.FS) []string {
 	return paths
 }
 
+func TestSync_keepsPartialSparseClone(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	gittest.Run(t, source, "config", "uploadpack.allowFilter", "true")
+	writeFiles(t, source, map[string]string{
+		"skills/changed/SKILL.md": "# v1\n",
+		"skills/deleted/SKILL.md": "# deleted\n",
+	})
+	gittest.Run(t, source, "add", ".")
+	gittest.Commit(t, source, "v1")
+	s := newStore(t, "file://"+source, "main")
+	require.NoError(t, s.Init(t.Context()))
+	writeFiles(t, source, map[string]string{
+		"skills/changed/SKILL.md": "# v2\n",
+		"skills/added/SKILL.md":   "# added\n",
+		"docs/guide.md":           "# guide\n",
+	})
+	require.NoError(t, os.RemoveAll(filepath.Join(source, "skills", "deleted")))
+	gittest.Run(t, source, "add", "-A")
+	head := gittest.Commit(t, source, "v2")
+	changed := gittest.Run(t, source, "rev-parse", head+":skills/changed/SKILL.md")
+	added := gittest.Run(t, source, "rev-parse", head+":skills/added/SKILL.md")
+	docs := gittest.Run(t, source, "rev-parse", head+":docs/guide.md")
+
+	_, err := s.Sync(t.Context())
+
+	require.NoError(t, err)
+	assert.True(t, hasObject(t, s.Dir, changed), "changed skill content is downloaded")
+	assert.True(t, hasObject(t, s.Dir, added), "added skill content is downloaded")
+	assert.False(t, hasObject(t, s.Dir, docs), "content outside skills is not downloaded")
+	assert.FileExists(t, filepath.Join(s.Dir, "skills", "added", "SKILL.md"))
+	assert.NoDirExists(t, filepath.Join(s.Dir, "skills", "deleted"))
+	assert.NoDirExists(t, filepath.Join(s.Dir, "docs"), "the checkout stays sparse")
+}
+
+func TestTree_readsDownloadedHistoryOffline(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	gittest.Run(t, source, "config", "uploadpack.allowFilter", "true")
+	writeFiles(t, source, map[string]string{"skills/go-review/SKILL.md": "# v1\n"})
+	gittest.Run(t, source, "add", ".")
+	old := gittest.Commit(t, source, "v1")
+	s := newStore(t, "file://"+source, "main")
+	require.NoError(t, s.Init(t.Context()))
+	writeFiles(t, source, map[string]string{"skills/go-review/SKILL.md": "# v2\n"})
+	gittest.Run(t, source, "add", ".")
+	gittest.Commit(t, source, "v2")
+	_, err := s.Sync(t.Context())
+	require.NoError(t, err)
+	require.NoError(t, os.RemoveAll(source), "the remote is gone")
+
+	tree, err := s.Tree(t.Context(), old)
+
+	require.NoError(t, err, "content downloaded before a sync stays readable offline")
+	data, err := fs.ReadFile(tree, "skills/go-review/SKILL.md")
+	require.NoError(t, err)
+	assert.Equal(t, "# v1\n", string(data))
+}
+
+func TestTree_doesNotDownloadMissingContent(t *testing.T) {
+	t.Parallel()
+	source := gittest.Init(t)
+	gittest.Run(t, source, "config", "uploadpack.allowFilter", "true")
+	writeFiles(t, source, map[string]string{"skills/go-review/SKILL.md": "# v1\n"})
+	gittest.Run(t, source, "add", ".")
+	old := gittest.Commit(t, source, "v1")
+	oldBlob := gittest.Run(t, source, "rev-parse", old+":skills/go-review/SKILL.md")
+	writeFiles(t, source, map[string]string{"skills/go-review/SKILL.md": "# v2\n"})
+	gittest.Run(t, source, "add", ".")
+	gittest.Commit(t, source, "v2")
+	s := newStore(t, "file://"+source, "main")
+	require.NoError(t, s.Init(t.Context()))
+	require.False(t, hasObject(t, s.Dir, oldBlob), "the fresh clone has not downloaded older content")
+	before := snapshot(t, s.Dir)
+
+	_, err := s.Tree(t.Context(), old)
+
+	require.Error(t, err, "a fresh clone does not have content from older commits")
+	assert.ErrorContains(t, err, old, "the error names the recorded commit")
+	assert.ErrorContains(t, err, "skills/go-review/SKILL.md", "the error names the missing file")
+	assert.Equal(t, before, snapshot(t, s.Dir), "reading never downloads objects")
+}
+
 func TestTree_unknownCommit(t *testing.T) {
 	t.Parallel()
 	s := newStore(t, gittest.Init(t), "main")
