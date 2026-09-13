@@ -1,8 +1,9 @@
 # Repository skill authoring
 
 Use the [Agent Skills specification](https://agentskills.io/specification) as
-the base format. Read `docs/SPEC.md` in the target `madalinpopa/skills` checkout,
-especially "Skill metadata" and "Agent differences", for the CLI contract.
+the base format. Resolve `docs/SPEC.md` from the current checkout's root,
+including forks. Read its "Skill metadata" and "Agent differences" sections
+for the CLI contract.
 For optional agent settings, consult the current
 [OpenAI skill documentation](https://learn.chatgpt.com/docs/build-skills#optional-metadata)
 and [Anthropic Claude Code reference](https://code.claude.com/docs/en/skills#frontmatter-reference).

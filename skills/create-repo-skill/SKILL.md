@@ -1,6 +1,6 @@
 ---
 name: create-repo-skill
-description: Creates or updates skills in the madalinpopa/skills repository using its naming, metadata, and packaging rules. Use when authoring this repository's skill catalog or maintaining its skill authoring guidance; not for generic skill creation elsewhere or Go CLI implementation.
+description: Creates or updates skills in this repository or its forks using the checkout's naming, metadata, and packaging rules. Use when authoring a skill catalog with this repository's layout and conventions or maintaining its skill authoring guidance; not for generic skill creation elsewhere or Go CLI implementation.
 status: published
 tags: [skills, authoring, repository]
 ---
@@ -14,10 +14,16 @@ and read its instructions. Use it for skill design and validation, then apply
 this repository's rules. If it is unavailable, report the missing dependency
 before creating or editing skill files.
 
-Work in the target `madalinpopa/skills` checkout. Resolve `AGENTS.md`,
-`docs/SPEC.md`, and the destination `skills/` from that repository root, not
-from an installed copy of this skill. Follow the target repository's agent
-instructions and inspect the current diff before editing.
+Work in the current repository checkout, including forks. Resolve `AGENTS.md`,
+`docs/SPEC.md`, and the destination `skills/` from that checkout's root, not
+from an installed copy of this skill. Identify the authoring context by these
+files and conventions, regardless of the GitHub owner or remote URL. Follow
+the checkout's agent instructions and inspect the current diff before editing.
+
+The CLI's configured store selects installation content; it does not select
+the checkout where skills are authored. Use the current checkout's rules even
+when this skill was installed from upstream. Do not change `store.repo` or
+`store.branch` merely because the checkout is a fork.
 
 ## Choose the outcome and name
 
