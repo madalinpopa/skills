@@ -51,9 +51,9 @@ homebrew_casks:
       branch: main
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     commit_msg_template: "skills {{ .Tag }}"
-    hooks:
-      post:
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/skills"]
-          end
+    custom_block: |
+      postflight_steps do
+        on_macos do
+          run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ "{{staged_path}}" }}/skills"]
+        end
+      end
