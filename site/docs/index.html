@@ -174,11 +174,20 @@
         </tbody>
       </table></div>
       <div class="code" data-lang="console"><pre><span class="p">$ </span>skills ls
-  go-review        Reviews Go code for correctness and idiom     <span class="m">go, review</span>
-  django-testing   Writes and structures Django tests            <span class="m">python, django</span>
+  go-review   <span class="m">go, review</span>
+      Reviews Go code for correctness and idiom. Use when a change touches Go
+      files and the author wants findings before opening a pull request.
+
+  django-testing   <span class="m">python, django</span>
+      Writes and structures Django tests.
 
 <span class="p">$ </span>skills ls --local
-  go-review        Reviews Go code for correctness and idiom     <span class="m">agents, claude</span></pre></div>
+  go-review   <span class="m">agents, claude</span>
+      Reviews Go code for correctness and idiom. Use when a change touches Go
+      files and the author wants findings before opening a pull request.</pre></div>
+      <p>Each skill is one block: the name and its tags, or its agents for installed listings, on the first line,
+        then the full description wrapped below. The description wraps to the terminal width, or to 80 columns
+        when the output is piped. A blank line separates blocks.</p>
       <p><code>--local</code> and <code>--global</code> cannot be combined and list only the default agents' installs.
         Drafts never appear in the store listing. Installed listings show the directory name and mark an unreadable
         description instead of hiding the skill.</p>
@@ -460,7 +469,7 @@ x-claude:
 
     <section id="output">
       <h2>Output and exit codes <a class="anchor" href="#output">#</a></h2>
-      <p>One line per skill, not per file. A skill installed for two agents prints one line. Symbols carry the meaning,
+      <p>One line per skill, or one block in <code>ls</code>, not per file. A skill installed for two agents prints one line. Symbols carry the meaning,
         so nothing is lost when color is off.</p>
       <div class="symbols">
         <div class="plus"><b>+</b> added</div>
