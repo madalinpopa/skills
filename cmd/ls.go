@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
+	"io"
 	"strings"
-	"text/tabwriter"
+	"unicode/utf8"
 
 	"github.com/spf13/cobra"
 
@@ -42,11 +42,11 @@ func listStore(c *cobra.Command) error {
 	if err != nil {
 		return err
 	}
-	rows := make([][]string, 0, len(skills))
+	blocks := make([]block, 0, len(skills))
 	for _, sk := range skills {
-		rows = append(rows, []string{sk.Name, sk.Description, strings.Join(sk.Tags, ", ")})
+		blocks = append(blocks, block{name: sk.Name, labels: strings.Join(sk.Tags, ", "), description: sk.Description})
 	}
-	return printRows(c, rows)
+	return printBlocks(c.OutOrStdout(), outputWidth(c.OutOrStdout()), blocks)
 }
 
 func listInstalled(c *cobra.Command, global bool) error {
@@ -58,7 +58,7 @@ func listInstalled(c *cobra.Command, global bool) error {
 	if err != nil {
 		return err
 	}
-	rows := make([][]string, 0, len(installed))
+	blocks := make([]block, 0, len(installed))
 	attention := false
 	for _, inst := range installed {
 		variants := make([]string, 0, len(inst.Targets))
@@ -74,9 +74,9 @@ func listInstalled(c *cobra.Command, global bool) error {
 			description = "! description unavailable"
 			attention = true
 		}
-		rows = append(rows, []string{inst.Name, description, strings.Join(variants, ", ")})
+		blocks = append(blocks, block{name: inst.Name, labels: strings.Join(variants, ", "), description: description})
 	}
-	if err := printRows(c, rows); err != nil {
+	if err := printBlocks(c.OutOrStdout(), outputWidth(c.OutOrStdout()), blocks); err != nil {
 		return err
 	}
 	if attention {
@@ -85,12 +85,55 @@ func listInstalled(c *cobra.Command, global bool) error {
 	return nil
 }
 
-func printRows(c *cobra.Command, rows [][]string) error {
-	w := tabwriter.NewWriter(c.OutOrStdout(), 0, 0, 3, ' ', 0)
-	for _, row := range rows {
-		if _, err := fmt.Fprintf(w, "  %s\n", strings.Join(row, "\t")); err != nil {
-			return err
+type block struct {
+	name        string
+	labels      string
+	description string
+}
+
+const descriptionIndent = "      "
+
+func printBlocks(w io.Writer, width int, blocks []block) error {
+	var b strings.Builder
+	for i, bl := range blocks {
+		if i > 0 {
+			b.WriteString("\n")
+		}
+		b.WriteString("  " + bl.name)
+		if bl.labels != "" {
+			b.WriteString("   " + bl.labels)
+		}
+		b.WriteString("\n")
+		for _, line := range wrap(bl.description, width-len(descriptionIndent)) {
+			b.WriteString(descriptionIndent + line + "\n")
 		}
 	}
-	return w.Flush()
+	_, err := io.WriteString(w, b.String())
+	return err
+}
+
+func wrap(text string, width int) []string {
+	var lines []string
+	var line strings.Builder
+	length := 0
+	for word := range strings.FieldsSeq(text) {
+		size := utf8.RuneCountInString(word)
+		switch {
+		case length == 0:
+			line.WriteString(word)
+			length = size
+		case length+1+size <= width:
+			line.WriteString(" " + word)
+			length += 1 + size
+		default:
+			lines = append(lines, line.String())
+			line.Reset()
+			line.WriteString(word)
+			length = size
+		}
+	}
+	if length > 0 {
+		lines = append(lines, line.String())
+	}
+	return lines
 }

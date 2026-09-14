@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 
 	"github.com/madalinpopa/skills/internal/install"
 )
@@ -18,6 +19,8 @@ const (
 	red    = "\x1b[31m"
 	reset  = "\x1b[0m"
 )
+
+const defaultWidth = 80
 
 type renderer struct {
 	out     io.Writer
@@ -222,4 +225,16 @@ func isTerminal(w io.Writer) bool {
 	}
 	info, err := file.Stat()
 	return err == nil && info.Mode()&os.ModeCharDevice != 0
+}
+
+func outputWidth(w io.Writer) int {
+	file, ok := w.(*os.File)
+	if !ok {
+		return defaultWidth
+	}
+	width, _, err := term.GetSize(int(file.Fd()))
+	if err != nil || width <= 0 {
+		return defaultWidth
+	}
+	return width
 }
