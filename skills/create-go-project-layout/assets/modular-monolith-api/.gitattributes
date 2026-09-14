@@ -1,0 +1,2 @@
+**/**.gen.go linguist-generated=true
+models/**.go linguist-generated=true

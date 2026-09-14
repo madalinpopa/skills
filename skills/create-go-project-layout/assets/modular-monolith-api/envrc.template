@@ -1,0 +1,24 @@
+export PATH=$PATH:./api/bin
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# POSTGRES ENV
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+export POSTGRES_USER="user"
+export POSTGRES_PASSWORD="password"
+export POSTGRES_DB="{{PROJECT_NAME}}"
+export POSTGRES_HOST="postgres"
+export POSTGRES_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}?sslmode=disable"
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# API ENV
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Modules and components add their variables here. The API validates them at
+# startup, so a bad value fails boot instead of a request.
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# WEB ENV
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Origin the browser calls the API on. In development the frontend dev server
+# and the API are separate origins. In production both sit behind one reverse
+# proxy, so this is left empty and requests stay same-origin.
+export VITE_API_BASE_URL="http://localhost:8080"
