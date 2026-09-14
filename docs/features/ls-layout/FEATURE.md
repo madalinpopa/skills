@@ -8,7 +8,7 @@ read each skill and decide what to install, so the outcome is one block per
 skill with the full description wrapped to the terminal width.
 
 - **Active phase**: [Phase 01: one wrapped block per skill](phase-01-wrapped-blocks.md)
-- **Feature acceptance**: Pending
+- **Feature acceptance**: Accepted on 2026-09-14 with phase 01 ("proceed")
 
 ## Scope
 
@@ -57,14 +57,14 @@ $ skills ls --local
 
 ## Acceptance criteria
 
-- [ ] In a terminal, every description line fits the terminal width and the
+- [x] In a terminal, every description line fits the terminal width and the
   whole description is printed. Evidence: phase 01, step 1 tests.
-- [ ] Piped output uses the same blocks wrapped at 80 columns.
+- [x] Piped output uses the same blocks wrapped at 80 columns.
   Evidence: phase 01, step 1 tests.
-- [ ] `--local` and `--global` print the agents on the header line and the
+- [x] `--local` and `--global` print the agents on the header line and the
   installed description below, including attention lines and exit code 3.
   Evidence: phase 01, step 1 tests.
-- [ ] `docs/SPEC.md` shows the block layout in the `ls` examples.
+- [x] `docs/SPEC.md` shows the block layout in the `ls` examples.
   Evidence: phase 01 implementation review.
 
 ## Agreed decisions
@@ -80,4 +80,4 @@ $ skills ls --local
 
 | Phase | Outcome | Depends on | Status | Phase file |
 | --- | --- | --- | --- | --- |
-| 01 | One wrapped block per skill in every `ls` view | None | awaiting implementation review | [phase-01-wrapped-blocks.md](phase-01-wrapped-blocks.md) |
+| 01 | One wrapped block per skill in every `ls` view | None | accepted | [phase-01-wrapped-blocks.md](phase-01-wrapped-blocks.md) |

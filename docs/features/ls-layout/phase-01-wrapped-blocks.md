@@ -7,20 +7,16 @@
 
 ## Current checkpoint
 
-- **Status**: awaiting implementation review
-- **Current step**: Step 1, implementation review is next
+- **Status**: accepted
+- **Current step**: Step 1 complete
 - **Approved scope**: Layout and piped behavior agreed on 2026-09-14; tests
-  reviewed and implementation approved on 2026-09-14 ("proceed.")
-- **Working tree**: on top of `vmknzrln` (tests): `cmd/ls.go`,
-  `cmd/render.go`, `docs/SPEC.md`, `go.mod`, `go.sum`, and a one-line fix in
-  `cmd/damaged_test.go` (trim only the trailing newline)
-- **Last verification**: see the evidence table; all commands pass on the
-  working tree described above
-- **Blocker or pending decision**: Developer review of the implementation;
-  where the `damaged_test.go` fix should land (squash into the test commit or
-  keep in the implementation commit)
-- **Next action**: On approval, commit as `feat(ls): print one wrapped block
-  per skill`; developer approval is required
+  and implementation approved on 2026-09-14 ("proceed")
+- **Working tree**: committed as `lutuzxmm` (plan), `vmknzrln` (tests, with
+  the trailing-newline trim fix squashed in), `vmopyrxu` (feature)
+- **Last verification**: `go test ./...` 325 passed after the final commit;
+  see the evidence table
+- **Blocker or pending decision**: None
+- **Next action**: Open a pull request when the developer asks
 
 ## Scope and required context
 
@@ -104,6 +100,8 @@
 
 ## Developer acceptance
 
-- **Decision**: Pending
-- **Reference and scope**: None
-- **Remaining work**: Step 1
+- **Decision**: accepted
+- **Reference and scope**: "proceed" on 2026-09-14 after the implementation
+  review and a Codex review with no actionable defects; accepts the block
+  layout for all `ls` views
+- **Remaining work**: None
