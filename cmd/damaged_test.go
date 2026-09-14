@@ -64,14 +64,11 @@ func TestLs_damagedInstallationsNeedAttention(t *testing.T) {
 	err := cmd.Execute(t.Context(), "", []string{"ls", "--global"}, strings.NewReader(""), &out, &errOut)
 
 	require.ErrorIs(t, err, cmd.ErrAttention)
-	rows := strings.Split(strings.TrimSpace(out.String()), "\n")
-	require.Len(t, rows, 3, "damaged rows sit beside healthy ones")
-	assert.Contains(t, rows[0], "broken")
-	assert.Contains(t, rows[0], "lock")
-	assert.Contains(t, rows[1], "go-review")
-	assert.Contains(t, rows[1], "Installed description.")
-	assert.Contains(t, rows[2], "nodesc")
-	assert.Contains(t, rows[2], "description unavailable")
+	blocks := strings.Split(strings.TrimSuffix(out.String(), "\n"), "\n\n")
+	require.Len(t, blocks, 3, "damaged blocks sit beside healthy ones")
+	assert.True(t, strings.HasPrefix(blocks[0], "  broken   agents, claude\n      ! damaged lock: "), blocks[0])
+	assert.Equal(t, "  go-review   agents, claude\n      Installed description.", blocks[1])
+	assert.Equal(t, "  nodesc   agents, claude\n      ! description unavailable", blocks[2])
 }
 
 func malformedSibling(t *testing.T) string {

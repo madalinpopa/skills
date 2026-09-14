@@ -19,7 +19,7 @@ import (
 
 func TestLs_listsPublishedSkills(t *testing.T) {
 	source := gittest.Init(t)
-	addSkill(t, source, "sql-review", "published", "Reviews SQL queries.", "[sql]")
+	addSkill(t, source, "sql-review", "published", "Reviews SQL queries for slow joins, missing indexes, and unsafe string building in every migration.", "[sql]")
 	addSkill(t, source, "go-review", "published", "Reviews Go code.", "[go, review]")
 	addSkill(t, source, "wip", "draft", "Not ready yet.", "[]")
 	gittest.Run(t, source, "add", ".")
@@ -31,13 +31,13 @@ func TestLs_listsPublishedSkills(t *testing.T) {
 	err := cmd.Execute(t.Context(), "", []string{"ls"}, strings.NewReader(""), &out, &errOut)
 
 	require.NoError(t, err, errOut.String())
-	lines := strings.Split(strings.TrimSpace(out.String()), "\n")
-	require.Len(t, lines, 2, "one line per published skill")
-	assert.Contains(t, lines[0], "go-review")
-	assert.Contains(t, lines[0], "Reviews Go code.")
-	assert.Contains(t, lines[0], "go, review")
-	assert.Contains(t, lines[1], "sql-review")
-	assert.Contains(t, lines[1], "Reviews SQL queries.")
+	want := "  go-review   go, review\n" +
+		"      Reviews Go code.\n" +
+		"\n" +
+		"  sql-review   sql\n" +
+		"      Reviews SQL queries for slow joins, missing indexes, and unsafe string\n" +
+		"      building in every migration.\n"
+	assert.Equal(t, want, out.String(), "one block per published skill, wrapped at 80 columns when piped")
 	assert.NotContains(t, out.String(), "wip", "drafts stay hidden")
 	assert.NotContains(t, out.String(), "installed-only", "the store view ignores installed skills")
 }
@@ -71,11 +71,9 @@ func TestLs_installedScopes(t *testing.T) {
 			err := cmd.Execute(t.Context(), "", []string{"ls", tt.flag}, strings.NewReader(""), &out, &errOut)
 
 			require.NoError(t, err, errOut.String())
-			lines := strings.Split(strings.TrimSpace(out.String()), "\n")
-			require.Len(t, lines, 1, "one line per installed skill")
-			assert.Contains(t, lines[0], tt.listed)
-			assert.Contains(t, lines[0], "Installed description.")
-			assert.Contains(t, lines[0], "agents, claude", "the physical targets in directory order, not one agent per copy")
+			want := "  " + tt.listed + "   agents, claude\n" +
+				"      Installed description.\n"
+			assert.Equal(t, want, out.String(), "one block per installed skill with the physical targets in directory order")
 			assert.NotContains(t, out.String(), tt.hidden, "no fallback to the other scope")
 			assert.NoDirExists(t, storeDir(home), "installed listings do not touch the store")
 		})

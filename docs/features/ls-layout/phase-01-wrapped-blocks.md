@@ -7,16 +7,18 @@
 
 ## Current checkpoint
 
-- **Status**: planned
-- **Current step**: Step 1, tests are next
-- **Approved scope**: Layout and piped behavior agreed on 2026-09-14 (see
-  FEATURE.md decisions); go-ahead for the step 1 tests not yet given
-- **Working tree**: `docs/features/ls-layout/` (new, uncommitted); no other changes
-- **Last verification**: Not run
-- **Blocker or pending decision**: Approval of the `golang.org/x/term`
-  dependency and go-ahead for step 1
-- **Next action**: Write the step 1 tests and run them to show the expected
-  failure; developer approval is required first
+- **Status**: awaiting test review
+- **Current step**: Step 1, test review is next
+- **Approved scope**: Layout and piped behavior agreed on 2026-09-14; go-ahead
+  for the step 1 tests given on 2026-09-14 ("Then proceed with the tests")
+- **Working tree**: on top of `lutuzxmm` (plan docs): new
+  `cmd/ls_blocks_test.go`; adapted `cmd/ls_test.go` and `cmd/damaged_test.go`
+- **Last verification**: `go test ./cmd/` fails to build (`block` and
+  `printBlocks` undefined); with the internal test set aside, the three
+  adapted command tests fail on the line shape
+- **Blocker or pending decision**: Developer review of the tests; approval of
+  the `golang.org/x/term` dependency
+- **Next action**: On approval, commit the tests and implement step 1
 
 ## Scope and required context
 
