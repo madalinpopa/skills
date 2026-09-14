@@ -1,7 +1,7 @@
 ---
 name: create-api-module
 description: Adds a new feature module to a Go API project created with the create-go-project-layout skill. It scaffolds the module directory with domain, app, REST and Postgres adapters, an OpenAPI spec, a first migration and query, a generated client, and an integration test, then registers the module in the server. Use whenever the user wants to add, create, or scaffold a module, a bounded context, a feature slice, or a new resource with its own table and endpoints in such a project, even if they only say "add users" or "I need a products API". Not for adding a route to an existing module, for auth or other platform components, or for projects with a different layout.
-status: draft
+status: published
 tags: [go, echo, module, scaffold]
 ---
 

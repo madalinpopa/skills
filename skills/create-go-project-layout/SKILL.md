@@ -1,7 +1,7 @@
 ---
 name: create-go-project-layout
 description: Scaffolds a new Go web project from a named layout. It creates the directory tree, placeholder Go packages, tooling (Task, Docker Compose, Dockerfile, golangci-lint, GitHub workflow), a docs folder with the spec and feature templates, and the agent instruction files. Use whenever the user wants to start, bootstrap, scaffold, or set up a new Go backend or web project, asks which layout fits an application (separate API and frontend, modular monolith, modules behind one frontend), or a workflow skill needs a project skeleton before modules are added. Not for adding a module, an auth component, or a frontend to an existing project, and not for projects in other languages.
-status: draft
+status: published
 tags: [go, echo, layout, scaffold]
 ---
 
