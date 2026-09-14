@@ -50,8 +50,8 @@ boundaries add more files than they save.
 │       │   ├── errs/          placeholder: error type and Echo error handler
 │       │   ├── httpserver/    placeholder: Echo constructor and middleware stack
 │       │   ├── logging/       placeholder: slog setup and context helpers
-│       │   └── pgkit/         placeholder: migrations, transactions, test DB
-│       └── testkit/           placeholder: integration environment for module tests
+│       │   └── pgkit/         MigrateDatabaseUp for one module schema
+│       └── testkit/           Postgres container, Env, Wire, Serve for module tests
 └── web/README.md             placeholder for the frontend
 ```
 
@@ -125,7 +125,17 @@ everything and formats the result. Generated files are never edited by hand.
 
 ## Platform packages
 
-These are placeholders in the scaffold. Their intended content:
+Two are real code because every module needs them from its first commit:
+
+- `pgkit.MigrateDatabaseUp` creates the module's schema and applies its
+  embedded `*.up.sql` files with golang-migrate, tracking them in a
+  `schema_migrations` table inside that schema.
+- `testkit` starts a Postgres container with Testcontainers, holds the pool,
+  the Echo instance, and the contracts registry in an `Env`, wires one module
+  through the same five phases as `server.New`, and serves it over `httptest`.
+  `RequireIntegration` skips a test unless `INTEGRATION=true`.
+
+The rest are placeholders. Their intended content:
 
 - `errs`: an `Error` type with an HTTP status, a public slug and message, an
   internal error for logs, and optional details; constructors per status; an
@@ -135,13 +145,8 @@ These are placeholders in the scaffold. Their intended content:
   ID, request log.
 - `logging`: `slog` initialisation and context helpers for a request logger and
   correlation ID.
-- `pgkit`: `MigrateDatabaseUp` for one module schema using golang-migrate over
-  an embedded filesystem, transaction helpers with retry on serialization
-  failure, unique violation detection, and a Testcontainers Postgres helper.
-- `testkit`: an integration `Env` with the pool, the Echo instance, stub
-  contracts, and helpers to wire one module and serve it over `httptest`.
-- `shared`: a `UUID` value type over the standard library `uuid` package
-  (Go 1.27), with text and SQL marshalling; modules wrap it in typed IDs.
+- `shared`: types every module needs that belong to no module. Identifiers
+  use the standard library `uuid` package directly, so this may stay empty.
 
 ## Dependencies
 

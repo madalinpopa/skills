@@ -61,8 +61,10 @@ layouts could fit, ask.
 ## Placeholders
 
 A placeholder package holds one `doc.go` that says what belongs there and which
-kind of skill fills it. Leave these files in place; the next skill replaces
-them. `docs/SPEC.md` starts with a TODO for the same reason.
+kind of skill fills it. Leave these files in place; a component skill replaces
+them. `docs/SPEC.md` starts with a TODO for the same reason. Migrations and
+the integration test environment are real code, because the module skill
+depends on them.
 
 ## Report
 
