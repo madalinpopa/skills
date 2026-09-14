@@ -7,18 +7,20 @@
 
 ## Current checkpoint
 
-- **Status**: awaiting test review
-- **Current step**: Step 1, test review is next
-- **Approved scope**: Layout and piped behavior agreed on 2026-09-14; go-ahead
-  for the step 1 tests given on 2026-09-14 ("Then proceed with the tests")
-- **Working tree**: on top of `lutuzxmm` (plan docs): new
-  `cmd/ls_blocks_test.go`; adapted `cmd/ls_test.go` and `cmd/damaged_test.go`
-- **Last verification**: `go test ./cmd/` fails to build (`block` and
-  `printBlocks` undefined); with the internal test set aside, the three
-  adapted command tests fail on the line shape
-- **Blocker or pending decision**: Developer review of the tests; approval of
-  the `golang.org/x/term` dependency
-- **Next action**: On approval, commit the tests and implement step 1
+- **Status**: awaiting implementation review
+- **Current step**: Step 1, implementation review is next
+- **Approved scope**: Layout and piped behavior agreed on 2026-09-14; tests
+  reviewed and implementation approved on 2026-09-14 ("proceed.")
+- **Working tree**: on top of `vmknzrln` (tests): `cmd/ls.go`,
+  `cmd/render.go`, `docs/SPEC.md`, `go.mod`, `go.sum`, and a one-line fix in
+  `cmd/damaged_test.go` (trim only the trailing newline)
+- **Last verification**: see the evidence table; all commands pass on the
+  working tree described above
+- **Blocker or pending decision**: Developer review of the implementation;
+  where the `damaged_test.go` fix should land (squash into the test commit or
+  keep in the implementation commit)
+- **Next action**: On approval, commit as `feat(ls): print one wrapped block
+  per skill`; developer approval is required
 
 ## Scope and required context
 
@@ -88,7 +90,17 @@
 
 | Step / criterion | Command or inspection | Result and relevant evidence | Tested state |
 | --- | --- | --- | --- |
-| Not run | | | |
+| Step 1 tests | `go test ./cmd/` | 94 passed | `vmknzrln` + implementation |
+| Wrap by width, blanks, empty labels, long word, runes | `TestPrintBlocks` | pass | same |
+| Piped output wraps at 80 | `TestLs_listsPublishedSkills` | pass; `go run . ls --local \| awk` shows lines of at most 80 | same |
+| Installed views and attention | `TestLs_installedScopes`, `TestLs_damagedInstallationsNeedAttention` | pass, exit 3 kept | same |
+| Terminal width | `script -q /dev/null sh -c 'stty cols 60; go run . ls'` | lines of at most 60 | same |
+| `go fix ./...` | | no changes | same |
+| `task format` | | no unformatted files | same |
+| `go test ./...` | | 325 passed in 8 packages | same |
+| `go vet ./...` | | clean | same |
+| `task lint` | | 0 issues after `go mod tidy` | same |
+| `task test:integration` | | not run; no integration boundary touched | |
 
 ## Developer acceptance
 

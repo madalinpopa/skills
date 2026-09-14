@@ -340,13 +340,24 @@ surprise.
 installed in the default agents' directories. Read descriptions from valid
 local `SKILL.md` files without making valid frontmatter a discovery condition.
 
+Each skill is one block: the name and its tags (or its agents for installed
+listings) on the first line, then the full description wrapped below. The
+description wraps to the terminal width, or to 80 columns when stdout is not a
+terminal. A blank line separates blocks.
+
 ```
 $ skills ls
-  go-review        Reviews Go code for correctness and idiom     go, review
-  django-testing   Writes and structures Django tests            python, django
+  go-review   go, review
+      Reviews Go code for correctness and idiom. Use when a change touches Go
+      files and the author wants findings before opening a pull request.
+
+  django-testing   python, django
+      Writes and structures Django tests.
 
 $ skills ls --local
-  go-review        Reviews Go code for correctness and idiom     agents, claude
+  go-review   agents, claude
+      Reviews Go code for correctness and idiom. Use when a change touches Go
+      files and the author wants findings before opening a pull request.
 ```
 
 `install` defaults to the detected repository root and writes a copy for every
@@ -606,8 +617,8 @@ in the output. Unsupported entries need manual resolution even with force.
 
 ## Output
 
-One line per skill, not per file. A skill installed for two agents should not
-print two lines.
+One line per skill, or one block in `ls`, not per file. A skill installed for
+two agents should not print twice.
 
 ```
 $ skills sync

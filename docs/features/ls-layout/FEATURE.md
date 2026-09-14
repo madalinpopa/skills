@@ -73,11 +73,11 @@ $ skills ls --local
 | --- | --- | --- |
 | Layout A: name and tags header, wrapped description below | Full description is the point of `ls`; header keeps name and tags scannable | Developer choice, 2026-09-14 |
 | Piped output uses the same blocks wrapped at 80 columns | One code path and one documented shape | Developer choice, 2026-09-14 |
-| Read the width with `golang.org/x/term` | Small Go-team package, works on POSIX and Windows; `x/sys` is already an indirect dependency | Pending developer approval |
+| Read the width with `golang.org/x/term` | Small Go-team package, works on POSIX and Windows; `x/sys` is already an indirect dependency | Developer approval, 2026-09-14 ("proceed.") |
 | No maximum line width on wide terminals | Simplest rule; can be revisited if long lines read badly | Proposal |
 
 ## Phase roadmap
 
 | Phase | Outcome | Depends on | Status | Phase file |
 | --- | --- | --- | --- | --- |
-| 01 | One wrapped block per skill in every `ls` view | None | planned | [phase-01-wrapped-blocks.md](phase-01-wrapped-blocks.md) |
+| 01 | One wrapped block per skill in every `ls` view | None | awaiting implementation review | [phase-01-wrapped-blocks.md](phase-01-wrapped-blocks.md) |
