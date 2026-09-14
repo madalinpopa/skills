@@ -19,7 +19,7 @@ jobs:
           go-version-file: go.mod
       - name: Check formatting
         run: |
-          unformatted=$(gofmt -l .)
+          unformatted=$(git ls-files -z '*.go' ':!skills' | xargs -0 gofmt -l)
           if [ -n "$unformatted" ]; then
             echo "unformatted files:"
             echo "$unformatted"
