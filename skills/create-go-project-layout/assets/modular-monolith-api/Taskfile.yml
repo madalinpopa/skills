@@ -1,0 +1,134 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+output: prefixed
+
+vars:
+  API_DIR: api
+  WEB_DIR: web
+
+tasks:
+  init:
+    desc: Initialize project (download deps, install web deps)
+    cmds:
+      - task: init:backend
+      - task: init:frontend
+
+  init:backend:
+    desc: Initialize backend
+    dir: '{{ .API_DIR }}'
+    cmd: go mod download
+
+  init:frontend:
+    desc: Initialize frontend
+    dir: '{{ .WEB_DIR }}'
+    cmd: test -f package.json && npm install || echo "web/ has no package.json yet"
+
+  up:
+    desc: Start development services
+    cmd: docker compose -f compose.yaml up {{.CLI_ARGS}}
+
+  down:
+    desc: Stop development services
+    cmd: docker compose -f compose.yaml down {{.CLI_ARGS}}
+
+  tidy:
+    desc: Tidy Go modules
+    dir: '{{.API_DIR}}'
+    cmds:
+      - go mod tidy
+
+  upgrade:
+    desc: Upgrade dependencies
+    dir: '{{.API_DIR}}'
+    cmd: go get -u -t ./...
+
+  gen:
+    desc: Regenerate handlers and queries, then format
+    dir: '{{.API_DIR}}'
+    cmds:
+      - cmd: go generate ./...
+      - task: format
+
+  test:
+    cmds:
+      - task: test:unit
+      - task: test:integration
+
+  test:unit:
+    cmd: go test ./... {{.CLI_ARGS}}
+    dir: '{{.API_DIR}}'
+
+  test:integration:
+    cmd: INTEGRATION=true go test ./... -count=1 {{.CLI_ARGS}}
+    dir: '{{.API_DIR}}'
+
+  lint:
+    cmds:
+      - task: lint:golangci
+      - task: lint:tidy
+
+  lint:golangci:
+    cmd: golangci-lint run ./...
+    dir: '{{.API_DIR}}'
+
+  lint:tidy:
+    desc: Verify go.mod is tidy
+    silent: true
+    dir: '{{.API_DIR}}'
+    cmd: go mod tidy -diff
+
+  security:
+    cmds:
+      - task: security:vuln
+
+  security:vuln:
+    cmd: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+    dir: '{{.API_DIR}}'
+
+  format:
+    cmds:
+      - task: format:fmt
+      - task: format:golangci
+
+  format:fmt:
+    cmd: go fmt ./...
+    dir: '{{.API_DIR}}'
+
+  format:golangci:
+    cmd: golangci-lint fmt ./...
+    dir: '{{.API_DIR}}'
+
+  patch:
+    desc: Create a new patch release tag
+    vars:
+      NEXT: { sh: 'LATEST=$(git tag --list "v[0-9]*.[0-9]*.[0-9]*" --sort=-v:refname | head -n 1); LATEST=${LATEST:-v0.0.0}; M=$(echo "$LATEST" | cut -d. -f1 | tr -d "v"); m=$(echo "$LATEST" | cut -d. -f2); p=$(echo "$LATEST" | cut -d. -f3); echo "v$M.$m.$((p + 1))"' }
+    cmds:
+      - task: _tag
+        vars: { TAG: "{{.NEXT}}" }
+
+  minor:
+    desc: Create a new minor release tag
+    vars:
+      NEXT: { sh: 'LATEST=$(git tag --list "v[0-9]*.[0-9]*.[0-9]*" --sort=-v:refname | head -n 1); LATEST=${LATEST:-v0.0.0}; M=$(echo "$LATEST" | cut -d. -f1 | tr -d "v"); m=$(echo "$LATEST" | cut -d. -f2); echo "v$M.$((m + 1)).0"' }
+    cmds:
+      - task: _tag
+        vars: { TAG: "{{.NEXT}}" }
+
+  major:
+    desc: Create a new major release tag
+    vars:
+      NEXT: { sh: 'LATEST=$(git tag --list "v[0-9]*.[0-9]*.[0-9]*" --sort=-v:refname | head -n 1); LATEST=${LATEST:-v0.0.0}; M=$(echo "$LATEST" | cut -d. -f1 | tr -d "v"); echo "v$((M + 1)).0.0"' }
+    cmds:
+      - task: _tag
+        vars: { TAG: "{{.NEXT}}" }
+
+  _tag:
+    internal: true
+    preconditions:
+      - sh: '! git rev-parse -q --verify "refs/tags/{{.TAG}}" >/dev/null'
+        msg: "Tag {{.TAG}} already exists."
+    cmds:
+      - git tag -a {{.TAG}} -m "Release {{.TAG}}"
+      - git push origin {{.TAG}}
+      - echo "Created and pushed new tag {{.TAG}}"

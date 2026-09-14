@@ -1,0 +1,17 @@
+# Read by scripts/scaffold.sh. Not copied into the project.
+# go_dir: where go mod init runs, relative to the project root.
+# require: libraries to fetch; go mod tidy drops the ones nothing imports yet.
+# tool: code generators added to the go.mod tool block.
+
+go_dir api
+
+require github.com/labstack/echo/v5
+require github.com/jackc/pgx/v5
+require github.com/oapi-codegen/runtime
+require github.com/golang-migrate/migrate/v4
+require github.com/stretchr/testify
+require github.com/testcontainers/testcontainers-go
+require github.com/testcontainers/testcontainers-go/modules/postgres
+
+tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+tool github.com/sqlc-dev/sqlc/cmd/sqlc

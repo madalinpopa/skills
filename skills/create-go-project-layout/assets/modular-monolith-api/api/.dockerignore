@@ -1,0 +1,14 @@
+.git
+.jj
+.env
+.env.*
+.envrc
+.idea
+
+bin/
+tmp/
+
+Dockerfile*
+docker-compose*.yml
+Taskfile.yml
+README.md

@@ -1,0 +1,31 @@
+version: "2"
+
+sql:
+  - engine: postgresql
+    queries: "queries"
+    schema: "migrations"
+    gen:
+      go:
+        package: "models"
+        out: "models"
+        sql_package: "pgx/v5"
+        emit_empty_slices: true
+        emit_pointers_for_null_types: true
+
+        overrides:
+          - db_type: "timestamptz"
+            nullable: true
+            go_type:
+              import: "time"
+              type: "Time"
+              pointer: true
+
+          - db_type: "timestamptz"
+            go_type:
+              import: "time"
+              type: "Time"
+
+          - column: "{{MODULE_NAME}}.{{ENTITIES}}.{{ENTITY}}_uuid"
+            go_type:
+              import: "{{MODULE_PATH}}/internal/modules/{{MODULE_NAME}}/domain"
+              type: "{{ENTITY_PASCAL}}UUID"
