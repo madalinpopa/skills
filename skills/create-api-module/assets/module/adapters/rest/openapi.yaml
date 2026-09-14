@@ -1,0 +1,98 @@
+openapi: 3.0.3
+info:
+  title: {{MODULE_PASCAL}} API
+  version: 0.1.0
+
+paths:
+  /{{MODULE_NAME}}/{{ENTITIES}}:
+    post:
+      summary: Create a {{ENTITY}}
+      operationId: create{{ENTITY_PASCAL}}
+      tags:
+        - {{MODULE_PASCAL}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Create{{ENTITY_PASCAL}}Request'
+      responses:
+        '201':
+          description: {{ENTITY_PASCAL}} created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/{{ENTITY_PASCAL}}Response'
+        '400':
+          description: The request is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /{{MODULE_NAME}}/{{ENTITIES}}/{uuid}:
+    get:
+      summary: Get a {{ENTITY}}
+      operationId: get{{ENTITY_PASCAL}}
+      tags:
+        - {{MODULE_PASCAL}}
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The {{ENTITY}}.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/{{ENTITY_PASCAL}}Response'
+        '404':
+          description: No {{ENTITY}} has this identifier.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Create{{ENTITY_PASCAL}}Request:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 255
+
+    {{ENTITY_PASCAL}}Response:
+      type: object
+      required:
+        - uuid
+        - name
+        - created_at
+        - updated_at
+      properties:
+        uuid:
+          type: string
+        name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - slug
+        - message
+      properties:
+        slug:
+          type: string
+        message:
+          type: string
