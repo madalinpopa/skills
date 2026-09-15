@@ -10,7 +10,7 @@ behavior the user can run.>
 
 ## Steps
 
-- [ ] <Step 1: what changes and where, no implementation details. One commit.>
+- [ ] <Step 1: the behavior a test proves first, then what changes and where, no implementation details. One commit.>
 - [ ] <Step 2>
 - [ ] <Step 3>
 
