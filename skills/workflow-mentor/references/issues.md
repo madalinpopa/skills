@@ -1,67 +1,50 @@
-# Writing issues
+# Choose or write an issue
 
-Read this when drafting a new issue or splitting work that does not fit one.
-The template is in `../assets/issue-template.md`; fill it, do not restate it.
+For a named issue, read its body, acceptance criteria, and relevant discussion
+directly. Reuse an existing feature/phase plan if the project requires one;
+avoid duplicating it in the issue.
 
-## One issue, one thing
+## Choose work
 
-An issue passes when every line below is true. If one fails, rewrite or
-split before creating it.
+Search open issues for the requested outcome. For "what should I work on",
+start with a compact list of numbers, titles, and labels. Inspect only likely
+candidates and check their blockers and current implementation. A limited
+list is not an exhaustive search; expand it before declaring no match.
 
-- It delivers one outcome a user of the project can observe. "Add config
-  loading" passes; "improve configuration" does not.
-- The outcome is testable: name the command, test, or behavior that proves
-  it.
-- It fits in at most five commits, one task per commit. A task that needs
-  several commits is a sub-issue in disguise.
-- It stands alone. It may depend on a finished issue, never on an open one
-  unless the parent links them as sub-issues in order.
-- Tasks say what changes and where, not how. "Add a `Load` function to
-  `internal/config` that reads the TOML file" is a task. A code sketch,
-  field list, or algorithm is implementation and belongs to the user.
+Recommend one issue with a short reason: useful now, unblocked, small enough
+to finish, and appropriate for the user's experience. Show alternatives only
+when a real tradeoff needs a decision. Reuse an explicitly selected issue
+without asking the user to select it again. Do not close stale or apparently
+completed issues as part of discovery.
 
-## Mentor's voice
+## Scope and draft
 
-Write as a senior engineer handing the issue to a colleague who will learn
-from it. Short sentences, plain words, second person. Say why the project
-needs the change before what to change. Name the concept the issue teaches in
-"What you will learn"; if you cannot name one, look for a harder or different
-slice of the work. Do not put questions in the issue body; questions belong
-in the mentoring conversation.
+Use the issue template linked from SKILL.md. Follow project templates and
+planning gates when they take precedence. Define:
 
-## Sizing and splitting
+- One observable outcome, why it matters, and how to verify it.
+- Scope and relevant non-goals; tasks say what changes and where, not the
+  implementation. For bugs, include reproduction and expected/actual behavior.
+- At most five planned commits per implementation issue. Count separate red
+  and green commits when required. Each checkbox represents one reviewable
+  commit outcome; mentoring steps may be smaller.
+- A useful learning objective from this work. Do not increase scope merely
+  to make the lesson harder.
 
-Count commits before writing tasks. Each task should be one self-contained
-commit that reviews in minutes: roughly the size Google calls a small change,
-about a hundred lines and one purpose. Keep a refactor and a behavior change
-in separate tasks, and keep a test with the code it covers unless the
-project splits failing tests and code into separate commits. Write each
-behavior task so it starts from a test: name the behavior the test proves.
+Split larger work into a parent and focused sub-issues. Order dependencies
+explicitly, prefer slices that deliver working behavior, and begin with an
+unblocked sub-issue. An intentionally failing test commit may precede its
+implementation under the project's policy.
 
-When the request needs more than five commits or more than one outcome:
+If the requested outcome is ambiguous, ask for the missing behavior before
+drafting tasks. If new scope appears during mentoring, propose a separate
+issue instead of silently expanding the current one.
 
-1. Create a parent issue with the template. Its outcome is the whole feature;
-   its task list names the sub-issues instead of commits.
-2. Create one sub-issue per outcome with `gh issue create --parent <N>`. Each
-   sub-issue passes the checks above on its own.
-3. Order them so each sub-issue leaves the project working. Prefer vertical
-   slices, one thin path end to end, over layers.
-4. Point the user at the first sub-issue. Work always happens in a sub-issue,
-   never in the parent.
+## Publish
 
-When the request is vague ("make the CLI nicer"), do not guess a feature.
-Ask the user for the one behavior they want first, and write that issue.
-
-## Bugs
-
-A bug issue keeps the same template. "What we build" states expected versus
-actual behavior and the reproduction. The work starts with a failing test
-that reproduces the bug, then the fix makes it pass. Split them into two
-tasks only when the project commits failing tests on their own.
-
-## Sources
-
-- Google, small changes: <https://google.github.io/eng-practices/review/developer/small-cls.html>
-- GitHub, sub-issues: <https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/adding-sub-issues>
-- Wake, INVEST stories and SMART tasks: <https://xp123.com/articles/invest-in-good-stories-and-smart-tasks/>
-- Beams, commit messages: <https://cbea.ms/git-commit/>
+Show the concrete draft and obtain approval if not already authorized. Use
+`use-gh`, a body file, and explicit repository context. Check installed CLI
+support before using sub-issue flags; use supported GitHub APIs when needed.
+Honor project label rules and report created URLs. If a multi-issue operation
+partially succeeds, report the created issues and remaining links; inspect
+existing state before retrying to avoid duplicates.

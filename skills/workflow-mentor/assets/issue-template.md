@@ -10,9 +10,8 @@ behavior the user can run.>
 
 ## Steps
 
-- [ ] <Step 1: the behavior a test proves first, then what changes and where, no implementation details. One commit.>
-- [ ] <Step 2>
-- [ ] <Step 3>
+- [ ] <One reviewable commit outcome: behavior to prove and where, no implementation details. Separate red/green tasks when project policy requires it.>
+- [ ] <Next commit outcome, only if needed; at most five per implementation issue.>
 
 ## What you will learn
 
