@@ -1,137 +1,82 @@
 # Repository skill authoring
 
-Use the [Agent Skills specification](https://agentskills.io/specification) as
-the base format. Resolve `docs/SPEC.md` from the current checkout's root,
-including forks. Read its "Skill metadata" and "Agent differences" sections
-for the CLI contract.
-For optional agent settings, consult the current
-[OpenAI skill documentation](https://learn.chatgpt.com/docs/build-skills#optional-metadata)
-and [Anthropic Claude Code reference](https://code.claude.com/docs/en/skills#frontmatter-reference).
+Read the sections relevant to the change. The current checkout's
+`docs/SPEC.md` is the CLI contract; consult its "Skill metadata" section for
+metadata and transformations, and "Agent differences" for agent integration.
+Use the [Agent Skills specification](https://agentskills.io/specification)
+for the base format. Routine body edits do not require these full references.
 
 ## Contents
 
-- [Folder and scope](#folder-and-scope)
-- [Frontmatter](#frontmatter)
+- [Metadata](#metadata)
+- [Packaging and publication](#packaging-and-publication)
 - [Agent-specific options](#agent-specific-options)
-- [Validate before review](#validate-before-review)
+- [Validation details](#validation-details)
 
-## Folder and scope
+## Metadata
 
-One directory per skill, with one shared `SKILL.md` and only the resources it
-needs:
-
-```
-skills/
-  review-code/
-    SKILL.md                shared by every agent
-    agents/openai.yaml      optional, Codex settings
-    references/             optional, guidance read on demand
-    scripts/                optional, executable helpers
-    assets/                 optional, templates or output resources
-```
-
-All skill resources belong inside `skills/<skill-name>/`. Agent installation
-directories such as `.agents/skills/`, `.claude/skills/`, and home directories
-are destinations for the CLI, not source locations for this library. Keep
-resources self-contained, use relative links, and use regular files and
-directories; source symlinks and a root `.skill-lock.json` are unsupported.
-
-Keep each skill focused on one reusable job with clear inputs and an expected
-result. Inspect existing skills before adding overlapping instructions. Keep
-`SKILL.md` short and below 500 lines; move substantial conditional guidance to
-linked references and say when to read them. Add scripts only for concrete
-automation needs. Avoid empty scaffolding and generic advice the agent already
-knows. Shared instructions must work on both agents; the CLI preserves body
-bytes, so it cannot translate Claude-specific substitutions or commands.
-
-## Frontmatter
-
-Begin `SKILL.md` with YAML frontmatter, followed by the instructions:
-
-```markdown
----
-name: review-code
-description: Reviews code changes for correctness and maintainability. Use when
-  asked to review a diff or pull request and report actionable findings.
-status: draft
-tags: [review, code]
----
-
-# Review code
-
-Read the changed code and its callers. Report actionable findings with file
-locations and observable consequences.
-```
-
-| Field | Authoring rule |
+| Field | Repository rule |
 | --- | --- |
-| `name` | Required; matches the folder and chosen category prefix. |
-| `description` | Required, nonempty, at most 1,024 characters; say what the skill does and when it applies. |
-| `status` | Store field; explicitly use `draft` for new work and `published` when ready. Omission means `published`; other values are invalid. |
-| `tags` | Optional store field; use a short list of strings for useful subjects, for example `[go, review]`. |
-| `license`, `compatibility`, `metadata`, `allowed-tools` | Optional standard fields; include only when needed and follow the base specification's types and limits. Author and version belong in `metadata`. |
-| `x-claude` | Optional store mapping for Claude-specific frontmatter; see below. |
+| `name` | Required, nonempty, matches the immediate skill folder and naming conventions. |
+| `description` | Required, nonempty, at most 1,024 characters; identifies capability and trigger. |
+| `status` | New skills explicitly use `draft`; preserve existing status unless requested. Omission means published; only `draft` and `published` are valid values. |
+| `tags` | Optional list of strings; null and non-string entries are invalid. |
+| `x-claude` | Optional mapping for Claude-only frontmatter; see below. |
+| Standard optional fields | Check `license`, `compatibility`, `metadata`, and `allowed-tools` against the base specification when used. Author/version belong under `metadata`; top-level `allowed-tools` is a space-separated string. |
 
-`status` and `tags` belong at the top level, not under `metadata`. They are CLI
-extensions, not part of the base standard, and are stripped on install. A draft
-is hidden from store listings and cannot be installed. Publishing content needs
-no CLI release: after the published skill reaches the configured store branch,
-`skills sync` makes it available. The CLI reads committed store content, so
-`skills ls` does not validate uncommitted authoring edits.
+Every YAML mapping, including nested mappings, must have unique keys. Unknown
+fields pass through unchanged; this does not establish agent support. Preserve
+supported fields rather than restricting source to a validator's allowlist.
+
+## Packaging and publication
+
+The CLI discovers immediate directories under `skills/`, each containing
+`SKILL.md` and its resources. Do not nest category directories. Keep the body
+below 500 lines, references directly discoverable from it, and a contents
+section in references longer than 100 lines. Avoid agent-specific substitutions
+in shared body text: installation transforms metadata, not instructions.
+
+`status` and `tags` are top-level store extensions stripped on install. Drafts
+are hidden from store listings and cannot be installed. Publication needs
+committed, published content on the configured store branch, followed by
+`skills sync` and install/update in consuming projects; no CLI release is
+needed. `skills ls` does not validate uncommitted authoring edits.
 
 ## Agent-specific options
 
-Keep standard fields at the top level and isolate optional vendor settings:
+Consult current docs only for settings being introduced or changed:
+[OpenAI optional metadata](https://learn.chatgpt.com/docs/build-skills#optional-metadata)
+and [Claude frontmatter](https://code.claude.com/docs/en/skills#frontmatter-reference).
 
-| Agent | Source location | What the CLI writes |
+| Agent | Source | Install behavior |
 | --- | --- | --- |
-| Claude Code | `x-claude` in `SKILL.md` | Lifts its keys to top-level frontmatter for Claude; drops the mapping for other agents. |
-| Codex | `agents/openai.yaml` | Copies the file to shared agent targets; omits it for Claude. There is no `x-codex` transform. |
+| Claude Code | `x-claude` in `SKILL.md` | Lift its fields to top level for Claude; drop the mapping for other agents. |
+| Codex | `agents/openai.yaml` | Copy to shared targets; omit for Claude. No `x-codex` transform. |
 
-For example, a Claude autocomplete hint belongs under `x-claude`:
+`x-claude` requires unique string keys. It cannot contain `name`, `description`,
+`status`, `tags`, or `x-claude`, or collide with top-level fields. Standard
+fields stay at top level. Put Claude-only settings such as `argument-hint`,
+`model`, `context`, or hooks under `x-claude`; follow vendor-supported types.
+Claude-only tool grants may use `x-claude.allowed-tools` when absent at top level.
 
-```yaml
-x-claude:
-  argument-hint: "[file-or-diff]"
-```
+Use Skill Creator's sidecar guidance for Codex `interface`, `policy`, and
+`dependencies.tools`. Preserve automatic discovery unless explicit-only use
+is requested: that mode uses `x-claude.disable-model-invocation: true` for
+Claude and `policy.allow_implicit_invocation: false` in `agents/openai.yaml`
+for Codex. Invocation settings grant no additional action permissions.
 
-Other optional Claude settings include `model`, `context`, `agent`, `hooks`,
-and invocation controls. Use only settings the workflow needs, with values
-checked against the current Claude reference. `x-claude` cannot contain `name`,
-`description`, `status`, `tags`, or another `x-claude`, and cannot duplicate a
-top-level key. All YAML mappings must have unique keys. A top-level
-`allowed-tools` uses the standard space-separated string format; Claude-only
-tool grants can go under `x-claude` instead, without duplicating that key.
+## Validation details
 
-For Codex, optional `agents/openai.yaml` settings cover `interface` display
-metadata, `policy` invocation controls, and `dependencies.tools` MCP
-requirements. Follow the OpenAI documentation and skill-creator's sidecar
-guidance; add only the settings needed for the skill.
+The base validator may reject store-only keys. Validate a temporary shared
+representation with `status`, `tags`, and `x-claude` removed, while checking
+source metadata separately against the CLI contract. Preserve YAML values,
+expand aliases whose anchors are removed, and leave body bytes unchanged.
 
-Keep automatic discovery enabled unless explicit-only invocation is requested.
-For that mode, use `x-claude.disable-model-invocation: true` for Claude and
-`policy.allow_implicit_invocation: false` in `agents/openai.yaml` for Codex.
-These settings control invocation, not authorization for the skill's actions.
+When changing agent settings, also inspect the Claude representation with
+`x-claude` lifted and the shared representation with it dropped; verify the
+sidecar's inclusion/exclusion. Check vendor fields against the affected
+agent's documentation rather than a base validator's field allowlist.
 
-Unknown top-level fields pass through unchanged; this does not mean an agent
-supports them. See the "Field kinds" section of the target repository's
-`docs/SPEC.md` for the full contract.
-
-## Validate before review
-
-Use skill-creator's validation workflow, then check this repository's additional
-metadata and transformation rules. A validator for the base format may reject
-the store-only keys: validate the shared transformed copy in a temporary
-directory without removing those fields from the source. Check Claude extras
-against the Claude reference separately. If a validator lacks a dependency or
-rejects a currently supported standard field, report the limitation and check
-that field against the current specification; do not weaken source metadata
-just to satisfy an outdated validator. The CLI is not a full Agent Skills
-validator, and there is no `skills check` command.
-
-Check the folder/name match, YAML types, relative links, and any agent options.
-Exercise added scripts and try representative prompts, including a nearby task
-that should not select the skill. Review the rendered metadata for both Claude
-and Codex when adding agent settings. Report checks and limitations, leave new
-skills as drafts until ready for publication, and propose a commit message for
-review. Commit or publish only when explicitly requested.
+Report missing validator dependencies or unsupported standard fields; do not
+weaken source metadata to make an outdated validator pass. The CLI is not a
+full Agent Skills validator and has no `skills check` command.

@@ -1,64 +1,58 @@
 ---
 name: create-repo-skill
-description: Creates or updates skills in this repository or its forks using the checkout's naming, metadata, and packaging rules. Use when authoring a skill catalog with this repository's layout and conventions or maintaining its skill authoring guidance; not for generic skill creation elsewhere or Go CLI implementation.
+description: Creates or updates catalog skills and authoring guidance in this repository or its forks, following local naming, metadata, and packaging rules. Not for generic skill creation elsewhere or Go CLI implementation.
 status: published
 tags: [skills, authoring, repository]
 ---
 
 # Create a repository skill
 
-## Start with skill-creator
+## Prepare
 
-Invoke the available `skill-creator` skill first (`$skill-creator` in Codex)
-and read its instructions. Use it for skill design and validation, then apply
-this repository's rules. If it is unavailable, report the missing dependency
-before creating or editing skill files.
+Use the available `skill-creator` first for design and validation; reuse its
+instructions if already loaded for this task. If unavailable, report the
+missing dependency before editing.
 
-Work in the current repository checkout, including forks. Resolve `AGENTS.md`,
-`docs/SPEC.md`, and the destination `skills/` from that checkout's root, not
-from an installed copy of this skill. Identify the authoring context by these
-files and conventions, regardless of the GitHub owner or remote URL. Follow
-the checkout's agent instructions and inspect the current diff before editing.
+Identify the current checkout by `AGENTS.md`, `docs/SPEC.md`, and `skills/`.
+Follow its guidance and inspect the diff. Author in this checkout, including
+forks, rather than the installed skill or configured store. Do not change
+`store.repo` or `store.branch` merely because the checkout is a fork.
 
-The CLI's configured store selects installation content; it does not select
-the checkout where skills are authored. Use the current checkout's rules even
-when this skill was installed from upstream. Do not change `store.repo` or
-`store.branch` merely because the checkout is a fork.
+## Repository essentials
 
-## Choose the outcome and name
+- Put each skill and all its resources in `skills/<skill-name>/`; installation
+  targets such as `.agents/` and `.claude/` are not source directories. Pass
+  the checkout's absolute `skills/` path to Skill Creator's initializer.
+- Start new skills with explicit `status: draft`. Preserve existing status
+  unless a change is requested. Keep `status` and optional `tags` at the top
+  level; they are store fields stripped on install.
+- Keep resources self-contained, use relative links and regular files, and
+  avoid source symlinks or a root `.skill-lock.json`. The CLI preserves body
+  bytes, so shared instructions must work across agents.
+- Apply Skill Creator's guidance without duplicating its manual. Check the
+  catalog for overlap when introducing or expanding a skill's scope.
 
-Inspect existing skills for overlap. Define the requested job, its inputs,
-expected result, and when it should be selected. Keep ordinary skills focused
-on one reusable job.
+## Load details only when needed
 
-Read [references/naming.md](references/naming.md) when choosing or changing a
-name or category. It contains the category legend and the `workflow-*`
-convention for skills that coordinate other skills. For a workflow, define
-component availability, handoffs, and completion before writing its steps.
+| Task | Read |
+| --- | --- |
+| Choose or change a name/category | [Naming conventions](references/naming.md) |
+| Create or update skill coordination | [Workflow skills](references/naming.md#workflow-skills) |
+| Create a skill, change metadata/packaging, or publish | Relevant sections of [authoring rules](references/authoring.md) and the checkout's `docs/SPEC.md` |
+| Change agent settings | [Agent-specific options](references/authoring.md#agent-specific-options) and current docs for the affected agent |
+| Resolve validator incompatibility | [Validation details](references/authoring.md#validation-details) |
 
-## Write the skill
-
-Read [references/authoring.md](references/authoring.md) before creating or
-editing skill files. It covers the base specification, CLI frontmatter,
-Claude and Codex options, packaging, and review checks.
-
-Create `skills/<skill-name>/SKILL.md` and every supporting resource inside that
-folder. When using skill-creator's initializer, pass the target repository's
-absolute `skills/` path as its output directory. Start new skills with explicit
-`status: draft`; preserve an existing skill's status unless a change is requested.
-
-Keep the entrypoint short and load detailed references only when needed. Add
-scripts, assets, or agent settings only for a concrete requirement. These
-instructions extend skill-creator for this repository; do not copy its general
-authoring manual into each skill.
+A wording-only edit needs no supporting reference unless it affects one of
+these areas.
 
 ## Verify and report
 
-Follow the authoring reference's validation checks and exercise any changed
-scripts. Check representative requests against the description, including a
-nearby request that should not trigger the skill. For a workflow, check that
-each handoff supplies what the next skill needs and that a missing dependency
-or failed step stops dependent work.
+Use Skill Creator's validator on a temporary shared copy with `status`, `tags`,
+and `x-claude` removed; retain those fields in source. Check the source's
+folder/name match, YAML types and unique keys, and relative links; run changed
+scripts. Review representative requests, including a nearby non-trigger.
+For workflows, verify handoffs and failure stops; for agent settings, inspect
+both installed representations using the authoring rules.
 
-Report changed files, checks performed, and any limitations. Propose a commit
-message. Leave publication and commits to the user's explicit request.
+Report changes, checks, limitations, and a proposed commit message. Commit or
+publish only when explicitly requested; honor authorization already given.
