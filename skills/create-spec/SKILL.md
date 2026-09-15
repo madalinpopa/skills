@@ -1,6 +1,6 @@
 ---
 name: create-spec
-description: Fills a project's docs/SPEC.md from its docs/templates/SPEC.md by interviewing the user one section at a time, drafting answers from the code and docs already in the repository, and recording decisions, non-goals, and pending questions without inventing requirements. Use whenever a project has docs/templates/SPEC.md and the user wants to write, fill, complete, draft, or resume the spec, asks what the spec still needs, or says the spec has TODOs or placeholders left, even if they only say "let's write the spec" or "help me describe what we are building". Not for feature or phase documents (those use FEATURE.md and PHASE.md), for projects without this template, or for changing the template itself.
+description: Fills a project's docs/SPEC.md from its docs/templates/SPEC.md by interviewing the user one section at a time, drafting answers from the code and docs already in the repository, and recording decisions, non-goals, and pending questions without inventing requirements. Use whenever a project has docs/templates/SPEC.md and the user wants to write, fill, complete, draft, or resume the spec, asks what the spec still needs, or says the spec has TODOs or placeholders left, even if they only say "let's write the spec" or "help me describe what we are building". Creates the missing docs/templates (SPEC.md, FEATURE.md, PHASE.md) from bundled copies when a project has none yet. Not for feature or phase documents (those use FEATURE.md and PHASE.md) or for changing the templates themselves.
 status: published
 tags: [spec, docs, planning]
 ---
@@ -12,10 +12,24 @@ decides what the application does; the agent gathers evidence, asks the
 questions the project cannot answer, writes the section, and shows it for
 review. Work one section at a time and stop for confirmation after each.
 
+## Initialize the templates
+
+Resolve the repository root. When `docs/templates/SPEC.md` is missing, run the
+bundled helper by its absolute installed path; `<skill-dir>` is this skill's
+directory:
+
+```sh
+"<skill-dir>/scripts/init-templates.sh" <repository-root>
+```
+
+It creates `docs/templates/` and copies the bundled `SPEC.md`, `FEATURE.md`,
+and `PHASE.md` from [assets/templates](assets/templates/) for each file that is
+missing. Existing files are kept as they are. Report which files it created
+and remind the user that they are new, uncommitted files.
+
 ## Locate the files
 
-1. Resolve the repository root. Read `docs/templates/SPEC.md` in full. If it
-   is missing, stop and say so; this skill needs the project's template.
+1. Read `docs/templates/SPEC.md` in full.
 2. Open `docs/SPEC.md`:
    - Missing, or only headings and `TODO` markers: copy the template over it.
    - Partly filled from this template: this is a resume. List which sections
