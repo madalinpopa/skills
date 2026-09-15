@@ -6,7 +6,9 @@ what to look at, how to phrase findings, and what "good" means here.
 ## Before writing
 
 1. Read the whole diff for the task, not the files. Note anything outside
-   the task's scope.
+   the task's scope. Read the tests first: they should state the behavior
+   the task asked for. If the user did not report a red run, ask how the
+   test failed before the code existed.
 2. Run the project's own checks, narrowest first: the package tests, then
    format, vet, lint, then the full suite when the task warrants it. Use
    the commands the repository documents, not assumed defaults.
@@ -25,7 +27,8 @@ the problem, and the why. Use the labels from Conventional Comments so the
 weight is clear:
 
 - `issue (blocking)`: wrong behavior, missing error handling, a security
-  gap, a test that does not test the change. The task is not done.
+  gap, a behavior change with no test, a test that does not test the
+  change. The task is not done.
 - `suggestion`: clearer or simpler code that the user should apply now.
 - `nitpick (non-blocking)`: style or naming; note it, do not block.
 - `question`: something you do not understand yet. Ask, do not assume.

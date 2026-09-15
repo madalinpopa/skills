@@ -1,6 +1,6 @@
 ---
 name: workflow-mentor
-description: Runs project work as a guided mentoring loop on GitHub issues. Finds or creates one focused issue of at most five commits, guides the user step by step without handing over the solution, reviews finished work, ticks the issue tasks, and opens the PR. Use whenever the user starts a change or feature, asks what to work on today, or says work on an issue is done. Not for questions or code reading that change nothing.
+description: Runs project work as a guided mentoring loop on GitHub issues. Finds or creates one focused issue of at most five commits, guides the user step by step and test first without handing over the solution, reviews finished work, ticks the issue tasks, and opens the PR. Use whenever the user starts a change or feature, asks what to work on today, or says work on an issue is done. Not for questions or code reading that change nothing.
 compatibility: Requires the gh CLI authenticated for the repository and the use-gh skill. Uses use-skills-cli to install missing skills, use-modern-go for Go changes, and use-jj in jj repositories.
 status: published
 tags: [workflow, mentor, github, issues, learning]
@@ -58,6 +58,23 @@ one task from the issue and ends in one commit. Present it as:
 - **Why:** the reason, tied to the project's patterns and the outcome.
 - **Done when:** what the user can observe before replying.
 
+Work test first. Every step that adds or changes behavior, including a bug
+fix, runs one red, green, refactor cycle:
+
+1. **Red.** The user writes the smallest test that shows the wanted behavior,
+   runs it, and reports the failure. Check that it fails for the right
+   reason: a missing behavior or wrong result, not a typo or a build error.
+   Do not move on until it does.
+2. **Green.** The user writes the least code that makes the test pass, then
+   runs the package tests.
+3. **Refactor.** With tests green, the user cleans names, duplication, and
+   shape without changing behavior, and runs the tests again.
+
+Ask the user to think in behavior first: "What should a caller see?" comes
+before "What should the code do?". Steps with no behavior change, such as
+docs, config, or a pure refactor under existing tests, skip red. If the
+project splits failing tests and code into separate commits, follow that.
+
 Ask before you tell. Open a step with one or two questions the user can
 answer from the code. Move down the hint ladder in
 [Mentoring](references/mentoring.md) as soon as an answer stalls: question,
@@ -71,7 +88,9 @@ for the answer, or the step introduces something new to them.
 
 1. Read the diff without changing it (`git diff` or `jj diff`). Run the
    project's own test and lint commands, narrowest first. For Go files,
-   invoke `use-modern-go` on the changed files.
+   invoke `use-modern-go` on the changed files. Confirm the new tests cover
+   the change and would fail without it; a behavior change with no test is
+   not done.
 2. Reply in three parts using [Reviewing](references/review.md):
    **What is good**, **What to improve** with the why for each item, and a
    **Verdict**: task complete, or one correction step in the format above.

@@ -34,7 +34,9 @@ in the mentoring conversation.
 Count commits before writing tasks. Each task should be one self-contained
 commit that reviews in minutes: roughly the size Google calls a small change,
 about a hundred lines and one purpose. Keep a refactor and a behavior change
-in separate tasks, and keep a test with the code it covers.
+in separate tasks, and keep a test with the code it covers unless the
+project splits failing tests and code into separate commits. Write each
+behavior task so it starts from a test: name the behavior the test proves.
 
 When the request needs more than five commits or more than one outcome:
 
@@ -53,8 +55,9 @@ Ask the user for the one behavior they want first, and write that issue.
 ## Bugs
 
 A bug issue keeps the same template. "What we build" states expected versus
-actual behavior and the reproduction. The first task is a failing test that
-reproduces it; the fix is the second task.
+actual behavior and the reproduction. The work starts with a failing test
+that reproduces the bug, then the fix makes it pass. Split them into two
+tasks only when the project commits failing tests on their own.
 
 ## Sources
 
