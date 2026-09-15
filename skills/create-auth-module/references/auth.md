@@ -2,8 +2,21 @@
 
 The auth module owns user accounts, sessions, and the caller's profile. It is
 a normal module of the layout: its own OpenAPI spec, Postgres schema,
-migrations, and tests, plus one contract for the rest of the API. The script
-writes this tree:
+migrations, and tests, plus one contract for the rest of the API.
+
+## Contents
+
+- [Tree](#tree)
+- [Routes](#routes)
+- [Tokens](#tokens)
+- [Configuration](#configuration)
+- [Registration](#registration)
+- [Consuming the contract](#consuming-the-contract)
+- [Generated code](#generated-code)
+
+## Tree
+
+The script writes this tree:
 
 ```
 api/internal/modules/auth/
@@ -125,10 +138,30 @@ The script makes these edits outside the module and `go build` proves them:
   `Auth Auth` on `Contracts`.
 - `envrc.template` and `compose.yaml`: the `AUTH_*` variables.
 
-The script only edits the stock forms of `config.go` and `contracts.go`. When
-a project already changed them, it stops and names the file; make the edit
-above by hand, then run `go generate ./internal/modules/auth/...`, `go mod
-tidy`, `go build ./...`, and `go vet ./...` from `api/`.
+The script only edits the stock forms of `config.go` and `contracts.go`. Its
+checks for these files run before copying templates or changing the project.
+Editing registration alone cannot recover this refusal: the module does not
+exist yet, and rerunning the script still requires the stock forms.
+
+For a compatible layout with customized registration, follow the project's
+change workflow and integrate manually:
+
+1. Inspect `scripts/scaffold-auth.sh` and the affected project files. Require
+   an absent `api/internal/modules/auth/`; copy `assets/module/` there and
+   replace every `{{MODULE_PATH}}` with the module path from `api/go.mod`.
+   Script and asset paths here are relative to this skill's root. Check for
+   remaining tokens and format the copied Go files.
+2. Merge the registration edits listed above into the existing server config
+   and contracts, preserving other modules, loaders, and imports. Add the
+   environment settings and Compose forwarding while preserving existing
+   values. Format the affected Go files. Do not restore customized files to
+   stock merely to pass the script.
+3. From `api/`, run `go get github.com/golang-jwt/jwt/v5 golang.org/x/crypto`,
+   `go generate ./internal/modules/auth/...`, `go mod tidy`, `go build ./...`,
+   and `go vet ./...`; then run the tests specified in `SKILL.md`.
+
+For a later script failure, inspect completed changes first; this procedure
+must not overwrite a partially created module.
 
 `Contracts.Verify` is left untouched on purpose. `testkit.Env.Wire` runs the
 same phases as the server, so a nil check for `Auth` there would fail every
