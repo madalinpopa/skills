@@ -19,7 +19,7 @@ for the base format. Routine body edits do not require these full references.
 | --- | --- |
 | `name` | Required, nonempty, matches the immediate skill folder and naming conventions. |
 | `description` | Required, nonempty, at most 1,024 characters; identifies capability and trigger. |
-| `status` | New skills explicitly use `draft`; preserve existing status unless requested. Omission means published; only `draft` and `published` are valid values. |
+| `status` | New skills explicitly use `published`; use `draft` when requested and preserve existing status unless changed explicitly. Omission means published; only `draft` and `published` are valid values. |
 | `tags` | Optional list of strings; null and non-string entries are invalid. |
 | `x-claude` | Optional mapping for Claude-only frontmatter; see below. |
 | Standard optional fields | Check `license`, `compatibility`, `metadata`, and `allowed-tools` against the base specification when used. Author/version belong under `metadata`; top-level `allowed-tools` is a space-separated string. |
@@ -59,7 +59,7 @@ fields stay at top level. Put Claude-only settings such as `argument-hint`,
 `model`, `context`, or hooks under `x-claude`; follow vendor-supported types.
 Claude-only tool grants may use `x-claude.allowed-tools` when absent at top level.
 
-Use Skill Creator's sidecar guidance for Codex `interface`, `policy`, and
+Use the local agent-metadata reference for Codex `interface`, `policy`, and
 `dependencies.tools`. Preserve automatic discovery unless explicit-only use
 is requested: that mode uses `x-claude.disable-model-invocation: true` for
 Claude and `policy.allow_implicit_invocation: false` in `agents/openai.yaml`
@@ -67,16 +67,14 @@ for Codex. Invocation settings grant no additional action permissions.
 
 ## Validation details
 
-The base validator may reject store-only keys. Validate a temporary shared
-representation with `status`, `tags`, and `x-claude` removed, while checking
-source metadata separately against the CLI contract. Preserve YAML values,
-expand aliases whose anchors are removed, and leave body bytes unchanged.
+Use the bundled source validator described in `validation.md`; it accepts this
+repository's store fields directly. Keep `status`, `tags`, and `x-claude` in the
+source. When checking transformed representations, drop `status` and `tags`,
+then lift `x-claude` for Claude or drop it for shared targets. Preserve YAML
+values, expand aliases whose anchors are removed, and keep body bytes unchanged.
 
-When changing agent settings, also inspect the Claude representation with
-`x-claude` lifted and the shared representation with it dropped; verify the
-sidecar's inclusion/exclusion. Check vendor fields against the affected
-agent's documentation rather than a base validator's field allowlist.
-
-Report missing validator dependencies or unsupported standard fields; do not
-weaken source metadata to make an outdated validator pass. The CLI is not a
-full Agent Skills validator and has no `skills check` command.
+Inspect both representations and sidecar inclusion when changing agent settings.
+Check vendor fields against current official documentation rather than a small
+base-validator allowlist. Report missing dependencies or unsupported checks;
+do not weaken valid source metadata to satisfy an outdated tool. The Go CLI
+is not a full Agent Skills validator and has no `skills check` command.

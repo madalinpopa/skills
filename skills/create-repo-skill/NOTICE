@@ -1,0 +1,7 @@
+This skill incorporates and reorganizes guidance from OpenAI's bundled
+skill-creator SKILL.md, references/openai_yaml.md, and scripts/quick_validate.py,
+distributed under the
+Apache License 2.0 included in LICENSE. The guidance has been adapted for
+repository-local authoring, published defaults, progressive disclosure, and
+local Bash commands. This notice records source provenance, not a runtime
+skill dependency or generated-work attribution.
