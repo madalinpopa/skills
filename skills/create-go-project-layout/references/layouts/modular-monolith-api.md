@@ -13,6 +13,18 @@ Not a fit: a server-rendered site with HTML templates, a project with several
 deployable services, or a tiny API with a single resource where module
 boundaries add more files than they save.
 
+## Contents
+
+- [Fit](#fit)
+- [Tree](#tree)
+- [How the server boots](#how-the-server-boots)
+- [Module shape](#module-shape)
+- [Generated code](#generated-code)
+- [Platform packages](#platform-packages)
+- [Dependencies](#dependencies)
+- [Tooling and commands](#tooling-and-commands)
+- [Environment](#environment)
+
 ## Tree
 
 ```
