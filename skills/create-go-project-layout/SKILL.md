@@ -1,87 +1,72 @@
 ---
 name: create-go-project-layout
-description: Scaffolds a new Go web project from a named layout. It creates the directory tree, placeholder Go packages, tooling (Task, Docker Compose, Dockerfile, golangci-lint, GitHub workflow), a docs folder with the spec and feature templates, and the agent instruction files. Use whenever the user wants to start, bootstrap, scaffold, or set up a new Go backend or web project, asks which layout fits an application (separate API and frontend, modular monolith, modules behind one frontend), or a workflow skill needs a project skeleton before modules are added. Not for adding a module, an auth component, or a frontend to an existing project, and not for projects in other languages.
+description: Scaffolds a new Go backend or web project from a supported layout, or helps choose a layout before scaffolding. Use when bootstrapping a project or preparing its skeleton for module skills. Not for adding components to existing projects.
 status: published
 tags: [go, echo, layout, scaffold]
 ---
 
 # Create Go project layout
 
-Scaffold a new project from one of the layouts in `references/layouts/`.
-The result is a skeleton: the tree, the tooling, the docs folder, and
-placeholder packages. Modules, auth, and other components are added later by
-their own skills. Do not write them here.
-
-## Inputs
-
-Collect these before running anything. Ask for the ones the request does not
-give.
-
-| Input | Script flag | Example |
-| --- | --- | --- |
-| Layout name | first argument | `modular-monolith-api` |
-| Project name, a short slug | `--name` | `fia` |
-| Go module path | `--module` | `github.com/acme/fia` |
-| Target directory | `--dir`, default `./<name>` | `./fia` |
-| Go version, major and minor | `--go`, default from `go version` | `1.27` |
-
-The target directory must not exist or must be empty. Never scaffold into an
-existing project.
+Create the skeleton with the bundled script. Leave modules, auth, frontend
+implementation, and placeholder packages for later skills.
 
 ## Choose a layout
 
-Every file in `references/layouts/` starts with a short fit summary. Read the
-summaries, pick the layout that matches the application, and say why. When two
-layouts could fit, ask.
+| Layout | Fit | Exclusions |
+| --- | --- | --- |
+| `modular-monolith-api` | One Go API binary with isolated modules, per-module Postgres schemas, and a separate frontend using JSON over HTTP. | Server-rendered sites, independently deployed services, or a tiny single-resource API. |
 
-| Layout | Good fit |
-| --- | --- |
-| [modular-monolith-api](references/layouts/modular-monolith-api.md) | One Go API built from isolated modules, with a separate frontend such as a SPA or a mobile app that talks JSON over HTTP. |
+For layout advice, explain the fit without collecting scaffold inputs or
+creating files. If the requirements do not fit a supported layout, explain
+the mismatch; ask only when missing requirements affect the choice.
+
+For architecture explanations, customization, or troubleshooting, read only
+the relevant sections of the [layout reference](references/layouts/modular-monolith-api.md).
+Routine scaffolding needs no reference or asset-content reads.
 
 ## Scaffold
 
-1. Read the chosen layout reference in full. It explains what every directory
-   is for and which files are placeholders.
-2. Run the script from this skill's directory:
+1. Resolve the inputs from the request and available project context. Ask
+   together for required values that remain unknown; use defaults for omitted
+   optional values.
+
+   | Input | Argument | Default |
+   | --- | --- | --- |
+   | Supported layout | first argument | chosen above |
+   | Lowercase project slug | `--name` | required |
+   | Go module path | `--module` | required |
+   | Target directory | `--dir` | `./<name>` in the user's working directory |
+   | Go major.minor version | `--go` | installed `go version` |
+
+2. Require an absent or empty target directory. From the user's working
+   directory, invoke the script by its absolute installed path; `<skill-dir>`
+   is the directory containing this `SKILL.md`:
 
    ```sh
-   scripts/scaffold.sh <layout> --name <slug> --module <path> --dir <target>
+   "<skill-dir>/scripts/scaffold.sh" <layout> --name <slug> --module <path> --dir <target>
    ```
 
-   It copies `assets/<layout>/`, replaces the placeholder tokens, checks that
-   none is left, then runs `go mod init`, `go get` for the libraries and
-   `go get -tool` for the generators listed in the layout manifest, `go mod
-   tidy`, `go build ./...`, and `go vet ./...`. `--list` prints the layouts.
-   `--skip-deps` copies the files only, for a machine without Go.
-3. Read the script output. If a step fails, report it with its output instead
-   of patching the generated project by hand.
-4. Do not initialise version control, commit, or start containers unless the
-   request asks for it.
+   The script copies assets, replaces and checks tokens, initializes the Go
+   module, downloads manifest libraries and generator tools, then runs
+   `go mod tidy`, `go build ./...`, and `go vet ./...`. Downloads require Go
+   and network access. Tidy may remove unused libraries; generator tools stay.
+   For a requested copy-only or offline scaffold, use `--skip-deps`; module
+   initialization, dependency installation, build, and vet are skipped. Supply
+   `--go <major.minor>` when Go is unavailable. `--list` lists layouts.
+3. Report a failed step with its relevant output; do not patch the generated
+   project by hand. Do not initialize version control, commit, or start
+   containers unless requested.
 
-## Placeholders
-
-A placeholder package holds one `doc.go` that says what belongs there and which
-kind of skill fills it. Leave these files in place; a component skill replaces
-them. `docs/SPEC.md` starts with a TODO for the same reason. Migrations and
-the integration test environment are real code, because the module skill
-depends on them.
+Keep placeholder `doc.go` files and the TODO spec. Module migrations and the
+integration test environment are real infrastructure, not placeholders.
 
 ## Report
 
-List the tree that was created, the commands run with their results, the
-placeholders left for later skills, and the next step, which is usually to
-create the first module.
+Report the destination, layout, verification outcome (including skipped
+checks), and next step, usually the first module. Include a full tree or
+command output only when requested or needed to explain a failure.
 
-## Adding a layout
+## Maintain layouts
 
-Add three things and the script picks the layout up by name:
-
-- `assets/<layout>/` with the project tree and a `.scaffold` manifest. The
-  manifest holds `go_dir`, one `require` line per library, and one `tool` line
-  per generator. The script deletes it from the target after copying.
-- `references/layouts/<layout>.md` that starts with the fit summary and keeps
-  the section order of the existing reference.
-- One row in the table above.
-
-Use only the three placeholder tokens the script knows. A layout that needs
-another token also needs a script change.
+Read [adding a layout](references/adding-a-layout.md) only when extending this
+skill's supported layouts.
