@@ -1,6 +1,6 @@
 ---
 name: workflow-mentor
-description: Runs project work as a guided mentoring loop on GitHub issues. Finds or creates one focused issue of at most five commits, guides the user step by step and test first without handing over the solution, reviews finished work, ticks the issue tasks, and opens the PR. Use whenever the user starts a change or feature, asks what to work on today, or says work on an issue is done. Not for questions or code reading that change nothing.
+description: Runs project work as a guided mentoring loop on GitHub issues. On first run, creates missing AGENTS.md and CLAUDE.md so every session knows the workflow. Finds or creates one focused issue of at most five commits, guides the user step by step and test first without handing over the solution, reviews finished work, ticks the issue tasks, and opens the PR. Use whenever the user starts a change or feature, asks what to work on today, or says work on an issue is done. Not for questions or code reading that change nothing.
 compatibility: Requires the gh CLI authenticated for the repository and the use-gh skill. Uses use-skills-cli to install missing skills, use-modern-go for Go changes, and use-jj in jj repositories.
 status: published
 tags: [workflow, mentor, github, issues, learning]
@@ -27,6 +27,31 @@ Invoke a skill through the agent's own mechanism. If it is unknown, follow
 `use-skills-cli` and try again; do not claim a skill ran when it did not.
 Before the first GitHub call, run `gh auth status`. On failure report it and
 stop the GitHub parts; continue mentoring locally only if the user wants.
+
+## 0. Set up the project
+
+On the first run in a repository, make sure the agent sees this way of
+working in every session. From the repository root, run:
+
+```sh
+"<skill-dir>/scripts/init-agent-docs.sh" <repository-root>
+```
+
+It copies [AGENTS.md](assets/AGENTS.md) and [CLAUDE.md](assets/CLAUDE.md)
+for each file that is missing and keeps existing files as they are.
+
+- **AGENTS.md created:** fill every `<placeholder>` from the repository:
+  the project's purpose, and build, test, format, and lint commands from its
+  README, task runner, or build files. Ask the user only for what the
+  repository cannot answer. Delete lines that do not apply. Show the result.
+- **AGENTS.md kept:** if it does not mention `workflow-mentor`, show the
+  "How we work", "Skills", and "Limits" sections from the template and add
+  them only if the user agrees.
+- **Warning that CLAUDE.md does not import `@AGENTS.md`:** propose adding the
+  line; do not rewrite the file.
+
+Report which files were created or changed and that they are uncommitted.
+Skip this step once both files exist and AGENTS.md mentions the workflow.
 
 ## 1. Find or create the issue
 
