@@ -1,9 +1,7 @@
 # Git interoperation
 
-Most jj repositories back onto Git. Colocated repositories keep `.jj` and
-`.git` side by side so Git tools still work. This file covers how the two
-stay in sync, bookmarks versus branches, fetch and push, pull-request flows,
-and the Git command table.
+Read the section matching the operation. Git-worded requests in a jj workspace
+still use jj mutations; they do not require reading this entire reference.
 
 ## Contents
 
@@ -24,12 +22,12 @@ Check with `jj git colocation status`. In a colocated repository:
   branches afterwards. `git branch` and `jj bookmark list` agree.
 - Git's HEAD is kept detached at `@-`, the parent of the working copy. Git
   sees the working-copy change as uncommitted edits. This is expected.
-- Bookmarks with no Git counterpart yet appear as `name@git` after export.
+- A `name@git` entry can expose disagreement between Git and jj bookmark state.
 - Use `git` for read-only work: `git log`, `git show`, `git blame`, `git
   diff`. Mutating Git commands (`commit`, `checkout`, `rebase`, `reset`,
-  `stash`) confuse the mapping and can create divergent changes. If one was
-  run, `jj undo` or `jj op restore` recovers the jj view; `jj git import`
-  pulls in refs Git changed.
+  `stash`) can create divergent changes. If one was run, inspect status and
+  the operation log, including any `import git refs` operation, before choosing
+  recovery. Do not blindly undo the latest operation or discard later work.
 - Git tools cannot read jj conflict markers as merged content, so resolve
   conflicts through jj before using Git tooling on those files.
 
@@ -107,8 +105,10 @@ Defaults: without flags, push sends tracked bookmarks in
 `origin`. Pushing a new bookmark starts tracking it. A push never moves
 bookmarks; move them first.
 
-Always confirm the user wants a push. Show `--dry-run` output when the push
-would create, move, or delete a remote bookmark that the user did not name.
+Require authorization for the push within the task; reuse approval already
+given. Preview the same explicit bookmark and remote with `--dry-run`, inspect
+the result, then push that scope. Avoid broad flags unless the requested scope
+includes every affected reference; report unexpected changes before proceeding.
 
 ## Pull-request flows
 
@@ -207,7 +207,7 @@ bookmark on `upstream` if present, otherwise `origin`.
 | `git rebase --onto B A^ tip` | `jj rebase -s A -o B` |
 | `git rebase -i` (reorder) | `jj rebase -r C --before B` or `jj arrange` |
 | `git rebase -i` (edit) | `jj diffedit -r X`, `jj split -r X` |
-| `git rebase --continue` | edit the file, then `jj squash` |
+| `git rebase --continue` | Resolve stored conflicts in the affected revision; squash only when resolving in a separate child |
 | `git cherry-pick X` | `jj duplicate X -o @` |
 | `git revert X` | `jj revert -r X -B @` |
 | `git rev-parse --show-toplevel` | `jj root` |

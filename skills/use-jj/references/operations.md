@@ -1,9 +1,9 @@
 # Operations, undo, and recovery
 
-Every jj command that changes the repository records an operation: bookmark
-targets, heads, working-copy commits, and Git refs at that moment. The log is
-append-only, so any earlier state can be viewed or restored. Hidden commits
-are never deleted until `jj util gc` runs.
+Read only the recovery or workspace section needed. Operations record local
+repository state; retained history can restore earlier views. Garbage collection
+and operation pruning can limit recovery. Local undo does not reverse a push
+or other external side effects.
 
 ## Contents
 
@@ -51,9 +51,11 @@ jj op revert <op>                       # cancel only that operation, keep later
 jj op restore <op> --what remote-tracking   # only remote bookmark state
 ```
 
-Prefer `op restore` when several commands went wrong; prefer `op revert` when
-one middle operation was the mistake. Both are safe to try because the
-restore itself can be undone.
+Inspect `jj op show <op>` or `jj op diff` before choosing recovery. `op revert`
+targets one operation while preserving later operations where possible;
+`op restore` rewinds the broader repository view. Preserve subsequent user work
+and verify the resulting graph/conflicts. Do not experiment with whole-repository
+restore merely because it may be undoable.
 
 ## View the past without changing it
 
@@ -64,7 +66,8 @@ jj diff --at-op <op> -r <x>
 jj log -r 'at_operation(<op>, @)'       # the working copy as of that op
 ```
 
-`--at-op` disables snapshotting for that command, so it never alters the log.
+For these read-only commands, `--at-op` disables snapshotting. It is not a
+read-only guard: a mutating command with `--at-op` can still create operations.
 
 ## Recover a hidden or abandoned commit
 

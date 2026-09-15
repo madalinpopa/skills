@@ -1,8 +1,9 @@
 # Workflows
 
-Step-by-step use cases. Every step uses `-m` or paths so no editor opens.
-Replace `<x>` placeholders with change IDs from `jj log`. After any rewrite,
-run `jj log` and confirm the graph matches the plan.
+Read only the requested recipe. Examples are alternatives where indicated,
+not a checklist to run in full. Replace placeholders with inspected revisions;
+retain existing authorization and verify the affected graph after each logical
+change. Use `-m` for descriptions and `-u` to retain a squash destination message.
 
 ## Contents
 
@@ -27,16 +28,13 @@ run `jj log` and confirm the graph matches the plan.
 ## Orient in an unfamiliar repository
 
 ```sh
-jj root
 jj st
-jj log                                  # default: local work plus trunk
-jj log -r 'trunk()..@'                  # the stack under the working copy
-jj bookmark list --all-remotes
-jj op log -n 5
+jj log -n 10                            # bounded initial context
 ```
 
-Read the output before changing anything. Note whether `@` is empty, whether
-it has a description, and which bookmark is nearest.
+Reuse known workspace context. Read the relevant diff before selecting changes.
+Expand to the stack, remote bookmarks, or operation log only when the task
+needs them; ordinary inspection does not require all three.
 
 ## Start a new change
 
@@ -60,14 +58,15 @@ down. This keeps the described commit clean while you experiment.
 ```sh
 jj new -m "wip"                         # scratch change on top
 # edit
-jj squash                               # everything into the parent
-jj squash internal/config               # only these paths into the parent
-jj squash --into <x>                    # into a specific ancestor
+jj squash -u                            # everything into the parent
+# Or select paths / a destination:
+jj squash -u internal/config            # only these paths into the parent
+jj squash -u --into <x>                  # into a specific ancestor
 ```
 
-`jj squash` keeps the parent's description unless you pass `-m`. Use
-`-u/--use-destination-message` to silence the message prompt when both sides
-have descriptions.
+`-u/--use-destination-message` keeps the destination's description and discards
+source descriptions. Use `-m "combined message"` when both messages matter;
+plain squash can open an editor when both sides have descriptions.
 
 ## Edit workflow: change an existing commit
 
@@ -101,7 +100,7 @@ Option A, targeted squash:
 
 ```sh
 # make the fix in @
-jj squash --into <x> path/to/file       # only that file moves down
+jj squash -u --into <x> path/to/file    # only that file moves down
 ```
 
 Option B, absorb everything automatically:
@@ -131,7 +130,7 @@ three or more pieces.
 ## Combine or reorder changes
 
 ```sh
-jj squash --from <b> --into <a>         # merge b into a, keep a's message
+jj squash -u --from <b> --into <a>      # merge b into a, keep a's message
 jj squash --from <b> --into <a> -m "combined message"
 jj rebase -r <c> -B <b>                 # move c before b
 jj rebase -r <c> -A <a>                 # move c right after a
@@ -151,8 +150,9 @@ jj log -r 'conflicts()'                 # resolve any, see conflicts.md
 ```
 
 `-b` finds the fork point with the destination and moves everything after it.
-`-s` moves a chosen root and its descendants. Immutable commits are skipped
-by definition because they are already on trunk.
+`-s` moves a chosen root and its descendants. Inspect the selection first;
+immutable revisions are not necessarily limited to trunk. Stop on an immutable
+error and revise the selection within scope instead of bypassing the check.
 
 ## Set aside work and come back
 
@@ -197,8 +197,10 @@ jj log -r 'conflicts()'
 ```
 
 A clean merge shows as `(empty)` because its content equals the auto-merge of
-its parents. To undo a merge, create a new change and restore from the first
-parent: `jj new <merge>` then `jj restore --from '<merge>-'`.
+its parents. To undo a merge's content, create a new change and restore from
+the explicitly selected parent: `jj new <merge>` then
+`jj restore --from <chosen-parent>`. `<merge>-` selects all parents and is
+ambiguous for a command requiring one revision.
 
 ## Review someone else's change
 
@@ -229,7 +231,7 @@ jj log -r 'trunk()..@' -T builtin_log_compact
 jj log -r '(trunk()..@) & empty()'      # empty changes to abandon
 jj log -r '(trunk()..@) & description(exact:"")'   # missing messages
 jj describe <x> -m "..."                # fix messages
-jj squash --from <fixup> --into <target>
+jj squash -u --from <fixup> --into <target>
 jj simplify-parents -r 'trunk()..@'     # drop redundant merge edges
 jj fix -s 'trunk()..@'                  # run configured formatters, if any
 ```

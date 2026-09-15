@@ -1,8 +1,8 @@
 # jj command reference
 
-Grouped by purpose. Flags listed are the ones that change behavior in normal
-work. Run `jj help <command>` for the full text. Every command accepts the
-global options at the end of this file.
+Read only the section needed for the task. Use `jj <command> -h` for installed
+flags and `--help` for detail; examples here are a lookup aid, not a required
+read or an exhaustive CLI contract. Global options are listed at the end.
 
 ## Contents
 
