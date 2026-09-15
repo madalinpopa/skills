@@ -70,7 +70,7 @@ the task, then use the installed skill:
 4. After success, invoke `create-repo-skill` (`$create-repo-skill` in Codex,
    `/create-repo-skill` in Claude). If it is not yet discoverable in the current
    session, read and follow the installed `SKILL.md` at the configured target.
-   It requires `skill-creator` first and supplies the authoring rules. Do not
+   It supplies self-contained authoring rules and local helpers. Do not
    repeat this setup when the skill refers back to this file in the same task.
 
 The CLI installs published, committed store content. If the skill is absent
