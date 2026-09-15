@@ -2,8 +2,21 @@
 
 A module is a feature slice that owns its HTTP contract, its Postgres schema,
 its migrations, and its tests. Other modules reach it only through the
-contracts registry. The script writes this tree for module `brand` with
-entity `profile`:
+contracts registry.
+
+## Contents
+
+- [Tree](#tree)
+- [Lifecycle](#lifecycle)
+- [Registration](#registration)
+- [Dependency rules](#dependency-rules)
+- [Generated code](#generated-code)
+- [Tests](#tests)
+- [Publishing a contract](#publishing-a-contract)
+
+## Tree
+
+The script writes this tree for module `brand` with entity `profile`:
 
 ```
 api/internal/modules/brand/
