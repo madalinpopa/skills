@@ -1,7 +1,7 @@
 ---
 name: workflow-mentor
 description: Mentors user-written project changes through GitHub issues, one verified, test-first step at a time. Use for step-by-step guidance, choosing the next issue, or reviewing progress in an active mentoring workflow. Also applies when project instructions select this workflow. Not for autonomous implementation or standalone code questions.
-compatibility: GitHub work requires authenticated gh and use-gh. Go guidance uses modern-go-guidelines:use-modern-go; jj repositories use use-jj. Missing skills use use-skills-cli. Bundled helpers require Bash and standard Unix tools.
+compatibility: Missing project instructions require create-agents-setup. GitHub work requires authenticated gh and use-gh. Go guidance uses modern-go-guidelines:use-modern-go; jj repositories use use-jj. Missing skills use use-skills-cli. Bundled helpers require Bash and standard Unix tools.
 status: published
 tags: [workflow, mentor, github, issues, learning]
 ---
@@ -39,7 +39,7 @@ helpers from the user's repository, not from the skill directory.
 
 | Situation | Read or use |
 | --- | --- |
-| First run; project instructions are missing or do not select this workflow | [Project setup](references/setup.md); copy [AGENTS.md](assets/AGENTS.md) and [CLAUDE.md](assets/CLAUDE.md) with the helper |
+| Either root AGENTS.md or CLAUDE.md is missing, or adopting this workflow | [Project setup](references/setup.md); use `create-agents-setup` for missing files before guiding changes |
 | No selected issue; choosing, drafting, or splitting work | [Issues](references/issues.md); use [issue template](assets/issue-template.md) for a new issue |
 | Stalled attempt, misconception, or unfamiliar concept | [Mentoring](references/mentoring.md) |
 | User reports a step done or requests verification | [Review](references/review.md) |
@@ -61,20 +61,13 @@ stalled attempt, give a concrete pointer; increase help with frustration.
 Wait for the user's attempt before advancing. Adjust explanation to what
 they have demonstrated, without making routine steps into quizzes.
 
-For a behavior change, including a bug fix:
-
-1. **Red:** have the user write the smallest useful behavior test. Verify its
-   failure demonstrates the missing behavior; distinguish an expected missing
-   API from unrelated build, setup, or environment failures. Stop at any
-   required test-review gate before implementation.
-2. **Green:** after red is verified and required approval is present, guide
-   the smallest implementation, then run the relevant tests.
-3. **Refactor:** suggest cleanup only when needed; verify behavior stays green.
-
-Docs and changes without observable behavior may use existing checks instead
-of a new failing test. Classify by effect, not file type: configuration can
-change behavior. Respect separate test and implementation commits where the
-project requires them; propose messages without making commits.
+Follow the project's TDD document for behavior changes and review gates. If
+none exists, use red / green / refactor: verify a minimal test fails for the
+missing behavior, guide implementation after required approval, then verify
+tests and any necessary cleanup. Separate behavior failures from environment
+errors. Changes without observable behavior may use existing checks; classify
+by effect, not file type. Follow project commit boundaries and propose messages
+without committing. Project rules own the detailed procedure.
 
 ## Keep progress accurate
 
@@ -86,7 +79,8 @@ authorization remains valid. This skill alone grants no permission to publish,
 commit, push, merge, close issues, or change labels.
 
 At review boundaries or session end, keep a compact checkpoint in the existing
-project record, or the response if none exists: repository and issue, task,
+project record (`docs/feature.md` or the project's feature overview and active
+phase), or the response if none exists: repository and issue, task,
 red/green/review state, checks and results, decisions, blockers, exact next
 action. Do not create a parallel progress document. Report failures and
 partial writes honestly; pause only the work that depends on them.

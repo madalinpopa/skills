@@ -1,27 +1,19 @@
 # Set up project instructions
 
-Use this only on first adoption or when project instructions are missing.
-Skip it during ordinary questions and reviews. Read existing instructions
-before proposing changes; they take precedence over this skill's defaults.
+Inspect root `AGENTS.md` and `CLAUDE.md` once when orienting. If either is
+missing, use `create-agents-setup`. It owns instruction templates, conventions,
+existing-file handling, and verification. Resolve a missing setup skill with
+`use-skills-cli`, then invoke it or read its installed `SKILL.md` and follow it.
+Do not keep a second setup template or copy files from another checkout.
 
-Inspect `AGENTS.md` and `CLAUDE.md` at the repository root. Stop setup on a
-symlink or non-regular target rather than copying through it. If either file
-is absent, use the bundled helper:
+If the dependency cannot be resolved, report the exact blocker. Continue direct
+answers and independent read-only mentoring; pause changes requiring setup.
+Setup does not authorize implementation or publication. After success, read
+the resulting instructions and resume the same issue and checkpoint.
 
-```sh
-"<skill-dir>/scripts/init-agent-docs.sh" <repository-root>
-```
-
-The helper copies missing templates and keeps existing files. Fill created
-AGENTS.md placeholders from the repository: purpose, applicable spec, and
-build/test/format/lint commands. Remove inapplicable lines; ask only for
-essential information the repository cannot supply. Show the completed files.
-
-If AGENTS.md exists without this workflow, propose a compact mentoring trigger
-and any needed project-specific limits. Add it only within the user's
-authorization; do not append the whole template or replace project rules.
-If CLAUDE.md does not import `@AGENTS.md`, propose that line without rewriting
-the file. Skip once both files are present and the workflow is configured.
-
-Report created, kept, or edited paths and their uncommitted state. On failure,
-inspect both paths and report partial creation; the helper is not transactional.
+If both files exist, preserve their rules. Empty files or an absent CLAUDE
+import need targeted repair through `create-agents-setup` within authorized
+setup scope. Do not reinitialize files during ordinary questions or reviews.
+If instructions do not select mentoring, follow the user's current mentoring
+request; propose a compact persistent trigger only when adopting the workflow.
+Surface conflicting instructions instead of silently replacing them.
