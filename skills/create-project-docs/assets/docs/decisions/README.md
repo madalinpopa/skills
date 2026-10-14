@@ -12,32 +12,35 @@ feature's requirements.md, indexed by [FEATURES.md](../specs/FEATURES.md).
 
 ## Record template
 
-Copy this template into the numbered file and replace pending fields:
+Copy this section-only template into the numbered file, give it the actual
+number and title, and add only established facts and agreed decisions. Leave
+unknown sections empty. For requested spec work, use the question tool with
+proposed options, following [AGENTS.md](../../AGENTS.md).
 
 ```markdown
-# Decision NNNN: Pending title
+# Decision
 
-- Status: proposed
-- Date: Pending
-- Decision reference: Pending: user approval or source of the agreed decision.
-- Related work: Pending: relevant feature and spec links.
+## Status
+
+## Date
+
+## Decision reference
+
+## Related work
 
 ## Context
 
-Pending: problem, constraints, and why a decision is necessary.
-
 ## Options considered
-
-Pending: realistic alternatives and their tradeoffs.
 
 ## Decision
 
-Pending: selected option and reason; do not imply approval before it exists.
-
 ## Consequences
-
-Pending: benefits, costs, limitations, and follow-up obligations.
 ```
+
+Record the problem and constraints in Context, realistic alternatives and
+tradeoffs in Options considered, the selected option and rationale in Decision,
+and benefits, costs, limits, and follow-up work in Consequences. Include the
+actual user approval or source in Decision reference; never imply agreement.
 
 Statuses: proposed, accepted, rejected, superseded. To replace an accepted
 decision, create a new record and link both directions; retain the old rationale.

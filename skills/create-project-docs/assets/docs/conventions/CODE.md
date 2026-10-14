@@ -40,4 +40,4 @@ framework and commands in [STACK.md](../specs/STACK.md); no framework is assumed
 - Use semantic controls, labels, and keyboard interactions; test behavior through
   user-visible outcomes rather than component internals.
 
-Pending: record project-specific boundaries and conventions when known.
+## Project-specific boundaries and conventions

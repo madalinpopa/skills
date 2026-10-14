@@ -9,7 +9,9 @@ tags: [setup, docs, conventions, go, typescript]
 # Create project docs
 
 Copy a documentation foundation into a project, then fill in what the user and
-the repository already make clear. Leave the rest as `Pending:`.
+the repository already make clear. Leave unknown sections empty: no placeholder
+text, filler questions, example entries, or empty checklist items. Specs grow
+progressively as the user works with the agent.
 
 ## Inspect and initialize
 
@@ -58,50 +60,83 @@ after the user approves that exact edit. Keep Claude-only additions.
 | [GOLANG.md](assets/docs/conventions/GOLANG.md) | Go conventions, toolchain, and `go fix` |
 | [TDD.md](assets/docs/conventions/TDD.md) | Test-first workflow, review loop, and verification |
 | [MISSION.md](assets/docs/specs/MISSION.md) | Problem, users, outcome, and non-goals |
-| [FEATURES.md](assets/docs/specs/FEATURES.md) | Feature index; each feature's `NNNN` number is its only ID |
-| [ROADMAP.md](assets/docs/specs/ROADMAP.md) | Delivery order and the only record of feature status |
+| [FEATURES.md](assets/docs/specs/FEATURES.md) | Feature catalog: intended outcomes and links to behavior requirements; no tasks or progress |
+| [ROADMAP.md](assets/docs/specs/ROADMAP.md) | Features and sub-features grouped with task checklists; no other content |
 | [STACK.md](assets/docs/specs/STACK.md) | Technologies, supported versions, and project commands |
 | [Decision guide](assets/docs/decisions/README.md) | Numbered decision records and their template |
 | [Feature guide](assets/docs/features/README.md) | Numbered feature folders and their three templates |
 
 Setup is done when:
 
-- AGENTS.md states the project's purpose, or keeps it `Pending:`.
+- AGENTS.md states the project's purpose when known; otherwise its Project
+  section stays empty.
 - When `.jj` exists at the repository root, newly created AGENTS.md records that
   the project uses jj-vcs and requires the `use-jj` skill for version-control
   work. Existing instruction files still require approval before editing.
-- STACK.md lists the languages and the real commands and working directories
-  found in manifests and scripts; missing ones stay `Pending`.
+- STACK.md records only technologies, versions, commands, and working directories
+  supported by manifests, scripts, or user decisions. Unknown sections stay empty.
 - Go or TypeScript/frontend guidance that does not apply is marked not
   applicable, and frontend rules are removed from Go-only projects.
-- Every other unknown stays `Pending:`. Fill MISSION, FEATURES, and ROADMAP
-  only with facts the user already gave.
+- Spec documents retain their section structure without text in unknown sections.
+  Apply the same rule to feature and decision templates. Keep writing guidance
+  in this skill, AGENTS.md, and the feature/decision guides, outside copyable
+  templates.
+- FEATURES.md describes identified feature outcomes and links to requirements;
+  it does not repeat roadmap tasks or track progress. Assign each real feature
+  the next unused four-digit number, `NNNN`, as its only ID. Preserve IDs.
+- ROADMAP.md contains only feature headings, nested sub-feature headings, and
+  task/subtask checklists, with concise links to plans or evidence when useful.
+  Do not add status tables, narrative, acceptance criteria, dependency notes,
+  or workflow instructions. Those belong in feature records or guides.
+- Read README, prototype files, existing docs, and earlier user answers for clear
+  features and tasks. Record only work those sources support; a prototype is
+  evidence of possible scope, not proof of agreed requirements or completion.
+  If no feature or task is clear, leave the corresponding section empty and
+  ROADMAP.md with only its title. Do not create example decisions or features.
 
-Use repository evidence and earlier answers first. Ask at most one short round
-of questions, and only for what the repository cannot show, with the
-ask-user-question tool or in chat. Go and TypeScript are likely choices, not
-defaults: confirm them, and never pick a framework, storage, architecture,
-version, dependency, or deployment just to fill a field. Check current official
-docs only for technologies being recorded, and put links and versions in
-STACK.md. Do not create example decisions or features.
+Use repository evidence and earlier answers first. Initialization does not need
+an interview to fill every section. Never choose a language, framework, storage,
+architecture, version, dependency, or deployment just to fill a field. Check
+current official docs only for technologies being recorded; put verified
+versions, official links, and verification dates in STACK.md. Compare selected
+and latest released versions without upgrading dependencies automatically.
+Record exact commands and working directories only when found; discovering a
+command does not mean it was run. Document configuration names, never secrets.
+
+## Fill specs progressively
+
+Whenever the user asks to fill, refine, or work on specs or a specific section,
+always use the available ask-user-question tool with concrete proposed options
+to guide the work. This also applies when such work is requested during setup.
+Read the relevant docs and repository evidence first, then ask a small, focused
+round about the requested section. Base options on that evidence, explain
+meaningful tradeoffs, and allow the user to supply another answer. Do not ask
+again for decisions already made or turn one section into a whole-project
+interview. Wait for answers before writing content that depends on them; keep
+unanswered sections empty. If no question tool is available, report that limit
+and ask equivalent option-based questions in chat.
+
+Update only the requested scope with established facts and the user's answers.
+Keep existing agreed content and document ownership. Capture actual unresolved
+questions only when raised in the work; do not seed lists of generic questions.
 
 When tailoring, keep these template rules, adapted only to existing project
 policy:
 
-- Ask only the minimum questions; record other unknowns as pending.
+- Leave unknowns empty and use guided question rounds for requested spec work.
 - Dependency changes need user approval; always check the latest release.
 - The TDD workflow: failing test, implementation, then a review by a different
   agent repeated until clean, and one user review that approves the commit.
   This describes a reviewer role; it does not install agents or tools.
 - Prefer integration coverage for behavior; add small unit tests only for distinct
   implementation gaps, without duplicating scenarios across layers.
-- Roadmaps and plans use task and subtask checklists with short descriptions.
-  Mark completed items `[x]` with evidence; keep pending or blocked items `[ ]`.
-  Feature plans group detailed tasks into related phases of one to five planned
-  commits each, with concrete subtasks and proposed commit messages. Roadmap
-  feature acceptance and plan task completion have separate owners. Split roadmap
-  features into small, independently verifiable slices with scope, dependencies,
-  acceptance criteria, and links to plan tasks and evidence.
+- Roadmaps group features and sub-features with concise task/subtask checklists.
+  Keep detailed behavior, acceptance criteria, dependencies, and execution
+  evidence in feature records; link rather than duplicate. Mark tasks `[x]`
+  only with evidence, leaving unfinished tasks `[ ]`. Completed tasks alone
+  do not imply user acceptance. Feature plans group detailed tasks into related
+  phases of one to five planned commits each, with concrete subtasks and
+  proposed commit messages. Add only phases and tasks supported by agreed work.
 - Specs use clear sections and concise bullets, linking shared facts to their
   owner. Use tables only for compact comparisons or mappings, never long prose.
 - The reply format with **User must be aware**.
@@ -118,16 +153,17 @@ request. This skill does not require either.
 
 Check `.jj` detection and the `use-jj` route when applicable. Check relative
 links, task routes, the CLAUDE import, that commands are real,
-that each topic has one owner, and that unknowns are marked pending. Check
+that each topic has one owner, and that unknown sections are empty. Check
 that plans and roadmaps use checklists, feature phases contain detailed tasks
-and one to five planned commits, roadmap features have small reviewable slices,
-completion claims have evidence, spec text uses
-sections and bullets, and test guidance avoids duplicate coverage.
+and one to five planned commits when agreed, roadmaps contain only feature and
+sub-feature groups with task checklists, completion claims have evidence, spec
+text uses sections and bullets, and test guidance avoids duplicate coverage.
 Confirm existing files kept their bytes. Copied templates are not agreed requirements,
 and copying docs does not mean any application tests passed.
 
 Report in short `-` bullets, without full logs. Add **User must be aware** with
-real limits, partial writes, and open questions, or "None". Record open items
-in the relevant docs and ask the user to review them. Propose a commit message,
+real limits, partial writes, and open questions, or "None". Report actual unresolved
+items without filling empty sections with placeholder text, and ask the user to
+review the changes. Propose a commit message,
 and leave changes uncommitted unless the user asks for a commit. Publishing
 this skill does not authorize committing, pushing, or publishing the project.

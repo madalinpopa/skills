@@ -43,4 +43,4 @@ affected tests. Do not raise the module's Go version just to apply newer syntax.
 Available fixes depend on the toolchain; consult [official go fix documentation](https://pkg.go.dev/cmd/go#hdr-Apply_fixes_suggested_by_static_checkers)
 and `go help fix` when selecting flags or a narrower scope.
 
-Pending: record project-specific package boundaries and test conventions.
+## Project-specific package boundaries and test conventions
