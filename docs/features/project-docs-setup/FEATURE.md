@@ -1,0 +1,62 @@
+# Feature: Project documentation setup
+
+Initialize a new project's agent instructions and documentation foundation.
+The primary audience builds Go backends with TypeScript frontends; frontend
+frameworks and product requirements remain project choices.
+
+- **Active phase**: [01: Initializer skill](phase-01-initializer-skill.md)
+- **Feature acceptance**: Accepted for commit: "do a commit for the current changes", 2026-10-14.
+
+## Using these documents
+
+Read repository instructions, this overview, and the active phase on resume.
+`docs/SPEC.md` owns this repository's CLI behavior and skill packaging contract.
+This feature adds catalog content, without changing the CLI. Generated project
+documents describe the target project, not this skill store.
+
+## Scope
+
+- **Included**: A new `skills/create-project-docs/` skill, bundled Markdown
+  templates, and a Bash helper that copies missing project documents.
+- **Non-goals**: Application scaffolding, dependency installation, choosing a
+  frontend framework, writing an invented product spec, or publishing changes.
+- **Constraints**: Keep generated `AGENTS.md` concise. `CLAUDE.md` imports
+  `AGENTS.md`. Preserve existing files and project conventions on rerun.
+- **Spec references**: [Store layout](../../SPEC.md#layout),
+  [Skill metadata](../../SPEC.md#skill-metadata).
+
+## Acceptance criteria
+
+- [ ] Setup creates `AGENTS.md` and `CLAUDE.md`, plus the requested convention
+  and specification documents, in the selected project root.
+- [ ] Agent instructions route by task rather than loading every document.
+- [ ] Templates separate product intent, observable behavior, stack choices,
+  roadmap, engineering conventions, decisions, and feature execution.
+- [ ] Go and TypeScript are defaults to discuss; React and other frameworks
+  are selected only from project evidence or the user's choices.
+- [ ] Reruns preserve existing bytes and report kept files. Unsafe destination
+  paths fail before copying; later write failures report partial creation.
+- [ ] Unknown project facts remain explicitly pending. No fictitious accepted
+  decision or approved feature is created.
+- [ ] Validation and focused helper checks pass; the developer reviews the result.
+
+## Agreed decisions
+
+| Decision | Reason | Approval or pending question |
+| --- | --- | --- |
+| Create a new skill for project initialization | User requested a new skill and a broader documentation structure | User request, 2026-10-14 |
+| Name it `create-project-docs` | Distinguishes documentation setup from application scaffolding | Approved: "yes, proceed", 2026-10-14 |
+| Use `TDD.md` and `STACK.md` | Consistent Markdown filenames; interprets `TDD.MD` and `STACKmd` | Approved: "yes, proceed", 2026-10-14 |
+| Treat numbered paths as record naming patterns | Avoid invented project decisions and features | Approved: "yes, proceed", 2026-10-14 |
+| Keep existing setup/spec skills unchanged | Their current narrower workflows remain independently useful | Approved: "yes, proceed", 2026-10-14 |
+| Run Go fixes periodically; verify latest library versions and require approval for dependencies | User's project engineering policy | Explicit user request, 2026-10-14 |
+| Prioritize readable tests, simple reusable helpers, and separate success/failure tables | User's test conventions | Explicit user request, 2026-10-14 |
+| Numbered feature folders contain plan.md, requirements.md, and validation.md | Separate requirements, implementation planning, and evidence; replaces the generated FEATURE.md convention | Explicit user request, 2026-10-14; validation..md normalized to validation.md |
+
+## Phase roadmap
+
+| Phase | Outcome | Depends on | Status | Phase file |
+| --- | --- | --- | --- | --- |
+| 01 | A reusable initializer with templates and preservation checks | None | accepted | [Phase 01](phase-01-initializer-skill.md) |
+
+Acceptance does not authorize commits or publication.

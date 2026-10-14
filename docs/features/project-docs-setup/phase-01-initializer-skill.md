@@ -1,0 +1,173 @@
+# Phase 01: Initializer skill
+
+- **Feature**: [Project documentation setup](FEATURE.md)
+- **Depends on**: None.
+- **Outcome**: One installed skill can initialize project guidance and docs.
+
+## Current checkpoint
+
+- **Status**: accepted
+- **Current step**: Helper, skill instructions, and 12 template assets complete.
+- **Approved scope**: User approved the proposed design with "yes, proceed"
+  on 2026-10-14, then approved the test review with "proceed" on 2026-10-14.
+  The subsequent user request adds periodic Go fixes and latest-version checks
+  with approval for external dependencies; these are documentation revisions.
+  The next request adds test readability, simple reusable helpers, and separate
+  success/failure table groups to TDD.md and GOLANG.md.
+  The latest request replaces the generated feature record with a numbered folder
+  containing plan.md, requirements.md, and validation.md. This repository's own
+  FEATURE/PHASE planning files retain its existing AGENTS.md convention.
+- **Working tree**: Two planning files and `skills/create-project-docs/`
+  containing the unchanged approved tests, SKILL.md, Bash helper, and 12 assets.
+  Existing catalog skills and application code are unchanged.
+- **Last verification**: Five helper tests pass; ShellCheck, Bash syntax,
+  catalog validator, link/import checks, and isolated failure exercises pass.
+- **Blocker or pending decision**: None; the user requested a commit of the current changes.
+- **Next action**: Finalize the authorized single commit containing the skill,
+  approved tests, templates, and these planning records. Remote publication
+  remains outside the requested scope.
+
+## Scope and required context
+
+Create `skills/create-project-docs/SKILL.md`, template assets, and a Bash copy
+helper. Keep the skill self-contained and published in source metadata;
+publishing to the configured store requires a separate explicit request.
+
+| Reference | Why it is needed |
+| --- | --- |
+| [Repository instructions](../../../AGENTS.md) | Authoring setup and review gates |
+| [Skill metadata](../../SPEC.md#skill-metadata) | Portable source packaging |
+| [Existing agent setup](../../../skills/create-agents-setup/SKILL.md) | Define routing boundary and reuse established guidance |
+| [Existing spec workflow](../../../skills/create-spec/SKILL.md) | Avoid implicitly invoking its different `docs/SPEC.md` workflow |
+
+## Proposed generated structure
+
+```text
+AGENTS.md
+CLAUDE.md
+docs/
+  conventions/
+    CODE.md
+    COMMITS.md
+    GOLANG.md
+    TDD.md
+  specs/
+    MISSION.md
+    FEATURES.md
+    ROADMAP.md
+    STACK.md
+  decisions/
+    README.md
+  features/
+    README.md
+```
+
+The directory guides hold reusable record templates and naming rules:
+`docs/decisions/0001-<decision>.md` and
+`docs/features/0001-<feature>/{plan.md,requirements.md,validation.md}`.
+Create actual numbered records only
+when the project supplies a real decision or feature. The developer approved
+this interpretation of the example numbered paths during plan review.
+
+`MISSION.md` owns the problem, users, intended outcome, and non-goals.
+`FEATURES.md` indexes product capabilities and links to their requirements.
+Each feature's requirements.md owns its behavior and acceptance contract,
+plan.md owns implementation steps and checkpoint, and validation.md owns
+verification evidence and user acceptance. `ROADMAP.md` owns delivery order
+and links to these records.
+`STACK.md` owns selected technologies, versions, verification commands, and
+links to official documentation. Pending choices are explicit.
+
+`CODE.md` covers common code guidance, including TypeScript boundaries and
+frontend conventions when applicable. `GOLANG.md` covers Go-specific guidance.
+`TDD.md` owns behavior-change test and implementation review gates.
+`COMMITS.md` owns commit proposals and explicit publication authorization.
+
+Generated `AGENTS.md` routes agents to these owners for their current task.
+Generated `CLAUDE.md` contains `@AGENTS.md`, preserving any existing additions.
+Do not auto-import convention files or mandate reading all docs at startup.
+Use existing project commands when known; do not invent runnable commands for
+an empty project. Do not impose mentoring or require unrelated skills.
+
+## Acceptance criteria
+
+- [ ] Empty projects receive all proposed files at the selected destination.
+- [ ] Existing regular files are kept without replacement or duplicate content.
+- [ ] Paths with spaces work; missing arguments and unsafe destinations fail
+  clearly. Symlinks and file/directory collisions are rejected in preflight.
+- [ ] Guidance handles Go-only, Go plus TypeScript, and an existing project
+  without assuming React or manufacturing product requirements.
+- [ ] Relative routes resolve; numbering guidance and document ownership agree.
+
+## Change plan and review checkpoints
+
+### Step 1: Tests for safe initialization
+
+- **Change and reason**: Focused helper tests in isolated temporary directories
+  establish the generated file set, preservation on rerun, and preflight refusal.
+- **Test cases**: Empty destination including a path with spaces; customized
+  existing instruction/convention files; symlink and collision; missing input.
+  Confirm failures express missing initializer behavior rather than tool failures.
+- **Test commit proposal**: `test(create-project-docs): cover safe documentation initialization`
+- **Implementation commit proposal**: `feat(create-project-docs): initialize project guidance and documentation`
+
+After plan approval, write and run the tests. Stop for test review with the diff
+and meaningful failure evidence. Implement the helper only after explicit
+approval. Skill prose and template assets gain nothing from artificial failing
+tests; review their content and links alongside the verified helper.
+
+### Step 2: Skill, templates, and helper
+
+Use the installed authoring skill's validator and its initializer when useful.
+The test-first skill directory already exists, so the initializer's refusal to
+overwrite existing directories is respected; the small entrypoint was authored
+directly. Add the templates
+and helper within the approved scope. Inspect the chosen target before writes;
+keep existing documents, adapt newly created templates, and report pending
+facts and partial creation accurately. Clarify triggering boundaries with
+`create-agents-setup`, `create-spec`, and application-layout skills in the new
+skill's own instructions without changing those skills.
+
+Run helper tests and catalog validation, check generated links and imports,
+and review the final diff. No Go source or external library changes are planned;
+Go formatting/build/test checks do not validate these Markdown/Bash artifacts.
+If scope expands to Go changes, follow all repository Go gates and verification.
+Stop for implementation review; leave changes uncommitted.
+
+## Verification evidence
+
+| Step / criterion | Command or inspection | Result and relevant evidence | Tested state |
+| --- | --- | --- | --- |
+| Authoring preparation | `skills sync` | Passed: store up to date at `ebfcb9e` | Before plan files |
+| Authoring preparation | `skills update create-repo-skill --agent codex` | Passed: 1 skill, 0 changed | Before plan files |
+| Baseline | `jj st` | Clean working copy | Before plan files |
+| Plan checks | `git diff --check` | Passed | Planning files only; these new files also require direct inspection |
+| Working-copy inspection | `jj diff --stat` | Environment failure: sandbox denied snapshot writes to `.git/objects`; no history mutation attempted | Planning files present |
+| Step 1 | `python3 -B -m unittest discover -s skills/create-project-docs/tests -v` | Expected failure: 5 test methods, 10 failing cases; `Project documentation initializer not implemented: init-project-docs.sh` | New test file; helper and templates absent |
+| Helper criteria | `python3 -B -m unittest discover -s skills/create-project-docs/tests -v` | Passed: all 5 methods, including preservation and refusal subcases | Helper, 12 assets, and approved tests |
+| Shell checks | `shellcheck skills/create-project-docs/scripts/init-project-docs.sh`; `bash -n skills/create-project-docs/scripts/init-project-docs.sh` | Both passed | Completed helper |
+| Validator environment | `bash .agents/skills/create-repo-skill/scripts/validate-skill.sh skills/create-project-docs` | Environment failure: default Python lacks PyYAML | Completed skill |
+| Temporary environment | `UV_CACHE_DIR=/private/tmp/project-docs-uv-cache uv run --with pyyaml --no-project bash .agents/skills/create-repo-skill/scripts/validate-skill.sh skills/create-project-docs` | First attempt failed due sandbox DNS; permitted network retry passed, using temporary cache | Completed skill |
+| Catalog format | Same uv validator command with `--offline` | Passed: `Valid skill: create-project-docs` | Final skill instructions and metadata |
+| Generated links and imports | Isolated Python inspection of a generated project and source Markdown | Passed: local links, balanced code fences, whitespace, single Claude import, no dummy records | Completed assets and plan |
+| Failure reporting | Isolated helper exercises under `/bin/bash` | Passed: root symlink and missing template refuse before writes; injected second-file copy failure reports 1 created and possible partial file | Completed helper |
+| Recurring context | Python whitespace-separated word count of assets/AGENTS.md | Approximately 300 words after policy and feature-layout revisions; document routing uses ordinary Markdown links | Revised agent template |
+| Trigger boundaries | Manual review of new-project Go/TypeScript, Go-only, existing-owner, instructions-only, and application-scaffold requests | Routes split-spec setup to this skill; preserves existing owners; no assumed React or tool installation; neighboring skills remain unchanged | Final skill instructions and templates |
+| Scope-specific checks | Inspection of changed file inventory | No Go files or external libraries changed; Go fix/format/test/vet and integration runs omitted as in approved plan | Skill and planning docs only |
+| Requested policy revision | Official Go command documentation and review of GOLANG.md, CODE.md, STACK.md, AGENTS.md, and SKILL.md | Documents periodic module/package fixes, latest-version verification, and explicit approval before dependency changes; focused file work uses its enclosing package | Revised documentation assets; helper and tests unchanged |
+| Policy revision checks | Offline authoring validator, `git diff --check`, and direct Markdown link/whitespace/fence inspection | All passed; helper tests not repeated because executable behavior is unchanged | Revised skill, assets, and planning docs |
+| Test readability revision | Review of TDD.md and GOLANG.md | Shared guidance prioritizes direct readable tests, minimal stubs, suitable helper reuse, descriptive small tables, and separate success/failure groups; Go guidance adds `t.Helper()` and test naming | Documentation assets only; helper and approved tests unchanged |
+| Feature record revision | Review of feature guide, FEATURES.md, ROADMAP.md, decision guide, AGENTS.md, and SKILL.md | Numbered folders use plan.md, requirements.md, and validation.md; templates and routes agree on ownership; no dummy feature generated | Documentation assets only; helper and approved tests unchanged |
+| Feature revision checks | Offline authoring validator, `git diff --check`, and Markdown link/anchor/whitespace/fence inspection | All passed; executable helper and test suite unchanged | Updated feature templates and routes |
+| Commit review | Helper tests, offline skill validator, ShellCheck, and current diff review | All checks passed; 17 intended files; no unrelated changes | Final skill and planning records |
+
+## Developer acceptance
+
+- **Decision**: Accepted for commit.
+- **Reference and scope**: "yes, proceed", 2026-10-14, accepts the proposed
+  design, file ownership, naming patterns, and helper scope. "proceed",
+  2026-10-14, approves reviewed tests and authorizes implementation.
+  "do a commit for the current changes", 2026-10-14, authorizes one commit of
+  the complete reviewed working tree, including tests and implementation together.
+- **Remaining work**: Finalize that single commit. No push or PR requested;
+  the skill reaches the configured store only after remote publication.
