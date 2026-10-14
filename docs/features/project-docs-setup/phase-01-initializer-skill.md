@@ -7,8 +7,8 @@
 ## Current checkpoint
 
 - **Status**: awaiting implementation review
-- **Current step**: Added minimal-question documentation guidance to SKILL.md
-  and the generated AGENTS.md. Further context optimization remains pending.
+- **Current step**: Added the adversarial code-review gate and minimal response
+  rules to SKILL.md, AGENTS.md, and TDD.md; documentation verification underway.
 - **Approved scope**: User approved the proposed design with "yes, proceed"
   on 2026-10-14, then approved the test review with "proceed" on 2026-10-14.
   The subsequent user request adds periodic Go fixes and latest-version checks
@@ -24,14 +24,18 @@
   instructional intent, performed in small reviewable slices.
   The next request requires using the available question tool to gather missing
   information for specs, feature records, and other docs, starting with the minimum.
-- **Working tree**: AGENTS.md optimization is committed as `c3d0f7a`; live Git
+  The latest request adds independent adversarial review before user approval,
+  a fix/re-review loop, minimal replies, and recorded pending decisions.
+- **Working tree**: Minimal-question guidance is committed as `bef9480`; live Git
   status was clean before this follow-up. Current changes touch SKILL.md,
-  assets/AGENTS.md, and these two planning records; executable files are unchanged.
-- **Last verification**: Offline catalog validator and `git diff --check` pass
-  for the follow-up. Prior helper tests and shell checks remain applicable;
+  assets/AGENTS.md, assets/docs/conventions/TDD.md, and these two planning records;
   executable files are unchanged.
-- **Blocker or pending decision**: User review of minimal-question guidance.
-- **Next action**: Review this documentation slice, then resume context optimization
+- **Last verification**: Offline catalog validator, `git diff --check`, and
+  Markdown route/anchor checks pass. Independent read-only documentation review
+  reports no actionable findings; executable files are unchanged.
+- **Blocker or pending decision**: User review of this guidance.
+- **Next action**: Present the independently reviewed documentation slice,
+  then resume context optimization
   of convention docs and feature/spec templates in separate slices. Do not commit
   without a new explicit request.
 
@@ -172,16 +176,17 @@ Stop for implementation review; leave changes uncommitted.
 | Sub-feature follow-up | Offline skill validator, `git diff --check`, and scoped text review | Passed: one new section defines sibling numbered sub-feature records, independent outcomes, parent links, dependencies, and review before implementation | Feature guide and planning records only; helper and tests unchanged |
 | Context optimization slice 1 | Word count, route inspection, instruction comparison, offline validator, and `git diff --check` | Passed: AGENTS.md reduced from 338 to 261 words (23%); all 10 routes resolve; small slices, review gates, dependency checks/approval, pending facts, preservation, contract conflicts, checkpoint routing, and commit limits retained | AGENTS.md only, plus planning updates; word counts are not measured tokens |
 | Minimal-question follow-up | Offline skill validator, `git diff --check`, and scoped instruction review | Passed: setup and later documentation work use the available question tool, reuse facts, ask the minimum for the next slice, keep non-blocking unknowns pending, and fall back to chat if needed | SKILL.md and AGENTS.md plus planning records; no executable changes |
+| Adversarial/reply follow-up | Offline validator, diff check, Markdown links/anchors, and independent `review_workflow` subagent inspection | Passed; reviewer reports no actionable findings, confirms approval gates and fix scope are preserved; review loop and minimal replies are documented. One reviewer file read targeted a nonexistent standalone validation template; the actual inline template was subsequently inspected. This was instruction review, not a generated-project code repair exercise. | SKILL.md, AGENTS.md, TDD.md, and planning records; no executable changes |
 
 ## Developer acceptance
 
-- **Decision**: Prior work committed; minimal-question guidance awaits review.
+- **Decision**: Prior work committed; adversarial-review and reply guidance awaits review.
 - **Reference and scope**: "yes, proceed", 2026-10-14, accepts the proposed
   design, file ownership, naming patterns, and helper scope. "proceed",
   2026-10-14, approves reviewed tests and authorizes implementation.
   "do a commit for the current changes", 2026-10-14, authorizes one commit of
   the complete reviewed working tree, including tests and implementation together.
-- **Remaining work**: Review minimal-question guidance, then optimize convention
+- **Remaining work**: Review adversarial-review/reply guidance, then optimize convention
   documents and feature/spec templates in separate reviewable slices.
   Earlier commit authorization does not cover these subsequent changes.
   No push or PR requested; publication remains separate.

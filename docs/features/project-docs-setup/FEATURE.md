@@ -56,6 +56,8 @@ documents describe the target project, not this skill store.
 | Split oversized features into sub-features with their own three-file records | Keep scope and outcomes independently reviewable | Explicit user request, 2026-10-14; follow-up awaiting review |
 | Optimize context in small slices without losing instructions | Start with recurring AGENTS.md context, then conventions and feature/spec assets | Explicit user request, 2026-10-14; slice 1 awaiting review |
 | Gather missing documentation facts with the available question tool, starting with the minimum | Reuse known facts, ask only for the next slice, and leave non-blocking unknowns pending | Explicit user request, 2026-10-14; follow-up awaiting review |
+| Require independent adversarial review of code slices before user review | Resolve actionable findings within approved scope; re-review fixes; preserve test approval and dependency gates | Explicit user request, 2026-10-14; follow-up awaiting review |
+| Keep replies minimal, with a User must be aware section and recorded pending decisions | Short change/check bullets, no repeated details; ask the user to review unresolved questions | Explicit user request, 2026-10-14; follow-up awaiting review |
 
 ## Phase roadmap
 

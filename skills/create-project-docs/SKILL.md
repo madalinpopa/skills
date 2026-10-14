@@ -79,6 +79,10 @@ Preserve the user's explicit policies during tailoring: external libraries need
 user approval before adoption, installation, or version changes, and their latest
 released versions must always be verified. Keep periodic `go fix` guidance in
 GOLANG.md for Go projects, scoped to the supported toolchain and reviewed changes.
+Preserve the adversarial-review gate in AGENTS.md and TDD.md: use an independent
+subagent after each code slice, resolve findings within approved scope, and
+re-review the final diff before user approval. This documents a reviewer role;
+it does not enable delegation tools or install platform-specific agents.
 Keep AGENTS.md around 300 words where practical, with essential constraints
 and ordinary Markdown links; do not auto-import all linked documents.
 
@@ -103,8 +107,12 @@ Distinguish copied starter templates from agreed product requirements. Check
 that existing bytes were preserved and no competing spec owner was introduced.
 Do not claim application tests passed merely because documentation was copied.
 
-Report created, tailored, and kept files; pending questions; checks and any
-partial writes; and a proposed commit message. Leave changes uncommitted unless
+Report changes and verification in short `-` bullets; avoid repeated details or
+full successful logs. Include **User must be aware** with only material limitations,
+partial writes, and pending questions/decisions, or "None". Record unresolved
+items in the relevant project docs and ask the user to review them using the
+available question tool, falling back to chat. Include a proposed commit message.
+Preserve these response rules in generated AGENTS.md. Leave changes uncommitted unless
 the user explicitly requests a commit. Published skill metadata grants no
 permission to commit, push, or publish the target project.
 

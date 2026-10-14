@@ -22,9 +22,16 @@ Verify current official documentation and latest released library versions.
 External dependency adoption, installation, replacement, or upgrades need user
 approval; checking the latest version does not authorize an upgrade.
 
-Follow TDD's test and implementation review gates for behavior changes. Propose
-a commit message after verified changes. Commit or publish only on explicit
+After each code slice, follow [TDD's adversarial review](docs/conventions/TDD.md#adversarial-review)
+before requesting user review; fix confirmed issues and repeat review until clear.
+Follow TDD's test and implementation approval gates. Propose a commit message
+after verified changes. Commit or publish only on explicit
 request; never add AI attribution.
+
+Keep replies minimal: short `-` bullets for changes and verification, without
+repeating details. Include a **User must be aware** section for material risks,
+limitations, and pending decisions, or "None". Record pending questions/decisions
+in the relevant docs and explicitly ask the user to review them.
 
 ## Read only for the current task
 
