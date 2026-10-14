@@ -59,7 +59,12 @@ additions. Reuse the agreed owner when existing docs use different paths.
 | [Decision guide](assets/docs/decisions/README.md) | Numbered decision records and their template |
 | [Feature guide](assets/docs/features/README.md) | Numbered folders with plan.md, requirements.md, and validation.md templates |
 
-Record known facts and explicit decisions; leave unknowns as `Pending:` questions.
+Record known facts and explicit decisions. Gather missing information with the
+available ask-user-question tool, or ask in chat if none is available. Start
+with the minimum needed for the next document slice, using repository evidence
+and previous answers first. Leave non-blocking unknowns as `Pending:` questions;
+do not turn initialization into an exhaustive interview. Preserve this rule in
+generated AGENTS.md so it also applies when later filling specs and feature records.
 Go backend and TypeScript frontend are candidate defaults, not requirements.
 Confirm them from the request or manifests; do not choose React, storage,
 architecture, versions, dependencies, or deployment merely to fill a table.

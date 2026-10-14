@@ -12,6 +12,11 @@ Inspect relevant code and diffs; preserve unrelated work. Surface conflicting
 instructions, requirements, or code before changing the contract. Record unknowns
 and unapproved choices as pending.
 
+When filling specs, feature records, or other docs, reuse known facts and use
+the available ask-user-question tool for missing information. Start with the
+minimum questions needed for the next slice; leave non-blocking unknowns pending.
+If no question tool is available, ask in chat. Never invent requirements.
+
 Use commands and working directories in STACK.md; report missing commands.
 Verify current official documentation and latest released library versions.
 External dependency adoption, installation, replacement, or upgrades need user
