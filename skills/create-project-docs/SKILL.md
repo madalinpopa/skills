@@ -18,6 +18,12 @@ root must already exist and is never the skill's own directory. Read existing
 instructions, README, docs, manifests, task scripts, and the diff when there is
 one. In an empty project, work from the user's description.
 
+Check for a `.jj` directory at the repository root. Its presence means the user
+uses jj-vcs (Jujutsu), even when `.git` also exists. Invoke the `use-jj` skill
+before version-control operations and follow it for history, changes, bookmarks,
+and remotes. If the skill is unavailable, report the missing prerequisite before
+version-control mutations; do not substitute Git mutations.
+
 If existing docs already cover the same topic at another path, agree with the
 user on which file owns it before adding a second one. Setup does not authorize
 moving or rewriting existing docs.
@@ -61,6 +67,9 @@ after the user approves that exact edit. Keep Claude-only additions.
 Setup is done when:
 
 - AGENTS.md states the project's purpose, or keeps it `Pending:`.
+- When `.jj` exists at the repository root, newly created AGENTS.md records that
+  the project uses jj-vcs and requires the `use-jj` skill for version-control
+  work. Existing instruction files still require approval before editing.
 - STACK.md lists the languages and the real commands and working directories
   found in manifests and scripts; missing ones stay `Pending`.
 - Go or TypeScript/frontend guidance that does not apply is marked not
@@ -107,7 +116,8 @@ request. This skill does not require either.
 
 ## Verify and report
 
-Check relative links, task routes, the CLAUDE import, that commands are real,
+Check `.jj` detection and the `use-jj` route when applicable. Check relative
+links, task routes, the CLAUDE import, that commands are real,
 that each topic has one owner, and that unknowns are marked pending. Check
 that plans and roadmaps use checklists, feature phases contain detailed tasks
 and one to five planned commits, roadmap features have small reviewable slices,

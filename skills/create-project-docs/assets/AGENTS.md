@@ -4,6 +4,11 @@ Project: Pending: purpose and users.
 
 ## Working rules
 
+When the repository root contains a `.jj` directory, the project uses jj-vcs
+(Jujutsu). Invoke `use-jj` for version-control work, even if `.git` also exists.
+If the skill is unavailable, report it before version-control mutations; do not
+substitute Git mutations.
+
 Work in small slices with one outcome each, including docs, configuration, and
 refactoring. Verify each slice and present it for user review before the next.
 Stay in scope. Inspect relevant code and diffs; preserve unrelated work. Raise
