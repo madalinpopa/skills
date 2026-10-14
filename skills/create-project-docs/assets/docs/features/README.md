@@ -22,14 +22,51 @@ only when a real feature is being planned, not as empty examples during setup.
 
 [FEATURES.md](../specs/FEATURES.md) indexes features and links to their
 requirements; [ROADMAP.md](../specs/ROADMAP.md) owns delivery order and status
-and links to plans. Do not record status in these three files. Link shared
+and links to plans. Keep feature status in ROADMAP.md; track task and subtask
+completion in plan.md and acceptance evidence in validation.md. Link shared
 decisions and constraints rather than duplicating them.
 
+## Writing structure
+
+- Use the template sections in a logical order: purpose and scope, behavior,
+  acceptance criteria, then open questions; approach, delivery, then checkpoint.
+- Write short bullets under sections. Split substantial behavior contracts into
+  subsections for inputs, outcomes, state, and failures when needed.
+- Use tables only for compact comparisons or mappings; keep requirements,
+  rationale, tasks, and verification evidence in sectioned lists.
+- Use `[ ]` task and subtask checklists for all plans and delivery sequences,
+  including future work. Give every task a short outcome description and each
+  subtask a concrete action. Group related tasks into named phases.
+- Mark a subtask `[x]` when its action is complete and link relevant evidence.
+  Mark its parent `[x]` only after all required subtasks and its user review are
+  complete. Leave blocked, deferred, or unverified work unchecked with a reason.
+- Update checklists at review boundaries and session end. Task completion does
+  not imply feature acceptance or permission to commit.
+
 Use the templates below for a real feature. Replace pending fields with known
-facts or explicit open questions. Detail only active work in plan.md; outline
-future steps briefly. Each step has one reviewable outcome and follows
+facts or explicit open questions. In plan.md, detail the tasks for every agreed
+phase; keep unagreed future work as a brief checklist with pending decisions.
+Each commit has one reviewable outcome and follows
 [TDD.md](../conventions/TDD.md). Keep the three files as the feature's records
 rather than creating a competing FEATURE.md or separate phase files.
+
+## Plan phases and commits
+
+- Group related implementation tasks into phases with a clear outcome and
+  dependencies. Keep phases as sections in plan.md.
+- Plan one to five commits per phase. Split a phase needing more than five into
+  smaller related phases; do not add filler commits to meet a count.
+- Give each planned commit a checklist task, a proposed message, affected areas,
+  relevant acceptance criteria, and detailed action subtasks for tests,
+  implementation, verification, and review as applicable.
+- Describe concrete work, such as the behavior to add, the code boundary to
+  change, and the scenario to verify; replace generic workflow labels with
+  feature-specific steps when writing a real plan.
+- Record the planned commit count per phase and respect project policy on whether
+  tests and implementation share a commit or need separate commits.
+- Mark a phase complete only after all required tasks and reviews are complete.
+  Track whether each commit is merely planned, ready for approval, or actually
+  committed; checked work alone does not claim a commit exists.
 
 ## Split oversized features
 
@@ -81,7 +118,7 @@ requirements.
 
 ## Open questions
 
-Pending: unresolved requirements; do not invent behavior to fill a section.
+- Pending: unresolved requirements; do not invent behavior to fill a section.
 
 Execution belongs in [plan.md](plan.md); evidence belongs in
 [validation.md](validation.md).
@@ -97,25 +134,55 @@ Execution belongs in [plan.md](plan.md); evidence belongs in
 
 ## Approach and boundaries
 
-Pending: implementation approach, affected areas, dependencies, and relevant
-existing code or decisions. Keep product requirements in requirements.md.
+- Approach: Pending: smallest implementation approach.
+- Affected areas: Pending: relevant existing code and boundaries.
+- Dependencies and decisions: Pending: links to agreed choices.
+- Keep product requirements in requirements.md.
 
-## Delivery steps
+## Delivery phases
 
-Pending: one reviewable outcome per step, relevant `NNNN/R-001` criteria,
-necessary failing tests, implementation scope, and a proposed commit message.
-Detail only the active step; outline later work. Present the plan before changes
-and follow the workflow in ../../conventions/TDD.md: failing test,
-implementation, adversarial review until clean, then user review.
-Existing explicit approval counts only within its stated scope.
-Execute one small slice at a time. Keep its diff focused, verify it, and present
-the result for user review before starting the next slice. Approval of the whole
-plan does not remove these review boundaries. Apply the same approach to docs,
-configuration, and refactoring; do not bundle later steps into the active slice.
+### Phase 1: Pending: related outcome
+
+- Outcome and criteria: Pending: observable result and `NNNN/R-001` links.
+- Dependencies: Pending: prerequisites or earlier phases.
+- Planned commits: Pending: 1–5; follow project commit policy.
+- [ ] Complete phase: all required tasks and reviews completed with evidence.
+
+#### Planned commit 1: Pending: proposed commit message
+
+- Affected areas: Pending: concrete files, packages, or boundaries.
+- Commit state: planned; record user authorization and commit reference when made.
+- [ ] Task: Pending: one reviewable outcome and relevant acceptance criteria.
+  - [ ] Agree scope: Pending: exact user approval and boundaries.
+  - [ ] Prove the gap: Pending: concrete scenario, necessary failing tests, and
+    failure evidence; prefer integration coverage and identify distinct unit gaps.
+  - [ ] Implement: Pending: specific changes needed to produce the outcome.
+  - [ ] Verify: Pending: commands, expected results, and validation.md evidence.
+  - [ ] Review: Pending: adversarial review, confirmed fixes, and review until clean.
+  - [ ] User review: Pending: decision and any requested revisions.
+
+Repeat the planned-commit section for the remaining commits, up to five per
+phase. Add a phase section for each related group of agreed tasks, with detailed
+subtasks. Keep unagreed later work separate:
+
+### Future work awaiting agreement
+
+- [ ] Pending: possible later outcome and the decision needed before planning.
+
+### Execution rules
+
+- Present the plan before changes. Follow ../../conventions/TDD.md: failing test,
+  implementation, adversarial review until clean, then user review.
+- Reuse explicit approval only within its stated scope. Plan approval does not
+  remove per-slice review boundaries or authorize commits.
+- Execute one small slice at a time, including docs, configuration, and
+  refactoring. Verify and present it before starting the next slice.
+- Omit the failing-test subtask for work that gains nothing from one, as allowed
+  by TDD.md. Keep completion evidence beside tasks or linked in validation.md.
 
 ## Current checkpoint
 
-- Active step: Pending
+- Active phase, planned commit, and task: Pending
 - Approved scope: Pending: exact user decision and scope.
 - Working tree: Pending: changed files and unrelated work to preserve.
 - Last verification: not run; link evidence in validation.md when available.
@@ -133,9 +200,14 @@ configuration, and refactoring; do not bundle later steps into the active slice.
 
 ## Verification evidence
 
-| Criterion (`NNNN/R-001`) or step | Scenario or check | Command / inspection | Result | Code checked |
-| --- | --- | --- | --- | --- |
-| Pending | Pending | Not run | Not verified | Pending: commit plus any uncommitted changes |
+### Criterion or task: Pending: `NNNN/R-001` or plan task
+
+- Scenario or check: Pending: observable outcome.
+- Command or inspection: Not run.
+- Expected failure: Pending: command and failure for the intended reason.
+- Final result: Not verified.
+- Code checked: Pending: commit plus any uncommitted changes.
+- Limitations: Pending: skipped checks, environment problems, or coverage gaps.
 
 Link criteria to observable outcomes and tests. Retain the expected
 failing-test evidence and subsequent passing results. Distinguish change failures

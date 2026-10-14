@@ -29,17 +29,18 @@ Replace pending entries with exact commands and their working directories from
 the project's manifests and scripts. Record Go and frontend commands separately
 when their roots differ. Finding a command is not proof that it was run.
 
-| Check | Command | Working directory |
-| --- | --- | --- |
-| Focused tests | Pending | Pending |
-| Full default tests | Pending | Pending |
-| Format | Pending | Pending |
-| Lint / static analysis | Pending | Pending |
-| Type checking, when applicable | Pending | Pending |
-| Build | Pending | Pending |
-| Integration, when applicable | Pending | Pending |
+- Focused tests: Pending: command and working directory.
+- Full default tests: Pending: command and working directory.
+- Format: Pending: command and working directory.
+- Lint / static analysis: Pending: command and working directory.
+- Type checking, when applicable: Pending: command and working directory.
+- Build: Pending: command and working directory.
+- Integration, when applicable: Pending: command, working directory, prerequisites,
+  and any opt-in gate for external services.
 
 ## Local setup
 
-Pending: record prerequisites, development commands, and configuration names.
-Reference secret provisioning without recording secret values in project docs.
+- Prerequisites: Pending.
+- Development commands and working directories: Pending.
+- Configuration names: Pending: reference secret provisioning without recording
+  secret values in project docs.

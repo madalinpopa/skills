@@ -6,6 +6,9 @@ Index the project's actual features. Requirements must fit
 
 ## Feature index
 
+Use sectioned bullet lists for the index, with a short outcome and links under
+each feature. Keep long behavior descriptions in requirements.md.
+
 Pending: list features agreed with the user. Give each the next unused
 four-digit number, such as `0001`, a name, and a short intended outcome. The
 number is the feature ID everywhere; it becomes the folder name

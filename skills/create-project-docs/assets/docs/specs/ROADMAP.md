@@ -7,10 +7,21 @@ status. Detailed execution belongs in numbered
 
 ## Delivery sequence
 
-Pending: agree on the first useful outcome and its dependencies. For each real
-entry, record the feature number (`NNNN`), outcome, dependency, status, and link
-to the feature's plan.md when it exists. Do not invent deadlines or tasks to
-populate a table.
+- [ ] Pending: agree on the first useful outcome and its dependencies.
+
+For each agreed feature, use a checklist entry with short descriptive subtasks:
+
+- [ ] `NNNN`: Pending: intended outcome; link to plan.md when it exists.
+  - [ ] Pending: phase outcome and a link to its plan tasks or evidence.
+  - [ ] User acceptance: Pending: link to the decision in validation.md.
+
+- Record each entry's dependency and status as short bullets beneath it.
+- Mark delivered milestones `[x]` with evidence; keep deferred or blocked ones
+  `[ ]` with a reason. Detailed implementation tasks stay in plan.md.
+- Mark a feature `[x]` only when its status is `accepted`; completed checks or
+  implementation tasks alone do not mean the user accepted it.
+- Replace placeholders only with real agreed work. Do not invent deadlines or
+  tasks to fill the checklist.
 
 Statuses:
 
@@ -25,8 +36,9 @@ Passing checks alone do not make a feature accepted.
 
 ## Later work
 
-Pending: outline future outcomes briefly; detail only the active work. Keep
-excluded product scope in MISSION.md rather than treating it as an obligation.
+- [ ] Pending: outline a future outcome briefly; link detailed agreed phases in plan.md.
+
+Keep excluded product scope in MISSION.md rather than treating it as an obligation.
 
 ## Review boundaries
 

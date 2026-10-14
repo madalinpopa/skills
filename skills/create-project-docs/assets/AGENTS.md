@@ -43,6 +43,8 @@ with **User must be aware**: material risks, limits, and pending decisions, or
 | Architecture choices | [Decision guide](docs/decisions/README.md) |
 | Feature planning, work, or resume | [Feature guide](docs/features/README.md) |
 
-ROADMAP.md owns feature status, requirements own behavior, plans own steps and
-the checkpoint, and validation owns evidence. Load old feature records only for
-a relevant dependency.
+Use task/subtask checklists for roadmaps and plans; mark completed work with
+evidence. Write specs as short bullets under clear sections; reserve tables for
+compact mappings. ROADMAP.md owns feature status, requirements own behavior,
+plans own task completion and the checkpoint, and validation owns evidence.
+Load old feature records only for a relevant dependency.

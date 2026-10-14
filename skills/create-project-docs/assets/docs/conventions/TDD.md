@@ -1,9 +1,25 @@
 # Test-driven changes
 
-Apply to every change in visible behavior, including bug fixes. Give each
-behavior one main test at the lowest useful level; add integration tests only
-for what lower-level tests cannot prove. Test what users and callers rely on,
-not field assignments, library behavior, private details, or coverage numbers.
+Apply to every change in visible behavior, including bug fixes. Test what users
+and callers rely on, not field assignments, library behavior, private details,
+or coverage numbers.
+
+## Balance test coverage
+
+- Prefer integration tests for observable behavior across the relevant components,
+  using real local dependencies and small fixtures where practical.
+- Give each behavior one main test. Inspect existing coverage before adding tests;
+  extend or reuse it instead of repeating the same scenarios and assertions at
+  both unit and integration levels.
+- Add small unit tests only to prove implementation logic that integration tests
+  do not adequately exercise, such as focused branches or boundary cases. State
+  the distinct gap each unit test covers; avoid testing private structure.
+- Keep the suite balanced: use the smallest integration boundary that proves the
+  behavior, rather than a full end-to-end environment for every case. If that
+  boundary is impractical or unreliable, use a focused unit test and record the
+  integration gap and reason.
+- Keep default runs deterministic and independent of network or shared services.
+  Gate checks requiring external services and document how to run them.
 
 ## Readable tests
 
