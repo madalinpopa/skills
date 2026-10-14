@@ -1,6 +1,7 @@
 """Exercise project documentation setup through its public Bash entrypoint."""
 
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 import unittest
@@ -86,7 +87,9 @@ class ProjectDocumentationSetup(unittest.TestCase):
         for name, contents in before.items():
             with self.subTest(name=name):
                 self.assertEqual((self.project / name).read_bytes(), contents)
-                self.assertIn(name, again.stdout)
+                first_label = "kept" if name in existing else "created"
+                self.assertRegex(first.stdout, rf"(?m)\b{first_label}\s+{re.escape(name)}$")
+                self.assertRegex(again.stdout, rf"(?m)\bkept\s+{re.escape(name)}$")
         for name, contents in existing.items():
             self.assertEqual(before[name], contents)
 
@@ -154,10 +157,53 @@ class ProjectDocumentationSetup(unittest.TestCase):
                 if not directory:
                     self.assertEqual(collision.read_bytes(), b"keep this file\n")
 
+    def test_refuses_competing_layouts_before_creating_documents(self):
+        cases = {
+            "single spec": "docs/SPEC.md",
+            "feature template": "docs/templates/FEATURE.md",
+            "phase template": "docs/templates/PHASE.md",
+            "feature record": "docs/features/0001-login/FEATURE.md",
+        }
+        for label, name in cases.items():
+            with self.subTest(case=label):
+                # Arrange: another documentation layout already owns specs or features.
+                project = self.workspace / label
+                project.mkdir()
+                existing = project / name
+                existing.parent.mkdir(parents=True)
+                existing.write_bytes(b"existing owner\n")
+                before = set(project.rglob("*"))
+
+                # Act.
+                result = self.run_helper(project)
+
+                # Assert: name the competing owner and write nothing.
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(name, result.stdout + result.stderr)
+                self.assertEqual(set(project.rglob("*")), before)
+                self.assertEqual(existing.read_bytes(), b"existing owner\n")
+
+    def test_allowed_existing_layout_is_kept_beside_new_documents(self):
+        # Arrange: the user agreed to keep an existing single spec.
+        spec = self.project / "docs/SPEC.md"
+        spec.parent.mkdir()
+        spec.write_bytes(b"# Existing spec\n")
+
+        # Act.
+        result = self.run_helper("--allow-existing-layout", self.project)
+
+        # Assert: every document is added and the existing spec keeps its bytes.
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for name in EXPECTED_FILES:
+            with self.subTest(name=name):
+                self.assertTrue((self.project / name).is_file())
+        self.assertEqual(spec.read_bytes(), b"# Existing spec\n")
+
     def test_refuses_missing_arguments_and_nonexistent_root(self):
         cases = {
             "missing argument": (),
             "extra argument": (self.project, "unexpected"),
+            "unknown option": ("--force", self.project),
             "missing root": (self.workspace / "missing",),
         }
         for label, args in cases.items():

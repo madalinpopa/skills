@@ -4,8 +4,8 @@ Keep changes within the agreed outcome and existing module responsibilities.
 Verify current official documentation for external APIs being changed.
 
 - Use descriptive names, direct control flow, and cohesive functions/modules.
-- Add abstractions and dependencies for a demonstrated need, with clear ownership.
-- Validate input at external boundaries; trust established internal invariants.
+- Add an abstraction or dependency only for a real, current need.
+- Validate input that comes from outside the program; trust its own guarantees.
 - Handle errors explicitly with useful context. Keep resource cleanup visible.
 - Explain non-obvious constraints in comments; avoid narrating the code.
 - Follow project formatters and linters. Avoid unrelated style rewrites.

@@ -9,8 +9,13 @@ fail() {
   exit 1
 }
 
+allow_existing_layout=false
+if [[ $# -eq 2 && "$1" == "--allow-existing-layout" ]]; then
+  allow_existing_layout=true
+  shift
+fi
 if [[ $# -ne 1 ]]; then
-  printf 'usage: init-project-docs.sh <existing-project-root>\n' >&2
+  printf 'usage: init-project-docs.sh [--allow-existing-layout] <existing-project-root>\n' >&2
   exit 2
 fi
 root="$1"
@@ -45,6 +50,16 @@ for file in "${files[@]}"; do
   fi
   [[ -f "$assets/$file" && ! -L "$assets/$file" ]] || fail "missing regular template: $file"
 done
+competing=()
+for owner in "$root"/docs/SPEC.md "$root"/docs/templates/FEATURE.md \
+  "$root"/docs/templates/PHASE.md "$root"/docs/features/*/FEATURE.md; do
+  if [[ -e "$owner" || -L "$owner" ]]; then
+    competing+=("${owner#"$root"/}")
+  fi
+done
+if [[ "$allow_existing_layout" == false && ${#competing[@]} -gt 0 ]]; then
+  fail "existing documentation layout: ${competing[*]}; agree on routing with the user, then rerun with --allow-existing-layout to keep both"
+fi
 
 for directory in "${directories[@]}"; do
   mkdir -p -- "$root/$directory" || fail "could not create directory: $directory"

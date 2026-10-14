@@ -1,8 +1,9 @@
 # Mission
 
-This document owns why the project exists and who it serves. Observable behavior
-belongs in [FEATURES.md](FEATURES.md); delivery order belongs in
-[ROADMAP.md](ROADMAP.md). Keep unknown facts explicit rather than inventing scope.
+This document owns why the project exists and who it serves. Detailed behavior
+belongs in each feature's requirements.md, indexed by [FEATURES.md](FEATURES.md);
+delivery order belongs in [ROADMAP.md](ROADMAP.md). Mark unknown facts as
+pending rather than inventing scope.
 
 ## Problem and users
 

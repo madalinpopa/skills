@@ -27,7 +27,7 @@ upgrade to the latest release.
 
 Replace pending entries with exact commands and their working directories from
 the project's manifests and scripts. Record Go and frontend commands separately
-when their roots differ. Command discovery is not proof a command was executed.
+when their roots differ. Finding a command is not proof that it was run.
 
 | Check | Command | Working directory |
 | --- | --- | --- |

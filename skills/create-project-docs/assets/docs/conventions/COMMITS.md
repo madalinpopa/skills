@@ -4,15 +4,14 @@ Use `<type>(<scope>): <imperative summary>`; omit scope when it adds no useful
 information. Types include `feat`, `fix`, `test`, `docs`, `refactor`, `build`,
 `ci`, and `chore`. Describe one reviewable outcome.
 
-Propose a message after each verified change. For behavior changes, keep the
-failing tests and implementation separately reviewable for two commits, following
-[TDD.md](TDD.md). Documentation or configuration work that gains nothing from
-a failing test may use one reviewed commit; classify by effect, not extension.
+Propose one commit message per slice, after its adversarial review is clean,
+following [TDD.md](TDD.md#workflow). The commit holds the slice's tests and
+implementation together.
 
 Review the exact diff and exclude unrelated work. Add a body when the reason,
 tradeoff, or compatibility impact needs explanation. Never add AI attribution;
 preserve genuine human attribution.
 
-Never create commits, push, open or merge pull requests, or publish without an
-explicit user request. Approval of a plan or implementation does not authorize
-these actions. Use the repository's chosen version-control tool.
+Create a commit only when the user approves that commit; approving a plan or
+other work does not count. Never push, open or merge pull requests, or publish
+without an explicit user request. Use the repository's chosen version-control tool.

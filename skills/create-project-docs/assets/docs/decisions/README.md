@@ -1,9 +1,9 @@
 # Decision records
 
 Record significant architecture or technology choices and their reasons.
-Create `0001-<decision-slug>.md`, then use the next unused number. Preserve
-existing numbering; do not renumber history. Ordinary implementation details
-need no decision record.
+Name each record `NNNN-<decision-slug>.md`, starting at `0001` and using the
+next unused number. Never renumber existing records. Ordinary implementation
+details need no decision record.
 
 Use the template below when a real decision needs recording. Proposals remain
 proposals until the user agrees. Link relevant [stack choices](../specs/STACK.md)
@@ -15,7 +15,7 @@ feature's requirements.md, indexed by [FEATURES.md](../specs/FEATURES.md).
 Copy this template into the numbered file and replace pending fields:
 
 ```markdown
-# Decision 0001: Pending title
+# Decision NNNN: Pending title
 
 - Status: proposed
 - Date: Pending

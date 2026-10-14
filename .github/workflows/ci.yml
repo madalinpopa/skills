@@ -44,3 +44,18 @@ jobs:
           go-version-file: go.mod
       - name: Test
         run: go test -race ./...
+
+  skills:
+    name: Skills
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - name: Validate skills and run their tests
+        run: |
+          for skill in skills/*/; do
+            uv run -q --with pyyaml bash skills/create-repo-skill/scripts/validate-skill.sh "$skill"
+            if [ -d "${skill}tests" ]; then
+              uv run -q --with pyyaml python3 -B -m unittest discover -s "${skill}tests"
+            fi
+          done
