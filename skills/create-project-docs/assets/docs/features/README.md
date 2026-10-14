@@ -29,6 +29,22 @@ future steps briefly. Each step has one reviewable outcome and follows
 [TDD.md](../conventions/TDD.md). Keep the three files as the feature's records
 rather than creating a competing FEATURE.md or separate phase files.
 
+## Split oversized features
+
+If a feature is too large to implement and review in small slices, split it into
+sub-features before implementation. Give each a clear, independently verifiable
+outcome, bounded requirements, and its own review checkpoints.
+
+Use sibling numbered folders for sub-features, each containing `plan.md`,
+`requirements.md`, and `validation.md`. Link the parent and sub-features in both
+directions and record their dependencies and delivery order in ROADMAP.md.
+Keep the parent focused on the overall outcome and shared constraints; link to
+the sub-feature owners instead of duplicating detailed requirements or evidence.
+
+Present the proposed split for user review. Implement one sub-feature at a time
+in small slices. Accept the parent only after its sub-features and any shared
+end-to-end acceptance criteria have evidence and user acceptance.
+
 ## requirements.md template
 
 ```markdown
@@ -89,6 +105,10 @@ failing tests, implementation scope, and proposed test/implementation messages.
 Detail only the active step; outline later work. Present the plan before changes
 and follow ../../conventions/TDD.md for separate test and implementation review.
 Existing explicit approval counts only within its stated scope.
+Execute one small slice at a time. Keep its diff focused, verify it, and present
+the result for user review before starting the next slice. Approval of the whole
+plan does not remove these review boundaries. Apply the same approach to docs,
+configuration, and refactoring; do not bundle later steps into the active slice.
 
 ## Current checkpoint
 

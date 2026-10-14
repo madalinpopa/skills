@@ -27,6 +27,11 @@ changing the contract.
 
 ## Working rules
 
+Do all work in small slices, each with one clear, reviewable outcome. Limit
+changes to what that slice needs; avoid bundling unrelated work or completing
+a large plan at once. Verify and present each slice for user review before
+starting the next, including documentation, configuration, and refactoring.
+
 Follow the TDD review gates for behavioral changes. Use commands and working
 directories recorded in STACK.md; report missing commands rather than inventing
 them. Verify current official documentation for external APIs being changed.

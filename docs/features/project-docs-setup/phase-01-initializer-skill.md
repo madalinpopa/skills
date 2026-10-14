@@ -6,8 +6,9 @@
 
 ## Current checkpoint
 
-- **Status**: accepted
-- **Current step**: Helper, skill instructions, and 12 template assets complete.
+- **Status**: awaiting implementation review
+- **Current step**: Added oversized-feature splitting to the feature guide;
+  prior small-slice guidance remains uncommitted.
 - **Approved scope**: User approved the proposed design with "yes, proceed"
   on 2026-10-14, then approved the test review with "proceed" on 2026-10-14.
   The subsequent user request adds periodic Go fixes and latest-version checks
@@ -17,15 +18,17 @@
   The latest request replaces the generated feature record with a numbered folder
   containing plan.md, requirements.md, and validation.md. This repository's own
   FEATURE/PHASE planning files retain its existing AGENTS.md convention.
-- **Working tree**: Two planning files and `skills/create-project-docs/`
-  containing the unchanged approved tests, SKILL.md, Bash helper, and 12 assets.
-  Existing catalog skills and application code are unchanged.
-- **Last verification**: Five helper tests pass; ShellCheck, Bash syntax,
-  catalog validator, link/import checks, and isolated failure exercises pass.
-- **Blocker or pending decision**: None; the user requested a commit of the current changes.
-- **Next action**: Finalize the authorized single commit containing the skill,
-  approved tests, templates, and these planning records. Remote publication
-  remains outside the requested scope.
+  The subsequent request requires all work to use small, reviewable slices.
+  The next request requires oversized features to be split into sub-features.
+- **Working tree**: Initial skill committed as `91e4ecca`. Follow-up changes
+  touch only assets/AGENTS.md, the feature guide, and these two
+  planning records. Helper, tests, and other templates are unchanged.
+- **Last verification**: Offline catalog validator and `git diff --check` pass
+  for the follow-up. Prior helper tests and shell checks remain applicable;
+  executable files are unchanged.
+- **Blocker or pending decision**: User review of the small-slice and sub-feature guidance.
+- **Next action**: Present the feature-splitting addition for review. Further
+  edits and a commit require user authorization covering those actions.
 
 ## Scope and required context
 
@@ -160,14 +163,17 @@ Stop for implementation review; leave changes uncommitted.
 | Feature record revision | Review of feature guide, FEATURES.md, ROADMAP.md, decision guide, AGENTS.md, and SKILL.md | Numbered folders use plan.md, requirements.md, and validation.md; templates and routes agree on ownership; no dummy feature generated | Documentation assets only; helper and approved tests unchanged |
 | Feature revision checks | Offline authoring validator, `git diff --check`, and Markdown link/anchor/whitespace/fence inspection | All passed; executable helper and test suite unchanged | Updated feature templates and routes |
 | Commit review | Helper tests, offline skill validator, ShellCheck, and current diff review | All checks passed; 17 intended files; no unrelated changes | Final skill and planning records |
+| Small-slice follow-up | Offline skill validator, `git diff --check`, and scoped diff review | Passed: one focused rule in AGENTS.md and matching execution guidance in the feature plan template; no executable changes | Two revised templates and two updated planning records after `91e4ecca` |
+| Sub-feature follow-up | Offline skill validator, `git diff --check`, and scoped text review | Passed: one new section defines sibling numbered sub-feature records, independent outcomes, parent links, dependencies, and review before implementation | Feature guide and planning records only; helper and tests unchanged |
 
 ## Developer acceptance
 
-- **Decision**: Accepted for commit.
+- **Decision**: Initial skill accepted and committed; small-slice and sub-feature follow-ups await review.
 - **Reference and scope**: "yes, proceed", 2026-10-14, accepts the proposed
   design, file ownership, naming patterns, and helper scope. "proceed",
   2026-10-14, approves reviewed tests and authorizes implementation.
   "do a commit for the current changes", 2026-10-14, authorizes one commit of
   the complete reviewed working tree, including tests and implementation together.
-- **Remaining work**: Finalize that single commit. No push or PR requested;
-  the skill reaches the configured store only after remote publication.
+- **Remaining work**: Review the requested small-slice and sub-feature policy revisions.
+  The initial commit authorization does not cover this subsequent change.
+  No push or PR requested; publication remains separate.

@@ -52,11 +52,13 @@ documents describe the target project, not this skill store.
 | Run Go fixes periodically; verify latest library versions and require approval for dependencies | User's project engineering policy | Explicit user request, 2026-10-14 |
 | Prioritize readable tests, simple reusable helpers, and separate success/failure tables | User's test conventions | Explicit user request, 2026-10-14 |
 | Numbered feature folders contain plan.md, requirements.md, and validation.md | Separate requirements, implementation planning, and evidence; replaces the generated FEATURE.md convention | Explicit user request, 2026-10-14; validation..md normalized to validation.md |
+| All work proceeds in small slices with review between slices | Keep changes easy to review, including docs, configuration, and refactoring | Explicit user request, 2026-10-14; follow-up awaiting review |
+| Split oversized features into sub-features with their own three-file records | Keep scope and outcomes independently reviewable | Explicit user request, 2026-10-14; follow-up awaiting review |
 
 ## Phase roadmap
 
 | Phase | Outcome | Depends on | Status | Phase file |
 | --- | --- | --- | --- | --- |
-| 01 | A reusable initializer with templates and preservation checks | None | accepted | [Phase 01](phase-01-initializer-skill.md) |
+| 01 | A reusable initializer with templates and preservation checks | None | awaiting implementation review | [Phase 01](phase-01-initializer-skill.md) |
 
 Acceptance does not authorize commits or publication.
