@@ -54,6 +54,7 @@ documents describe the target project, not this skill store.
 | Numbered feature folders contain plan.md, requirements.md, and validation.md | Separate requirements, implementation planning, and evidence; replaces the generated FEATURE.md convention | Explicit user request, 2026-10-14; validation..md normalized to validation.md |
 | All work proceeds in small slices with review between slices | Keep changes easy to review, including docs, configuration, and refactoring | Explicit user request, 2026-10-14; follow-up awaiting review |
 | Split oversized features into sub-features with their own three-file records | Keep scope and outcomes independently reviewable | Explicit user request, 2026-10-14; follow-up awaiting review |
+| Optimize context in small slices without losing instructions | Start with recurring AGENTS.md context, then conventions and feature/spec assets | Explicit user request, 2026-10-14; slice 1 awaiting review |
 
 ## Phase roadmap
 

@@ -7,8 +7,9 @@
 ## Current checkpoint
 
 - **Status**: awaiting implementation review
-- **Current step**: Added oversized-feature splitting to the feature guide;
-  prior small-slice guidance remains uncommitted.
+- **Current step**: Context optimization, slice 1: compact the generated AGENTS.md
+  while preserving essential rules and conditional routes. Remaining assets are
+  inspected but unchanged in this slice.
 - **Approved scope**: User approved the proposed design with "yes, proceed"
   on 2026-10-14, then approved the test review with "proceed" on 2026-10-14.
   The subsequent user request adds periodic Go fixes and latest-version checks
@@ -20,15 +21,18 @@
   FEATURE/PHASE planning files retain its existing AGENTS.md convention.
   The subsequent request requires all work to use small, reviewable slices.
   The next request requires oversized features to be split into sub-features.
-- **Working tree**: Initial skill committed as `91e4ecca`. Follow-up changes
-  touch only assets/AGENTS.md, the feature guide, and these two
-  planning records. Helper, tests, and other templates are unchanged.
+  The latest request authorizes review and context optimization without losing
+  instructional intent, performed in small reviewable slices.
+- **Working tree**: Prior follow-ups are committed as `c4410ad`; live Git status
+  was clean at the start of optimization. This slice changes only assets/AGENTS.md
+  and the two planning records; executable files and other assets are unchanged.
 - **Last verification**: Offline catalog validator and `git diff --check` pass
   for the follow-up. Prior helper tests and shell checks remain applicable;
   executable files are unchanged.
-- **Blocker or pending decision**: User review of the small-slice and sub-feature guidance.
-- **Next action**: Present the feature-splitting addition for review. Further
-  edits and a commit require user authorization covering those actions.
+- **Blocker or pending decision**: User review of optimization slice 1.
+- **Next action**: Review compact AGENTS.md and its retained instructions. After
+  review, optimize convention docs, then feature/spec templates as separate
+  slices. Do not commit without a new explicit request.
 
 ## Scope and required context
 
@@ -165,15 +169,17 @@ Stop for implementation review; leave changes uncommitted.
 | Commit review | Helper tests, offline skill validator, ShellCheck, and current diff review | All checks passed; 17 intended files; no unrelated changes | Final skill and planning records |
 | Small-slice follow-up | Offline skill validator, `git diff --check`, and scoped diff review | Passed: one focused rule in AGENTS.md and matching execution guidance in the feature plan template; no executable changes | Two revised templates and two updated planning records after `91e4ecca` |
 | Sub-feature follow-up | Offline skill validator, `git diff --check`, and scoped text review | Passed: one new section defines sibling numbered sub-feature records, independent outcomes, parent links, dependencies, and review before implementation | Feature guide and planning records only; helper and tests unchanged |
+| Context optimization slice 1 | Word count, route inspection, instruction comparison, offline validator, and `git diff --check` | Passed: AGENTS.md reduced from 338 to 261 words (23%); all 10 routes resolve; small slices, review gates, dependency checks/approval, pending facts, preservation, contract conflicts, checkpoint routing, and commit limits retained | AGENTS.md only, plus planning updates; word counts are not measured tokens |
 
 ## Developer acceptance
 
-- **Decision**: Initial skill accepted and committed; small-slice and sub-feature follow-ups await review.
+- **Decision**: Prior work committed; context optimization slice 1 awaits review.
 - **Reference and scope**: "yes, proceed", 2026-10-14, accepts the proposed
   design, file ownership, naming patterns, and helper scope. "proceed",
   2026-10-14, approves reviewed tests and authorizes implementation.
   "do a commit for the current changes", 2026-10-14, authorizes one commit of
   the complete reviewed working tree, including tests and implementation together.
-- **Remaining work**: Review the requested small-slice and sub-feature policy revisions.
-  The initial commit authorization does not cover this subsequent change.
+- **Remaining work**: Review AGENTS.md optimization, then optimize convention
+  documents and feature/spec templates in separate reviewable slices.
+  Earlier commit authorization does not cover these subsequent changes.
   No push or PR requested; publication remains separate.
