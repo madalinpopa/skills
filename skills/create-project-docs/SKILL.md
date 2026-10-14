@@ -90,7 +90,9 @@ policy:
   Mark completed items `[x]` with evidence; keep pending or blocked items `[ ]`.
   Feature plans group detailed tasks into related phases of one to five planned
   commits each, with concrete subtasks and proposed commit messages. Roadmap
-  feature acceptance and plan task completion have separate owners.
+  feature acceptance and plan task completion have separate owners. Split roadmap
+  features into small, independently verifiable slices with scope, dependencies,
+  acceptance criteria, and links to plan tasks and evidence.
 - Specs use clear sections and concise bullets, linking shared facts to their
   owner. Use tables only for compact comparisons or mappings, never long prose.
 - The reply format with **User must be aware**.
@@ -108,7 +110,8 @@ request. This skill does not require either.
 Check relative links, task routes, the CLAUDE import, that commands are real,
 that each topic has one owner, and that unknowns are marked pending. Check
 that plans and roadmaps use checklists, feature phases contain detailed tasks
-and one to five planned commits, completion claims have evidence, spec text uses
+and one to five planned commits, roadmap features have small reviewable slices,
+completion claims have evidence, spec text uses
 sections and bullets, and test guidance avoids duplicate coverage.
 Confirm existing files kept their bytes. Copied templates are not agreed requirements,
 and copying docs does not mean any application tests passed.

@@ -53,7 +53,8 @@ rather than creating a competing FEATURE.md or separate phase files.
 ## Plan phases and commits
 
 - Group related implementation tasks into phases with a clear outcome and
-  dependencies. Keep phases as sections in plan.md.
+  dependencies. Link tasks to the small delivery slices in ROADMAP.md; a phase
+  may group related slices. Keep phases as sections in plan.md.
 - Plan one to five commits per phase. Split a phase needing more than five into
   smaller related phases; do not add filler commits to meet a count.
 - Give each planned commit a checklist task, a proposed message, affected areas,
