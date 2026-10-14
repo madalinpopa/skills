@@ -9,9 +9,9 @@ tags: [setup, docs, conventions, go, typescript]
 # Create project docs
 
 Copy a documentation foundation into a project, then fill in what the user and
-the repository already make clear. Leave unknown sections empty: no placeholder
-text, filler questions, example entries, or empty checklist items. Specs grow
-progressively as the user works with the agent.
+the repository already make clear. Spec files start empty; add headings only
+with real content. Omit placeholders, filler questions, and example entries.
+Specs grow progressively as the user works with the agent.
 
 ## Inspect and initialize
 
@@ -59,11 +59,12 @@ after the user approves that exact edit. Keep Claude-only additions.
 | [COMMITS.md](assets/docs/conventions/COMMITS.md) | Commit messages and when a commit is allowed |
 | [GOLANG.md](assets/docs/conventions/GOLANG.md) | Go conventions, toolchain, and `go fix` |
 | [TDD.md](assets/docs/conventions/TDD.md) | Test-first workflow, review loop, and verification |
+| [Spec writing guide](assets/docs/specs/README.md) | Section guidance and concise writing rules |
 | [MISSION.md](assets/docs/specs/MISSION.md) | Problem, users, outcome, and non-goals |
 | [ROADMAP.md](assets/docs/specs/ROADMAP.md) | Features and sub-features grouped with task checklists; no other content |
 | [STACK.md](assets/docs/specs/STACK.md) | Technologies, supported versions, and project commands |
-| [Decision guide](assets/docs/decisions/README.md) | Numbered decision records and their template |
-| [Feature guide](assets/docs/features/README.md) | Numbered feature folders and their three templates |
+| [Decision guide](assets/docs/decisions/README.md) | Numbered decision records and section-writing guidance |
+| [Feature guide](assets/docs/features/README.md) | Numbered feature folders and record-writing guidance |
 
 Setup is done when:
 
@@ -73,13 +74,13 @@ Setup is done when:
   the project uses jj-vcs and requires the `use-jj` skill for version-control
   work. Existing instruction files still require approval before editing.
 - STACK.md records only technologies, versions, commands, and working directories
-  supported by manifests, scripts, or user decisions. Unknown sections stay empty.
+  supported by manifests, scripts, or user decisions. Omit unknown topics.
 - Go or TypeScript/frontend guidance that does not apply is marked not
   applicable, and frontend rules are removed from Go-only projects.
-- Spec documents retain their section structure without text in unknown sections.
-  Apply the same rule to feature and decision templates. Keep writing guidance
-  in this skill, AGENTS.md, and the feature/decision guides, outside copyable
-  templates.
+- Spec files are empty unless established facts can be recorded. Do not seed
+  titles, section outlines, or writing instructions in them. Add sections only
+  with content, following the [spec writing guide](assets/docs/specs/README.md).
+  Feature and decision guides also describe sections instead of empty templates.
 - Assign each real feature the next unused four-digit number, `NNNN`, as its
   only ID across ROADMAP.md and feature records. Check both for used numbers;
   never reuse or renumber IDs. Detailed behavior belongs in requirements.md.
@@ -90,8 +91,8 @@ Setup is done when:
 - Read README, prototype files, existing docs, and earlier user answers for clear
   features and tasks. Record only work those sources support; a prototype is
   evidence of possible scope, not proof of agreed requirements or completion.
-  If no feature or task is clear, leave the corresponding section empty and
-  ROADMAP.md with only its title. Do not create example decisions or features.
+  If no feature or task is clear, leave ROADMAP.md empty. Do not create example
+  decisions or features.
 
 Use repository evidence and earlier answers first. Initialization does not need
 an interview to fill every section. Never choose a language, framework, storage,
@@ -112,8 +113,8 @@ round about the requested section. Base options on that evidence, explain
 meaningful tradeoffs, and allow the user to supply another answer. Do not ask
 again for decisions already made or turn one section into a whole-project
 interview. Wait for answers before writing content that depends on them; keep
-unanswered sections empty. If no question tool is available, report that limit
-and ask equivalent option-based questions in chat.
+unanswered topics out of the document. If no question tool is available, report
+that limit and ask equivalent option-based questions in chat.
 
 Update only the requested scope with established facts and the user's answers.
 Keep existing agreed content and document ownership. Capture actual unresolved
@@ -122,7 +123,7 @@ questions only when raised in the work; do not seed lists of generic questions.
 When tailoring, keep these template rules, adapted only to existing project
 policy:
 
-- Leave unknowns empty and use guided question rounds for requested spec work.
+- Omit unknown topics and use guided question rounds for requested spec work.
 - Dependency changes need user approval; always check the latest release.
 - The TDD workflow: failing test, implementation, then a review by a different
   agent repeated until clean, and one user review that approves the commit.
@@ -136,8 +137,9 @@ policy:
   do not imply user acceptance. Feature plans group detailed tasks into related
   phases of one to five planned commits each, with concrete subtasks and
   proposed commit messages. Add only phases and tasks supported by agreed work.
-- Specs use clear sections and concise bullets, linking shared facts to their
-  owner. Use tables only for compact comparisons or mappings, never long prose.
+- Group related spec content under clear sections and use concise lists.
+  Link shared facts to their owner. Avoid long paragraphs and prose-heavy tables;
+  reserve tables for compact comparisons or mappings.
 - The reply format with **User must be aware**.
 - `go fix` guidance in GOLANG.md for Go projects.
 
@@ -153,11 +155,12 @@ request. This skill does not require either.
 
 Check `.jj` detection and the `use-jj` route when applicable. Check relative
 links, task routes, the CLAUDE import, that commands are real,
-that each topic has one owner, and that unknown sections are empty. Check
+that each topic has one owner, and that unknown specs are empty files. Check
 that plans and roadmaps use checklists, feature phases contain detailed tasks
 and one to five planned commits when agreed, roadmaps contain only feature and
 sub-feature groups with task checklists, completion claims have evidence, spec
-text uses sections and bullets, and test guidance avoids duplicate coverage.
+text uses concise sectioned lists without empty headings, and test guidance
+avoids duplicate coverage.
 Confirm existing files kept their bytes. Copied templates are not agreed requirements,
 and copying docs does not mean any application tests passed.
 

@@ -1,47 +1,32 @@
 # Decision records
 
-Record significant architecture or technology choices and their reasons.
-Name each record `NNNN-<decision-slug>.md`, starting at `0001` and using the
-next unused number. Never renumber existing records. Ordinary implementation
-details need no decision record.
+## When to create a record
 
-Use the template below when a real decision needs recording. Proposals remain
-proposals until the user agrees. Link relevant [stack choices](../specs/STACK.md)
-and [feature records](../features/README.md). Product requirements stay in each
-feature's requirements.md; feature groups and tasks belong in
-[ROADMAP.md](../specs/ROADMAP.md).
+- Record significant architecture or technology choices and their reasons.
+- Skip ordinary implementation details; do not create examples during setup.
+- Name records `NNNN-<decision-slug>.md` using the next unused number.
+- Preserve numbering and names; never renumber existing records.
+- Proposals remain proposals until the user agrees.
 
-## Record template
+## Writing a record
 
-Copy this section-only template into the numbered file, give it the actual
-number and title, and add only established facts and agreed decisions. Leave
-unknown sections empty. For requested spec work, use the question tool with
-proposed options, following [AGENTS.md](../../AGENTS.md).
+- Start empty; add the actual number, title, and sections only with known content.
+- Follow the [spec writing guide](../specs/README.md): group related facts and
+  write concise lists, without placeholders or empty outlines.
+- Use the question tool with proposed options for requested spec work, following
+  [AGENTS.md](../../AGENTS.md).
+- Status and date: record the actual state and date of the decision.
+- Decision reference: cite user approval or the source of the agreed choice.
+- Related work: link relevant stack choices, feature records, or roadmap tasks.
+- Context: list the problem, constraints, and reason a decision is needed.
+- Options considered: list realistic alternatives and their tradeoffs.
+- Decision: state the selected option and reason; never imply approval.
+- Consequences: list benefits, costs, limits, and follow-up work.
 
-```markdown
-# Decision
+## Ownership and revisions
 
-## Status
-
-## Date
-
-## Decision reference
-
-## Related work
-
-## Context
-
-## Options considered
-
-## Decision
-
-## Consequences
-```
-
-Record the problem and constraints in Context, realistic alternatives and
-tradeoffs in Options considered, the selected option and rationale in Decision,
-and benefits, costs, limits, and follow-up work in Consequences. Include the
-actual user approval or source in Decision reference; never imply agreement.
-
-Statuses: proposed, accepted, rejected, superseded. To replace an accepted
-decision, create a new record and link both directions; retain the old rationale.
+- Keep technology choices in [STACK.md](../specs/STACK.md).
+- Keep product behavior in [feature requirements](../features/README.md).
+- Keep feature groups and tasks in [ROADMAP.md](../specs/ROADMAP.md).
+- Use statuses: proposed, accepted, rejected, superseded.
+- Replace accepted decisions with a new linked record; retain the old rationale.

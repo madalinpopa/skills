@@ -15,6 +15,7 @@ EXPECTED_FILES = {
     "docs/conventions/COMMITS.md",
     "docs/conventions/GOLANG.md",
     "docs/conventions/TDD.md",
+    "docs/specs/README.md",
     "docs/specs/MISSION.md",
     "docs/specs/ROADMAP.md",
     "docs/specs/STACK.md",
@@ -56,8 +57,16 @@ class ProjectDocumentationSetup(unittest.TestCase):
             for path in self.project.rglob("*")
             if path.is_file()
         }
+        specs = {
+            "docs/specs/MISSION.md",
+            "docs/specs/ROADMAP.md",
+            "docs/specs/STACK.md",
+        }
+        for name in specs:
+            with self.subTest(spec=name):
+                self.assertEqual((self.project / name).read_bytes(), b"")
         self.assertEqual(files, EXPECTED_FILES)
-        for name in EXPECTED_FILES:
+        for name in EXPECTED_FILES - specs:
             with self.subTest(name=name):
                 self.assertTrue((self.project / name).read_bytes())
         self.assertEqual((self.project / "CLAUDE.md").read_text(), "@AGENTS.md\n")
@@ -69,6 +78,7 @@ class ProjectDocumentationSetup(unittest.TestCase):
             "AGENTS.md": b"# My project rules\nKeep my custom commands.\n",
             "CLAUDE.md": b"@AGENTS.md\n\nKeep Claude-specific instructions.\n",
             "docs/conventions/CODE.md": b"# Our conventions\nPreserve this file.\n",
+            "docs/specs/STACK.md": b"",
         }
         for name, contents in existing.items():
             destination = self.project / name
@@ -78,6 +88,8 @@ class ProjectDocumentationSetup(unittest.TestCase):
         # Act: complete the missing documents, then repeat setup.
         first = self.run_helper(self.project)
         self.assertEqual(first.returncode, 0, first.stderr)
+        for name in EXPECTED_FILES:
+            self.assertTrue((self.project / name).is_file(), name)
         before = {name: (self.project / name).read_bytes() for name in EXPECTED_FILES}
         again = self.run_helper(self.project)
 

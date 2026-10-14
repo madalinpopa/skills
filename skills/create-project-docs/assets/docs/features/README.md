@@ -32,8 +32,10 @@ than duplicating them. Use roadmap order for delivery order.
 
 ## Writing structure
 
-- Use the template sections in a logical order: purpose and scope, behavior,
-  acceptance criteria, then open questions; approach, delivery, then checkpoint.
+- Add sections only when there is real content, following the
+  [spec writing guide](../specs/README.md). Do not seed empty outlines.
+- Group related information logically: scope, behavior, and acceptance;
+  approach, delivery, and checkpoint.
 - Write short bullets under sections. Split substantial behavior contracts into
   subsections for inputs, outcomes, state, and failures when needed.
 - Use tables only for compact comparisons or mappings; keep requirements,
@@ -47,9 +49,9 @@ than duplicating them. Use roadmap order for delivery order.
 - Update checklists at review boundaries and session end. Task completion does
   not imply feature acceptance or permission to commit.
 
-Use the section-only templates below for a real feature. Add its actual number
-and title, then fill sections progressively with established facts and user
-answers. Leave unknown sections empty; do not copy writing guidance into them.
+Start records empty; add the actual feature number, title, and relevant sections
+when established facts and user answers are available. Use the section guidance
+below; do not copy it into the records or prefill empty headings.
 For requested spec work, always use the available question tool with proposed
 options as described in [AGENTS.md](../../AGENTS.md); ask only about the requested
 scope and wait for answers before filling dependent sections. In plan.md, detail
@@ -95,121 +97,41 @@ Present the proposed split for user review. Implement one sub-feature at a time
 in small slices. Accept the parent only after its sub-features and any shared
 end-to-end acceptance criteria have evidence and user acceptance.
 
-## Filling the records
+## Writing requirements.md
 
-- Requirements: record the actor, outcome, included scope, non-goals, constraints,
-  and explicit approval when known. Describe observable behavior, meaningful
-  failures, state invariants, and repeated/conflicting/partial cases only where
-  relevant. Retries and rollback are not implied requirements.
-- Give concrete acceptance scenarios stable IDs such as `R-001`; cite them as
-  `NNNN/R-001` in tests and validation. Do not create criteria just to fill space.
-- Plans: add sections for actual agreed phases and planned commits, including
-  outcome, criteria, dependencies, commit count, proposed messages, affected
-  areas, and concrete task/subtask checklists. Include necessary failing tests,
-  implementation, verification, adversarial review, and user review per TDD.md.
-  Omit failing tests for work that gains nothing from them, as TDD.md permits.
-- Present plans before changes. Approval applies only within its stated scope;
-  it does not authorize commits or remove per-slice review boundaries. Execute,
-  verify, and present one small slice before starting the next, including docs,
-  configuration, and refactoring.
-- Checkpoints: record the active phase/commit/task, approved scope, working-tree
-  changes and unrelated work to preserve, last verification, actual blockers,
-  and one exact next action. Do not fill unknown fields with status guesses.
-- Validation: link each criterion or task to its scenario, command or inspection,
-  expected failure and final result, code checked, and actual limitations.
-  Distinguish change failures, environment problems, skipped checks, and checks
+- Agreement: record the actual user decision and approved scope.
+- Problem and scope: group the actor, outcome, included work, non-goals, and
+  constraints; link mission, stack, and decision owners.
+- Behavior contract: group input rules, preconditions, visible results, side
+  effects, state invariants, meaningful failures, and recovery.
+- Repeated, conflicting, or partial execution: describe only relevant cases.
+  Do not imply retries or rollback without an agreed requirement.
+- Acceptance criteria: list concrete scenarios with stable `R-001` IDs.
+- Open questions: list actual unresolved requirements raised during work.
+- Related records: link plan.md and validation.md when they exist.
+
+## Writing plan.md
+
+- Related records: link requirements and evidence.
+- Approach and boundaries: list the smallest approach, affected areas,
+  dependencies, and agreed decisions.
+- Delivery phases: group actual agreed outcomes into phases of one to five
+  planned commits; follow the phase and commit rules above.
+- Tasks: use concrete checklists with proposed messages, affected areas,
+  acceptance links, tests, implementation, verification, and review steps.
+- Future work: list only identified later work; omit speculative filler.
+- Current checkpoint: group the active phase/commit/task, approved scope,
+  working-tree changes, verification, actual blockers, and exact next action.
+
+## Writing validation.md
+
+- Related records: link requirements and the execution plan.
+- Verification evidence: group entries by criterion or task; list the scenario,
+  command or inspection, expected failure, final result, code checked, and limits.
+- Distinguish change failures, environment problems, skipped checks, and checks
   not run. Passing commands alone do not prove every criterion.
-- User acceptance: record only an actual decision, its reference and scope,
-  accepted criteria, and any remaining work. Approval does not authorize commits
-  or publication. Keep acceptance separate from task completion.
-
-## requirements.md template
-
-```markdown
-# Feature requirements
-
-## Agreement
-
-## Problem and scope
-
-### Actor and intended outcome
-
-### Included
-
-### Non-goals
-
-### Constraints
-
-## Behavior contract
-
-### Preconditions and input rules
-
-### Observable results and side effects
-
-### State and invariants
-
-### Repeated, conflicting, or partial execution
-
-### Failures and recovery
-
-## Acceptance criteria
-
-## Open questions
-
-## Related records
-```
-
-## plan.md template
-
-```markdown
-# Feature plan
-
-## Related records
-
-## Approach and boundaries
-
-### Approach
-
-### Affected areas
-
-### Dependencies and decisions
-
-## Delivery phases
-
-## Future work
-
-## Current checkpoint
-
-### Active phase, planned commit, and task
-
-### Approved scope
-
-### Working tree
-
-### Last verification
-
-### Questions and blockers
-
-### Next action
-```
-
-## validation.md template
-
-```markdown
-# Feature validation
-
-## Related records
-
-## Verification evidence
-
-## User acceptance
-
-### Decision
-
-### Reference and scope
-
-### Remaining work
-```
+- User acceptance: record the actual decision, reference, accepted scope, and
+  remaining work. Do not imply acceptance from passing checks.
 
 On resume, read requirements.md and the checkpoint in plan.md, then relevant
 validation evidence and linked contracts. Compare the checkpoint with the

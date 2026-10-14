@@ -20,13 +20,15 @@
 ## Specs
 
 - Never invent requirements; fill specs progressively.
-- Leave unknown sections empty, without placeholders or generic questions.
+- Start specs empty; add sections only with known content. Omit placeholders.
+- Follow the [spec writing guide](docs/specs/README.md): group related facts
+  under headings and write short lists; avoid long paragraphs and prose-heavy tables.
 - For requested spec work, always use the available question tool with concrete
   proposed options based on repository evidence.
 - Ask focused rounds, reuse prior answers, and wait before writing dependent
   content. If no tool is available, explain and ask option-based questions in chat.
 - ROADMAP.md contains only feature/sub-feature groups and task checklists;
-  leave it title-only when no work is identified.
+  leave it empty when no work is identified.
 - Requirements own behavior; plans own execution and checkpoints; validation
   owns evidence and user acceptance. Link shared facts.
 - Mark completed tasks with evidence; completion does not imply user acceptance.
@@ -57,4 +59,4 @@
 - Use short bullets for changes and verification; avoid repetition.
 - End with **User must be aware**: material risks, limits, unresolved decisions,
   or "None".
-- Record actual open questions where relevant; leave other sections empty.
+- Record actual open questions where relevant; omit unknown topics.
