@@ -13,10 +13,21 @@ tasks:
     cmds:
       - task: test:unit
       - task: test:integration
+      - task: test:skills
   test:unit:
     cmd: go test ./... {{.CLI_ARGS}}
   test:integration:
     cmd: INTEGRATION=true go test ./... -count=1 {{.CLI_ARGS}}
+  test:skills:
+    desc: Validate every skill and run its Python tests
+    cmd: |
+      set -e
+      for skill in skills/*/; do
+        uv run -q --with pyyaml bash skills/create-repo-skill/scripts/validate-skill.sh "$skill"
+        if [ -d "${skill}tests" ]; then
+          uv run -q --with pyyaml python3 -B -m unittest discover -s "${skill}tests"
+        fi
+      done
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   #   Lint
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
