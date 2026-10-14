@@ -4,58 +4,57 @@
 
 ## Working rules
 
-When the repository root contains a `.jj` directory, the project uses jj-vcs
-(Jujutsu). Invoke `use-jj` for version-control work, even if `.git` also exists.
-If the skill is unavailable, report it before version-control mutations; do not
-substitute Git mutations.
+- Work in small slices, including docs, configuration, and refactoring.
+- Inspect relevant code and diffs; preserve unrelated work and stay in scope.
+- Raise conflicts between instructions, requirements, and code before changing
+  a contract.
+- Verify each slice and present it for user review before the next.
 
-Work in small slices with one outcome each, including docs, configuration, and
-refactoring. Verify each slice and present it for user review before the next.
-Stay in scope. Inspect relevant code and diffs; preserve unrelated work. Raise
-conflicts between instructions, requirements, and code before changing a contract.
+## Version control
 
-Never invent requirements. Fill specs progressively; leave unknown sections
-empty, without placeholders or generic questions. When the user asks to fill or
-work on specs or a specific section, always use the available ask-user-question
-tool with concrete proposed options based on repository evidence. Ask focused
-rounds, reuse prior answers, and wait before writing dependent content. If no
-question tool is available, explain that and ask option-based questions in chat.
+- When `.jj` exists, use jj-vcs and invoke `use-jj`, even alongside `.git`.
+- If `use-jj` is unavailable, report it before mutations; do not substitute Git.
+- Commit only after user approval; publish only on explicit request.
+- Never add AI attribution.
 
-Use the commands and working directories in STACK.md; report missing ones.
-Check current official docs and the latest released library versions. Adding,
-installing, replacing, or upgrading a dependency needs user approval; a version
-check is not approval.
+## Specs
 
-For each change, follow [TDD's workflow](docs/conventions/TDD.md#workflow):
-write a failing test and see it fail, implement, then have a different agent do
-an adversarial review; fix and repeat until clean. Then the user reviews and
-approves the commit. Commit only on that approval; publish only on explicit
-request; never add AI attribution.
+- Never invent requirements; fill specs progressively.
+- Leave unknown sections empty, without placeholders or generic questions.
+- For requested spec work, always use the available question tool with concrete
+  proposed options based on repository evidence.
+- Ask focused rounds, reuse prior answers, and wait before writing dependent
+  content. If no tool is available, explain and ask option-based questions in chat.
+- ROADMAP.md contains only feature/sub-feature groups and task checklists;
+  leave it title-only when no work is identified.
+- Requirements own behavior; plans own execution and checkpoints; validation
+  owns evidence and user acceptance. Link shared facts.
+- Mark completed tasks with evidence; completion does not imply user acceptance.
 
-Reply in short `-` bullets for changes and verification, without repeats. End
-with **User must be aware**: material risks, limits, and unresolved decisions, or
-"None". Record actual open questions when relevant; leave other sections empty.
+## Implementation
 
-## Read only for the current task
+- Use STACK.md commands and working directories; report missing ones.
+- Check current official docs and latest released library versions.
+- Dependency additions, installations, replacements, and upgrades need approval.
+- Follow [TDD](docs/conventions/TDD.md#workflow): failing test, implementation,
+  independent adversarial review until clean, then user review.
 
-| Task | Guidance |
-| --- | --- |
-| Goals, users, scope | [MISSION.md](docs/specs/MISSION.md) |
-| Feature outcomes and requirement links | [FEATURES.md](docs/specs/FEATURES.md) |
-| Features, sub-features, and task checklists | [ROADMAP.md](docs/specs/ROADMAP.md) |
-| Technologies, versions, commands | [STACK.md](docs/specs/STACK.md) |
-| Code, TypeScript/frontend, dependencies | [CODE.md](docs/conventions/CODE.md) |
-| Go work | [GOLANG.md](docs/conventions/GOLANG.md) |
-| Behavior changes, tests, verification | [TDD.md](docs/conventions/TDD.md) |
-| Commit proposals, delivery | [COMMITS.md](docs/conventions/COMMITS.md) |
-| Architecture choices | [Decision guide](docs/decisions/README.md) |
-| Feature planning, work, or resume | [Feature guide](docs/features/README.md) |
+## Read for the current task
 
-Use task/subtask checklists for roadmaps and plans; mark completed work with
-evidence. Write specs as short bullets under clear sections; reserve tables for
-compact mappings. FEATURES.md catalogs outcomes and requirement links, without
-progress. ROADMAP.md contains only feature/sub-feature groups and task checklists;
-leave it title-only when no work is identified. Requirements own behavior, plans
-own execution details and the checkpoint, and validation owns evidence and user
-acceptance. Link shared facts rather than duplicating them.
-Load old feature records only for a relevant dependency.
+- [MISSION.md](docs/specs/MISSION.md): goals, users, scope.
+- [ROADMAP.md](docs/specs/ROADMAP.md): features, sub-features, tasks.
+- [STACK.md](docs/specs/STACK.md): technologies, versions, commands.
+- [CODE.md](docs/conventions/CODE.md): code, frontend, dependencies.
+- [GOLANG.md](docs/conventions/GOLANG.md): Go work.
+- [TDD.md](docs/conventions/TDD.md): behavior changes, tests, verification.
+- [COMMITS.md](docs/conventions/COMMITS.md): commit proposals and delivery.
+- [Decision guide](docs/decisions/README.md): architecture choices.
+- [Feature guide](docs/features/README.md): planning, work, resume.
+- Load historical records only for relevant dependencies.
+
+## Replies
+
+- Use short bullets for changes and verification; avoid repetition.
+- End with **User must be aware**: material risks, limits, unresolved decisions,
+  or "None".
+- Record actual open questions where relevant; leave other sections empty.

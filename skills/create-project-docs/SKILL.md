@@ -60,7 +60,6 @@ after the user approves that exact edit. Keep Claude-only additions.
 | [GOLANG.md](assets/docs/conventions/GOLANG.md) | Go conventions, toolchain, and `go fix` |
 | [TDD.md](assets/docs/conventions/TDD.md) | Test-first workflow, review loop, and verification |
 | [MISSION.md](assets/docs/specs/MISSION.md) | Problem, users, outcome, and non-goals |
-| [FEATURES.md](assets/docs/specs/FEATURES.md) | Feature catalog: intended outcomes and links to behavior requirements; no tasks or progress |
 | [ROADMAP.md](assets/docs/specs/ROADMAP.md) | Features and sub-features grouped with task checklists; no other content |
 | [STACK.md](assets/docs/specs/STACK.md) | Technologies, supported versions, and project commands |
 | [Decision guide](assets/docs/decisions/README.md) | Numbered decision records and their template |
@@ -81,9 +80,9 @@ Setup is done when:
   Apply the same rule to feature and decision templates. Keep writing guidance
   in this skill, AGENTS.md, and the feature/decision guides, outside copyable
   templates.
-- FEATURES.md describes identified feature outcomes and links to requirements;
-  it does not repeat roadmap tasks or track progress. Assign each real feature
-  the next unused four-digit number, `NNNN`, as its only ID. Preserve IDs.
+- Assign each real feature the next unused four-digit number, `NNNN`, as its
+  only ID across ROADMAP.md and feature records. Check both for used numbers;
+  never reuse or renumber IDs. Detailed behavior belongs in requirements.md.
 - ROADMAP.md contains only feature headings, nested sub-feature headings, and
   task/subtask checklists, with concise links to plans or evidence when useful.
   Do not add status tables, narrative, acceptance criteria, dependency notes,
@@ -142,8 +141,9 @@ policy:
 - The reply format with **User must be aware**.
 - `go fix` guidance in GOLANG.md for Go projects.
 
-Keep AGENTS.md near 300 words with plain Markdown links; do not import every
-linked document.
+Keep AGENTS.md near 300 words, using section headings and short bullet lists
+only, including task routes. Avoid prose paragraphs and tables. Use plain
+Markdown links; do not import every linked document.
 
 Writing an existing `docs/SPEC.md` belongs to `create-spec` when available; do
 not use it to rewrite this layout. Application scaffolding is a separate

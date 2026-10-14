@@ -1,8 +1,10 @@
 # Feature records
 
-Create one folder per real feature, named `NNNN-<slug>`. `NNNN` is the
-feature's number from [FEATURES.md](../specs/FEATURES.md) and its only ID.
-Preserve existing numbering and names.
+Create one folder per real feature, named `NNNN-<slug>`. Assign the next unused
+four-digit number, checking [ROADMAP.md](../specs/ROADMAP.md) and existing feature
+folders. `NNNN` is the feature's only ID everywhere. Preserve existing numbering
+and names; never reuse or renumber IDs. A feature may appear in ROADMAP.md before
+it needs a folder.
 
 ```text
 0001-feature-x/
@@ -20,9 +22,8 @@ only when a real feature is being planned, not as empty examples during setup.
 - `plan.md`: implementation approach, delivery steps, approvals, and current checkpoint.
 - `validation.md`: verification evidence and the user's acceptance decision.
 
-[FEATURES.md](../specs/FEATURES.md) indexes features and links to their
-requirements, without tasks or progress. [ROADMAP.md](../specs/ROADMAP.md)
-contains only feature and sub-feature groups with task/subtask checklists. Link
+[ROADMAP.md](../specs/ROADMAP.md) groups features and sub-features with
+task/subtask checklists, without a separate feature index. Link
 tasks to plan.md for execution details and validation.md for evidence when those
 records exist. Keep acceptance decisions in validation.md, dependencies and the
 checkpoint in plan.md, and behavior in requirements.md. Do not add status fields,
@@ -82,7 +83,7 @@ If a feature is too large to implement and review in small slices, split it into
 sub-features before implementation. Give each a clear, independently verifiable
 outcome, bounded requirements, and its own review checkpoints.
 
-Give each sub-feature its own number in FEATURES.md and a sibling folder
+Give each sub-feature its own number in ROADMAP.md and a sibling folder
 containing `plan.md`, `requirements.md`, and `validation.md`. Link the parent
 and sub-features in both directions and record their dependencies and delivery
 order through its grouping and task order in ROADMAP.md; put dependency details

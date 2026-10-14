@@ -8,7 +8,8 @@ details need no decision record.
 Use the template below when a real decision needs recording. Proposals remain
 proposals until the user agrees. Link relevant [stack choices](../specs/STACK.md)
 and [feature records](../features/README.md). Product requirements stay in each
-feature's requirements.md, indexed by [FEATURES.md](../specs/FEATURES.md).
+feature's requirements.md; feature groups and tasks belong in
+[ROADMAP.md](../specs/ROADMAP.md).
 
 ## Record template
 
