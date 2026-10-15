@@ -7,6 +7,8 @@
 - Name records `NNNN-<decision-slug>.md` using the next unused number.
 - Preserve numbering and names; never renumber existing records.
 - Proposals remain proposals until the user agrees.
+- Record unresolved questions in [the question log](../QUESTIONS.md), following
+  the [question guide](../conventions/QUESTIONS.md); link IDs from the record.
 
 ## Writing a record
 

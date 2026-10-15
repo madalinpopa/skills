@@ -77,6 +77,8 @@ request a user decision with evidence and remaining disagreement. Never claim
 clean review with unresolved blockers; clean review does not prove defect-free code.
 
 Review authorizes neither new scope nor dependency changes. Record unresolved
-questions/decisions in requirements/plans and ask with the available question tool
+questions in [the question log](../QUESTIONS.md), following the
+[question guide](QUESTIONS.md), and link them from affected requirements/plans.
+Ask with the available question tool
 before dependent work. If delegation is unavailable, report the blocker and request
 a decision; do not substitute self-review or claim clean review.

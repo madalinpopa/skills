@@ -46,6 +46,9 @@
   [TDD.md](docs/conventions/TDD.md) and follow its applicable review gates.
 - Before commit proposals or delivery, read [COMMITS.md](docs/conventions/COMMITS.md).
 - Before spec edits, read the [spec writing guide](docs/specs/README.md).
+- Before recording questions or applying answers, read the
+  [question guide](docs/conventions/QUESTIONS.md); it owns the single log format
+  and document-first closure rules.
 - Before recording architecture decisions, read the [decision guide](docs/decisions/README.md).
 - Before planning or resuming work, read the [feature guide](docs/features/README.md).
 - Load historical records only for relevant dependencies.

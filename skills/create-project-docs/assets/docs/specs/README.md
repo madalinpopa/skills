@@ -20,7 +20,8 @@
 - Intended outcome: state what improves for users and how success can be observed.
 - Scope and non-goals: list included outcomes, deliberate exclusions, and real
   constraints. Do not turn undecided work into a non-goal.
-- Open questions: record only unresolved product questions raised during work.
+- Open questions: link relevant entries in [the question log](../QUESTIONS.md);
+  follow the [question guide](../conventions/QUESTIONS.md), without local lists.
 - Keep detailed feature behavior in feature requirements; tasks belong in ROADMAP.md.
 
 ## ROADMAP.md

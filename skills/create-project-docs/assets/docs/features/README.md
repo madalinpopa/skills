@@ -44,7 +44,8 @@ Add only sections with content:
   prerequisites, and links to shared specs or decisions.
 - Acceptance criteria: concrete, verifiable scenarios with stable `R-001` IDs.
   For codebase work, state what must improve and what behavior must be preserved.
-- Open questions: actual unresolved scope or design decisions.
+- Open questions: link relevant IDs in [the question log](../QUESTIONS.md);
+  follow the [question guide](../conventions/QUESTIONS.md), without local lists.
 
 ## plan.md
 
