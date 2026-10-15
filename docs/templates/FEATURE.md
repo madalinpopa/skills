@@ -12,8 +12,9 @@ phases as brief roadmap entries; create a sibling phase file from
 `docs/templates/PHASE.md` when that phase becomes active. Replace placeholders,
 remove unused sections, and resolve repository paths from the repository root.
 
-`AGENTS.md` owns engineering rules and verification commands. `docs/SPEC.md`
-owns CLI behavior. This file records the feature agreement; phase files record
+`AGENTS.md` owns review gates and routes to engineering conventions and
+verification commands in `docs/conventions/`. `docs/SPEC.md` owns CLI behavior.
+This file records the feature agreement; phase files record
 execution and evidence. Surface conflicts for a developer decision before
 changing the affected behavior or contract.
 
