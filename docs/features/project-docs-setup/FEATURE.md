@@ -68,6 +68,6 @@ documents describe the target project, not this skill store.
 | Phase | Outcome | Depends on | Status | Phase file |
 | --- | --- | --- | --- | --- |
 | 01 | A reusable initializer with templates and preservation checks | None | awaiting implementation review | [Phase 01](phase-01-initializer-skill.md) |
-| 02 | One question log with document-first resolution and concise persistent guidance | Existing initializer | awaiting test review | [Phase 02](phase-02-central-question-log.md) |
+| 02 | One question log with document-first resolution and concise persistent guidance | Existing initializer | awaiting implementation review | [Phase 02](phase-02-central-question-log.md) |
 
 Acceptance does not authorize commits or publication.

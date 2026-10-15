@@ -27,6 +27,7 @@ assets="$(cd -- "$(dirname -- "$0")/../assets" && pwd -P)"
 directories=(docs docs/conventions docs/specs docs/decisions docs/features)
 files=(
   AGENTS.md CLAUDE.md
+  docs/QUESTIONS.md docs/conventions/QUESTIONS.md
   docs/conventions/CODE.md docs/conventions/COMMITS.md
   docs/conventions/GOLANG.md docs/conventions/TDD.md
   docs/specs/README.md docs/specs/MISSION.md
