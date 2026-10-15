@@ -59,7 +59,7 @@ after the user approves that exact edit. Keep Claude-only additions.
 | [COMMITS.md](assets/docs/conventions/COMMITS.md) | Commit messages and when a commit is allowed |
 | [GOLANG.md](assets/docs/conventions/GOLANG.md) | Go conventions, toolchain, and `go fix` |
 | [TDD.md](assets/docs/conventions/TDD.md) | Test-first workflow, review loop, and verification |
-| [Question guide](assets/docs/conventions/QUESTIONS.md) | Question IDs, checklist format, answers, and closure in docs/QUESTIONS.md |
+| [Question guide](assets/docs/conventions/QUESTIONS.md) | Simple questions grouped by purpose, answers, and closure in docs/QUESTIONS.md |
 | [Spec writing guide](assets/docs/specs/README.md) | Section guidance and concise writing rules |
 | [MISSION.md](assets/docs/specs/MISSION.md) | Problem, users, outcome, and non-goals |
 | [ROADMAP.md](assets/docs/specs/ROADMAP.md) | Features and sub-features grouped with task checklists; no other content |
@@ -125,9 +125,10 @@ duplicating it; do not seed generic questions.
 
 Before recording questions or applying answers, read the
 [question guide](assets/docs/conventions/QUESTIONS.md). It owns the log format
-and lifecycle: keep open questions first, apply answers to their owning sections,
+and lifecycle: group simple task questions by purpose, apply answers to their owning sections,
 and check tasks only after verifying the updates. Partial or unapplied answers
-stay open. Preserve question IDs and link other documents to the log.
+stay open. Use no question IDs or HTML anchors; link other documents to the
+relevant group in the log.
 
 When tailoring, keep these template rules, adapted only to existing project
 policy:

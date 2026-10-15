@@ -61,6 +61,7 @@ documents describe the target project, not this skill store.
 | Use phased task-only plans for features and codebase work | Clear progress, one next action, linked evidence, and less duplicated context | Explicit user request, 2026-10-15; awaiting documentation review |
 | Centralize actual open questions in docs/QUESTIONS.md | One visible checklist; document answers in their owning sections before closing questions | Plan approved: "arata bine, continua cu implementarea", 2026-10-15; test review remains required |
 | Replace the mandatory awareness footer with one concrete Next Step | Record questions and decision blockers as they arise in QUESTIONS.md; propose the next useful action after each work slice | Explicit user request, 2026-10-15; included in phase 02 |
+| Keep question checklists simple and grouped by purpose | Remove question IDs, HTML anchors, and mandatory metadata; document answers before checking tasks | Explicit user correction, 2026-10-15; documentation updated for review |
 
 ## Phase roadmap
 

@@ -83,7 +83,7 @@ class ProjectDocumentationSetup(unittest.TestCase):
             "CLAUDE.md": b"@AGENTS.md\n\nKeep Claude-specific instructions.\n",
             "docs/conventions/CODE.md": b"# Our conventions\nPreserve this file.\n",
             "docs/specs/STACK.md": b"",
-            "docs/QUESTIONS.md": b"- [ ] Q-0001 -- Confirm retention duration.\n",
+            "docs/QUESTIONS.md": b"## Data retention\n\n- [ ] How long should data be retained?\n",
         }
         for name, contents in existing.items():
             destination = self.project / name
