@@ -60,6 +60,7 @@ documents describe the target project, not this skill store.
 | Keep replies minimal, with a User must be aware section and recorded pending decisions | Short change/check bullets, no repeated details; ask the user to review unresolved questions | Explicit user request, 2026-10-14; follow-up awaiting review |
 | Use phased task-only plans for features and codebase work | Clear progress, one next action, linked evidence, and less duplicated context | Explicit user request, 2026-10-15; awaiting documentation review |
 | Centralize actual open questions in docs/QUESTIONS.md | One visible checklist; document answers in their owning sections before closing questions | Plan approved: "arata bine, continua cu implementarea", 2026-10-15; test review remains required |
+| Replace the mandatory awareness footer with one concrete Next Step | Record questions and decision blockers as they arise in QUESTIONS.md; propose the next useful action after each work slice | Explicit user request, 2026-10-15; included in phase 02 |
 
 ## Phase roadmap
 

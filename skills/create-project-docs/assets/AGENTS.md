@@ -53,6 +53,11 @@
 ## Replies
 
 - Use short bullets for changes and verification; avoid repetition.
-- End with **User must be aware**: material risks, limits, unresolved decisions,
-  or "None".
-- Record actual open questions where relevant; omit unknown topics.
+- Whenever user input is needed, use the available ask-question tool when it
+  supports the question; otherwise ask in chat. Reuse known answers.
+- Record actual questions and blockers needing user input in `docs/QUESTIONS.md`
+  as they arise; state the input needed and affected work. Omit generic questions.
+- End with **Next Step**: one concrete action based on current progress, such as
+  answering a blocking question, reviewing changes, or working on a feature.
+  Link the relevant question or task; a proposal does not authorize new work.
+- Report material failures and limits alongside the relevant result.

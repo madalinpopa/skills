@@ -8,21 +8,29 @@
 ## Current checkpoint
 
 - **Status**: awaiting test review.
-- **Current step**: Extended initializer tests; no implementation changes.
+- **Current step**: Initializer tests await review. Separately applied the
+  explicitly requested documentation-only reply changes; those await review.
 - **Approved scope**: User approved the proposed plan on 2026-10-15:
   "arata bine, continua cu implementarea". This does not bypass test review.
-- **Working tree**: test_initializer.py and these two planning records.
+  Follow-up request replaces the mandatory awareness footer with Next Step
+  and requires recording questions or blockers when discovered during work.
+  A further explicit request requires the available ask-question tool whenever
+  it supports a question, including questions outside spec work.
+- **Working tree**: test_initializer.py, SKILL.md, assets/AGENTS.md, and these
+  two planning records. Helper and new question assets remain unchanged.
 - **Last verification**: The focused Python suite fails because the initializer
   does not create or preflight the two new question documents.
 - **Pending decision**: Explicit approval of tests and implementation scope.
-- **Next action**: User reviews tests; after approval, implement this phase.
+- **Next action**: User reviews the reply guidance and initializer tests;
+  after test approval, implement the remaining question-log workflow.
 
 ## Scope and required context
 
 - Add an initially empty docs/QUESTIONS.md and a concise persistent procedure
   in docs/conventions/QUESTIONS.md. Keep instructions out of the log.
 - Update the initializer file list, SKILL.md, generated AGENTS.md, and affected
-  spec/feature/decision guides. Replace local question lists with log links.
+  spec/feature/decision guides and TDD reporting guidance. Replace local
+  question lists with log links.
 - Use stable question IDs, open-first task lists, required input, relevant
   target, and blocking impact when applicable. Keep resolved entries concise.
 - Document complete or partial answers in their owning sections. Close only
@@ -31,6 +39,15 @@
   requires authorization for affected edits; do not create a competing owner.
 - Load open questions and relevant documents; consult resolved history only
   when needed. Report what input is needed next without repeating the log.
+- Record questions and blockers when discovered, rather than waiting for the
+  final reply. Explain required input and link the affected work. A blocker
+  the agent can resolve within scope does not require an invented user question.
+- Remove the mandatory User must be aware footer everywhere in this skill's
+  output instructions. Report material failures or limits where relevant.
+- End each work-slice reply with one concrete Next Step based on current state:
+  the blocking question, required review, next task, or useful feature proposal.
+  Reference an existing question ID when applicable. A suggestion does not
+  authorize starting new scope; avoid inventing work when the request is done.
 - No CLI behavior, Go, dependencies, commits, or publication changes.
 
 Read [repository instructions](../../../AGENTS.md),
@@ -45,6 +62,8 @@ Read [repository instructions](../../../AGENTS.md),
 - [ ] Partial answers, duplicates, contradictions, withdrawals, and resumption
   retain unresolved information without inventing decisions or authorization.
 - [ ] Relative routes resolve and recurring guidance stays concise.
+- [ ] Questions and blockers are recorded during work; replies propose one
+  actionable Next Step without the mandatory awareness footer or duplicate logs.
 
 ## Change plan and review checkpoints
 
@@ -76,6 +95,15 @@ Read [repository instructions](../../../AGENTS.md),
   the old helper. Existing-log preservation checks are ready but cannot finish
   until the missing guide is created.
 - Tests exercise observable filesystem behavior; helper and assets unchanged.
+- Follow-up reporting changes do not alter helper behavior or test scope;
+  review them with the skill instructions rather than wording-matching tests.
+- Reply guidance applied in SKILL.md and assets/AGENTS.md on explicit user
+  correction: remove the awareness footer, record questions as they arise,
+  and end with one actionable Next Step. Scoped diff inspection and whitespace
+  checks passed. Default validator lacked PyYAML; the existing temporary uv
+  environment validated the skill offline successfully. No packages installed.
+- Extended the same reply guidance to use an available ask-question tool for
+  all questions it supports, with chat fallback and reuse of known answers.
 - `git diff --check` passed. Initial `jj diff` hit sandbox snapshot restrictions;
   the permitted retry succeeded. No history changes were requested or made.
 

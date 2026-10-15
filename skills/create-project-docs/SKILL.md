@@ -117,8 +117,10 @@ unanswered topics out of the document. If no question tool is available, report
 that limit and ask equivalent option-based questions in chat.
 
 Update only the requested scope with established facts and the user's answers.
-Keep existing agreed content and document ownership. Capture actual unresolved
-questions only when raised in the work; do not seed lists of generic questions.
+Keep existing agreed content and document ownership. Record actual unresolved
+questions and blockers needing user input in `docs/QUESTIONS.md` as they arise,
+with the input needed and affected work. Reuse an existing entry instead of
+duplicating it; do not seed generic questions.
 
 When tailoring, keep these template rules, adapted only to existing project
 policy:
@@ -140,7 +142,11 @@ policy:
 - Group related spec content under clear sections and use concise lists.
   Link shared facts to their owner. Avoid long paragraphs and prose-heavy tables;
   reserve tables for compact comparisons or mappings.
-- The reply format with **User must be aware**.
+- Short replies ending with one concrete **Next Step**, linked to the relevant
+  question or task when available; proposals do not authorize new work.
+- Whenever user input is needed, use the available ask-question tool when it
+  supports the question; otherwise ask in chat. Apply this beyond spec work
+  too, and reuse known answers instead of asking again.
 - `go fix` guidance in GOLANG.md for Go projects.
 
 Keep AGENTS.md near 300 words, using section headings and short bullet lists
@@ -168,9 +174,15 @@ avoids duplicate coverage.
 Confirm existing files kept their bytes. Copied templates are not agreed requirements,
 and copying docs does not mean any application tests passed.
 
-Report in short `-` bullets, without full logs. Add **User must be aware** with
-real limits, partial writes, and open questions, or "None". Report actual unresolved
-items without filling empty sections with placeholder text, and ask the user to
-review the changes. Propose a commit message,
+Report changes and verification in short `-` bullets without repetition or full
+logs. Report material limits and partial writes alongside the relevant result.
+Record actual questions and blockers needing user input in `docs/QUESTIONS.md`
+during work rather than waiting for the final reply. Whenever user input is
+needed, use the available ask-question tool when it supports the question;
+otherwise ask in chat. End with **Next Step**:
+one concrete action based on current progress, such as answering a blocking
+question, reviewing changes, or working on a feature. Link the relevant question
+or task when available; do not invent follow-up work or imply permission to start
+new scope. Propose a commit message,
 and leave changes uncommitted unless the user asks for a commit. Publishing
 this skill does not authorize committing, pushing, or publishing the project.
