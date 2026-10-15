@@ -1,166 +1,106 @@
 # Go conventions
 
-Apply only to Go work. Read the relevant `go.mod` and toolchain configuration;
-supported versions and module locations belong in [STACK.md](../specs/STACK.md).
-Do not assume the machine's newest Go version is the project's target.
-Apply [shared code conventions](CODE.md) and [TDD.md](TDD.md) alongside the
-Go-specific rules below.
+Apply only to Go work, alongside [CODE.md](CODE.md) and [TDD.md](TDD.md).
+Read the relevant `go.mod` and toolchain configuration; use supported versions,
+not the machine's newest Go. Record versions and module roots in
+[STACK.md](../specs/STACK.md).
 
-## Readable packages and APIs
+## Readability and APIs
 
-- Name packages for the capability they provide; avoid catch-all `util`, `common`,
-  or `helpers` packages. Keep the exported surface small and names clear at the
-  call site, without repeating the package name.
-- Use short names for small, obvious scopes and descriptive names for longer
-  scopes or domain concepts. Keep initialisms consistent, such as `ID` and `URL`.
-- Handle errors and exceptional cases early so the main operation reads straight
-  through. Avoid shadowing an error or result when it obscures which value returns.
-- Define small interfaces in the consuming package when a caller needs substitution.
-  Prefer concrete return types unless an interface is the intended API; do not
-  mirror every struct with an interface or add one solely to generate mocks.
-- Prefer standard-library facilities when they fit. Use generics for genuinely
-  shared algorithms or containers with useful type constraints; avoid `any`,
-  reflection, or type assertions that discard information known at compile time.
-- Document exported declarations and non-obvious contracts: mutation, ownership,
-  zero-value behavior, and concurrent use. Keep implementation commentary selective.
+- Name packages by capability; avoid catch-all utility packages and package-name
+  repetition. Keep exports small, names proportional to scope, and initialisms
+  consistent (`ID`, `URL`). Handle failures early; avoid confusing shadowing.
+- Define small interfaces at the consuming boundary when substitution is needed.
+  Prefer concrete returns unless an interface is the API; avoid mirrored
+  interfaces and interfaces added solely for mocks.
+- Prefer suitable standard-library APIs. Use generics for shared typed algorithms
+  or containers; avoid `any`, reflection, and assertions that discard known types.
+- Document exports and non-obvious contracts: ownership, mutation, zero values,
+  partial results, side effects, and concurrent use. Keep other comments selective.
 
-See [Go code review comments](https://go.dev/wiki/CodeReviewComments) and
-[Google's Go style decisions](https://google.github.io/styleguide/go/decisions).
+## Values and resources
 
-## Values, mutation, and ownership
+- Prefer useful zero values. Use constructors to establish invariants or acquire
+  dependencies; reject invalid external configuration before returning a usable value.
+- Use pointer receivers for mutation or non-copyable state; keep receivers
+  consistent. Never copy used synchronization values or structs containing them.
+- Slice and map copies share data; clone when independent mutation is required.
+  `slices.Clone` and `maps.Clone` are shallow: nested mutable values still alias.
+- Preserve observable absent/zero/nil/empty distinctions, especially in serialized
+  data and updates. Initialize maps before writes; sort keys for ordered output.
+- Keep acquisition and cleanup together, normally with `defer` after success.
+  Release per-iteration resources promptly rather than retaining them until return.
+- Check write, flush, close, and commit errors that affect success. Preserve the
+  primary failure and report meaningful cleanup failures; cleanup alone proves
+  neither persistence nor success.
 
-- Make zero values useful where practical. Use constructors when initialization
-  must establish invariants or acquire dependencies; return errors for invalid
-  external configuration rather than leaving a partially usable value.
-- Choose pointer receivers for mutation or values that must not be copied. Keep
-  receiver choices consistent for a type; do not copy a used mutex, `sync.Once`,
-  `sync.WaitGroup`, or a struct containing them.
-- Remember that copying a slice or map still shares its backing data. Copy at an
-  ownership boundary when callers must mutate independently; `slices.Clone` and
-  `maps.Clone` are shallow copies, so nested mutable values may still alias.
-- Preserve observable distinctions between absent, zero, nil, and empty values,
-  especially in serialization and updates. Initialize maps before writing to them;
-  sort keys when output order is part of the contract.
-- Keep acquisition and cleanup together. After successful acquisition, normally
-  defer cleanup in the owning scope. In loops, use a smaller scope or explicit
-  cleanup when waiting for the outer function to return would retain resources.
-- Check write, flush, close, and commit errors when they determine whether an
-  operation succeeded. Preserve the primary failure while reporting meaningful
-  cleanup failures; deferred cleanup alone does not prove a write succeeded.
+## Errors
 
-See the [`sync` contracts](https://pkg.go.dev/sync),
-[`slices.Clone`](https://pkg.go.dev/slices#Clone), and
-[Effective Go](https://go.dev/doc/effective_go).
-
-## Errors as contracts
-
-- Return `error` for expected failures; reserve panic for programming errors or
-  documented unrecoverable conditions. Do not recover just to return success.
-- Add operation-specific context when useful. Use `%w` when callers should inspect
-  the cause, recognizing that wrapped errors become part of the API. Translate
-  dependency errors at boundaries when exposing them would leak implementation
-  details the package should remain free to change.
-- Use `errors.Is` for sentinel matching and the supported toolchain's typed error
-  inspection API, such as `errors.As`, for error types. Do not branch on error text.
-  Introduce custom errors only when callers need a distinct recovery decision or
-  structured information.
-- Return an explicit `nil` error on success. A typed nil pointer stored in an
-  `error` interface is non-nil; avoid returning one accidentally.
-- Make partial results and partial side effects explicit in the contract. Do not
-  hide failures behind empty results, retries, or fallback values unless required.
-
-See [working with wrapped errors](https://go.dev/blog/go1.13-errors) and
-[nil errors in the Go FAQ](https://go.dev/doc/faq#nil_error).
+- Return errors for expected failures; reserve panic for programming errors or
+  documented unrecoverable conditions. Never recover merely to report success.
+- Add useful operation context. Wrap with `%w` when callers should inspect the
+  cause; wrapped errors become API commitments. Translate dependency errors when
+  exposing them would violate the package boundary.
+- Match sentinels with `errors.Is` and types with supported typed inspection APIs
+  such as `errors.As`, never error strings. Add custom errors only for useful
+  recovery decisions or structured information.
+- Return explicit `nil` on success: a typed nil pointer in an `error` is non-nil.
+  Do not hide failures with empty results, retries, or fallbacks unless required.
 
 ## Context and concurrency
 
-- Accept `ctx context.Context` as the first parameter of operations that need
-  cancellation or deadlines, and pass it to downstream work. Do not replace a
-  request context with `context.Background()` to bypass cancellation.
-- Pass contexts per call rather than storing them in long-lived structs, except
-  when an existing API contract requires it. Use context values for request-scoped
-  metadata, not optional arguments or dependency injection.
-- Call the cancel function from `WithCancel`, `WithTimeout`, or `WithDeadline` on
-  every path once the derived work is done. Cancellation signals a stop; it does
-  not wait for goroutines to exit or interrupt code that ignores the context.
-- Add concurrency for a concrete need. Bound in-flight work, and make each
-  goroutine's owner, exit condition, error propagation, and completion observable.
-  Join owned workers before releasing resources they still use.
-- Use a mutex for shared state when it is clearest, and channels for communication
-  or ownership transfer. Protect the entire invariant, not just individual fields;
-  do not assume a concurrent map makes multi-step operations atomic.
-- Give channel closure a clear owner that knows all sends are finished. Make
-  potentially blocking sends and receives cancellable when work may be abandoned.
-  Buffers and sleeps are not substitutes for coordination.
+- Pass `ctx context.Context` first where cancellation/deadlines apply and propagate
+  it downstream. Never replace request context with `context.Background()` to
+  bypass cancellation. Pass contexts per call unless an API requires storage;
+  values carry request metadata, not options or dependencies.
+- Always release derived contexts with their cancel function. Cancellation neither
+  waits for goroutines nor interrupts work that ignores it.
+- Add concurrency only for a concrete need. Bound work; define goroutine ownership,
+  exit, error propagation, and completion. Join workers before releasing their resources.
+- Use mutexes for shared state and channels for communication when clearest.
+  Synchronize whole invariants; concurrent maps do not make compound actions atomic.
+- Close channels only when all sends have finished, under a clear owner. Make
+  blocking communication cancellable when work may be abandoned; buffers and
+  sleeps do not replace coordination.
 
-See the [`context` contract](https://pkg.go.dev/context) and
-[goroutine lifetime guidance](https://go.dev/wiki/CodeReviewComments#goroutine-lifetimes).
+## Tests and verification
 
-## Go tests and verification
+Coverage and review follow [TDD.md](TDD.md).
 
-Follow [TDD.md](TDD.md) for coverage choices, review, and the test-first workflow.
+- Prefer small `map[string]struct` tables when suitable; use slices for ordered
+  cases. Name groups `TestBehavior_success` and `TestBehavior_failed`.
+- Use `t.Helper()`, `t.Cleanup()`, `t.TempDir()`, and local fixtures. Parallelize
+  only isolated tests, never tests changing environment/working directory or
+  shared mutable state. Coordinate with signals rather than sleeps.
+- Run project format, test, build, and `go vet` checks for relevant modules/build
+  configurations. Exercise changed concurrency with `go test -race`; it detects
+  only races on executed paths. Report unavailable tools or unsupported environments.
+- Consider fuzzing parsers, decoders, and transformations with useful invariants;
+  retain regression seeds and time-bound exploratory runs.
+- Use the project's `govulncheck` workflow; dependency installation follows
+  [CODE.md](CODE.md). Benchmark/profile demonstrated performance problems before
+  adding pools, caches, or synchronization complexity.
 
-- For table tests, prefer simple `map[string]struct` tables when appropriate;
-  name success and failure groups `TestBehavior_success` and `TestBehavior_failed`.
-  Use a slice when case order matters; never rely on map iteration order.
-- Mark helpers with `t.Helper()`, register test-owned cleanup with `t.Cleanup()`,
-  and use `t.TempDir()` and local fixtures for filesystem tests.
-- Use `t.Parallel()` only for isolated tests. Do not combine it with `t.Setenv`,
-  working-directory changes, or shared mutable resources. Coordinate concurrent
-  tests with explicit signals instead of timing assumptions and arbitrary sleeps.
-- Run the project's formatting, test, build, and `go vet` checks for relevant
-  modules and build configurations. Exercise changed concurrent paths with
-  `go test -race`; a passing run covers only paths executed under that workload.
-- Consider fuzz tests for parsers, decoders, or transformations with useful
-  invariants. Keep discovered regressions as seed cases; give exploratory fuzz
-  runs a time budget rather than making ordinary test runs unbounded.
-- Use the project's `govulncheck` workflow for vulnerability checks. Report missing
-  tools or unsupported race-detector environments; follow [CODE.md](CODE.md) before
-  installing dependencies. Benchmark and profile a demonstrated performance
-  problem before adding pooling, caching, or synchronization complexity.
+## AI-assisted changes and modernization
 
-See [race detection](https://go.dev/doc/articles/race_detector),
-[Go fuzzing](https://go.dev/doc/security/fuzz/), and
-[Go security practices](https://go.dev/doc/security/best-practices).
+- Inspect affected packages, callers, tests, and versions before generating code.
+  Reuse existing types/helpers; verify unfamiliar APIs for the selected version
+  with `go doc` and official documentation.
+- Review generated code against the contracts above. Compilation does not prove
+  behavior. Derive test expectations independently from requirements or checked
+  examples; never weaken assertions or requirements to fit generated code.
+- Prefer tool diagnostics and deterministic refactoring over speculative rewrites.
+  Inspect diffs and run checks; generated claims are not verification evidence.
+- When available, follow `modern-go-guidelines:use-modern-go` for the file/module.
+  Otherwise use official Go docs and report the limitation; do not auto-install tools.
+- Periodically run `go fix ./...` per module, especially after supported toolchain
+  upgrades and before substantial reviews. For focused work, target the affected
+  package, including when changing one file. Consult `go help fix` for supported flags.
+- Use supported idioms when clearer. Review fixes for nil preservation, aliasing,
+  and evaluation order; preserve behavior, scope, and unrelated edits. Format and
+  rerun affected tests. Do not raise the Go version merely to modernize syntax.
 
-## AI-assisted Go changes
-
-- Before generating code, inspect the affected package, callers, existing tests,
-  and module versions. Reuse established types and helpers; check unfamiliar APIs
-  against the selected dependency version with `go doc` and official documentation.
-- Review generated code for the same contracts as handwritten code: error causes,
-  nil behavior, aliasing, cleanup, cancellation, and partial failure. Compilation
-  establishes type correctness, not the required behavior.
-- Derive expected results from requirements or independently checked examples.
-  Tests that reproduce the generated algorithm can repeat its mistakes. Do not
-  weaken assertions or change requirements merely to make generated code pass.
-- Prefer toolchain diagnostics and deterministic refactoring tools over repeated
-  speculative rewrites. Inspect each diff and run the relevant checks; generated
-  explanations and claimed test results are not verification evidence.
-
-These conventions apply
-[Google's guidance on reviewing and verifying AI-assisted Go](https://developers.googleblog.com/why-go-is-an-ideal-language-for-ai-assisted-software-engineering/)
-to this workflow; they do not require a particular AI tool.
-
-## Keep Go syntax current
-
-When `modern-go-guidelines:use-modern-go` is available, follow its installed
-version-specific guidance for the file/module being changed. If unavailable,
-use current official Go documentation and report that limitation; this document
-does not require installing tools automatically.
-
-Periodically run `go fix ./...` from each relevant module root, especially after
-a supported Go version upgrade and before reviewing substantial Go changes.
-For focused work, run `go fix ./path/to/package`; for a specific file, target
-its enclosing package so fixes retain package and type context.
-
-Use the project's supported toolchain and review the generated diff. Keep changes
-within the agreed scope, preserve unrelated edits, then run formatting and the
-affected tests. Do not raise the module's Go version just to apply newer syntax.
-Available fixes depend on the toolchain; consult [official go fix documentation](https://pkg.go.dev/cmd/go#hdr-Apply_fixes_suggested_by_static_checkers)
-and `go help fix` when selecting flags or a narrower scope.
-
-Go 1.26 introduced a rewritten `go fix` with version-aware modernizers. Prefer
-supported idioms when they improve clarity, but review semantic details such as
-nil preservation, aliasing, and evaluation order. A modernization is not permission
-to change behavior. See [using go fix to modernize Go code](https://go.dev/blog/gofix).
+Sources: [Go review guidance](https://go.dev/wiki/CodeReviewComments),
+[errors](https://go.dev/blog/go1.13-errors), [context](https://pkg.go.dev/context),
+[modernization](https://go.dev/blog/gofix), and
+[AI-assisted Go](https://developers.googleblog.com/why-go-is-an-ideal-language-for-ai-assisted-software-engineering/).
