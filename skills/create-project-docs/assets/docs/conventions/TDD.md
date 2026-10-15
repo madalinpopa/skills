@@ -1,115 +1,82 @@
 # Test-driven changes
 
-Apply to every change in visible behavior, including bug fixes. Test what users
-and callers rely on, not field assignments, library behavior, private details,
-or coverage numbers.
+Test every visible behavior change, including fixes. Assert what users/callers
+rely on, not field assignments, library behavior, private structure, or coverage.
 
-## Balance test coverage
+## Coverage and readability
 
-- Prefer integration tests for observable behavior across the relevant components,
-  using real local dependencies and small fixtures where practical.
-- Give each behavior one main test. Inspect existing coverage before adding tests;
-  extend or reuse it instead of repeating the same scenarios and assertions at
-  both unit and integration levels.
-- Add small unit tests only to prove implementation logic that integration tests
-  do not adequately exercise, such as focused branches or boundary cases. State
-  the distinct gap each unit test covers; avoid testing private structure.
-- Keep the suite balanced: use the smallest integration boundary that proves the
-  behavior, rather than a full end-to-end environment for every case. If that
-  boundary is impractical or unreliable, use a focused unit test and record the
-  integration gap and reason.
-- Keep default runs deterministic and independent of network or shared services.
-  Gate checks requiring external services and document how to run them.
-
-## Readable tests
-
-Readability is the priority. Make each test's setup, action, and expected outcome
-easy to follow without tracing through a test framework or layers of helpers.
-
-- Keep setup and assertions direct. Avoid unnecessary abstractions, generic test
-  harnesses, and complicated stubs; use simple fixtures and minimal stubs when
-  a real dependency cannot reasonably be exercised.
-- Use helpers for repeated setup, fixture creation, or assertions when they make
-  the test clearer. Reuse suitable existing helpers rather than duplicating them.
-  Give helpers descriptive names and keep their responsibilities small; leave
-  the behavior under test and its expected outcome visible at the call site.
-- Use table tests when cases share setup and assertion structure. Give each case
-  a descriptive name and explicit inputs and expected results. Keep tables small;
-  do not force unrelated scenarios into one table.
-- Group table tests into separate success and failure tests. Keep each group's
-  assertions consistent rather than branching on flags inside a combined runner.
+- Prefer the smallest integration boundary proving behavior, with real local
+  dependencies and small fixtures where practical. Avoid full end-to-end setups
+  when smaller boundaries suffice.
+- Give each behavior one main test; inspect and extend existing coverage rather
+  than duplicating scenarios across layers. Add focused unit tests only for logic
+  integration tests miss; state the distinct gap. If integration is impractical
+  or unreliable, use a unit test and record the integration gap/reason.
+- Keep default tests deterministic, network-free, and independent of shared services.
+  Gate external-service checks and document their commands.
+- Make setup, action, and outcome obvious. Avoid generic harnesses and complicated
+  stubs; use minimal stubs when real dependencies are impractical.
+- Reuse small, descriptive helpers when clearer; keep tested behavior and expected
+  results visible at the call site.
+- Use small tables only for cases sharing setup/assertions, with descriptive names
+  and explicit inputs/results. Separate success/failure groups; avoid flag-driven
+  assertion branches or unrelated cases in one table.
 
 ## Workflow
 
-Work one slice at a time. The user reviews once, at the end of each slice.
+Work one slice at a time; the user reviews once at its end.
 
-1. Write the smallest useful failing test. Run it and confirm it fails because
-   the required behavior is missing, not because of an environment or setup
-   error. Keep the command and failure output as evidence.
-2. Implement the smallest clear change that makes it pass, within the approved
-   scope. Refactor only where useful, keeping tests and agreed behavior intact.
-3. Run focused tests, then the format, lint, full-test, and build checks in
-   [STACK.md](../specs/STACK.md). Run integration tests only when the changed
-   boundary needs them.
-4. Delegate the [adversarial review](#adversarial-review) to a different agent
-   and wait for its result. Do not continue or ask for user review meanwhile.
-5. Resolve findings using the review procedure below. After fixes, rerun affected
-   checks and go back to step 4 with the updated diff.
-6. When the review is clean, stop for user review. Show the changes, the
-   failing-test evidence, final check results, review findings and fixes,
-   remaining concerns, and a proposed commit message. Commit only after the
-   user approves that commit.
+1. Write/run the smallest useful failing test. Confirm missing behavior causes
+   failure, not setup/environment; retain the command and output.
+2. Implement the smallest clear change within approved scope; refactor only where
+   useful while preserving tests and agreed behavior.
+3. Run focused tests, then project format, lint, full-test, and build checks in
+   [STACK.md](../specs/STACK.md). Run integration checks when the changed boundary needs them.
+4. Delegate [adversarial review](#adversarial-review) to a different agent; wait
+   before continuing or requesting user review.
+5. Resolve findings below; after fixes, rerun affected checks and repeat step 4.
+6. Once clean, stop for user review with changes, failing-test evidence, check
+   results, findings/fixes, remaining concerns, and a proposed commit message.
+   Commit only with approval for that commit.
 
-Plan approval does not skip the user review or authorize commits. Reuse explicit
-approval within its stated scope. Documentation/configuration work that gains
-nothing from a failing test skips step 1; configuration that changes behavior
-still needs tests.
-
-Report every failed or skipped check and its cause; never describe an unrun
-check as passed.
+Plan approval neither skips review nor authorizes commits; reuse explicit approval
+within scope. Skip step 1 for documentation/configuration that gains nothing from
+failing tests; behavior-changing configuration still needs tests. Report every
+failed/skipped check and its cause; never claim an unrun check passed.
 
 ## Adversarial review
 
-Delegate to one independent, read-only reviewer by default, using the environment's
-available subagent tool. Supply the current diff, approved scope, relevant
-requirements, test evidence, and necessary code context; omit the implementer's
-conclusions.
+Default to one independent, read-only reviewer via the available subagent tool.
+Provide the diff, approved scope, requirements, test evidence, and necessary code
+context; omit implementer conclusions.
 
-Reviewer brief:
+Reviewer instructions:
 
-- Challenge correctness, regressions, boundary handling, security, and test
-  adequacy. Read relevant callers, contracts, and existing tests beyond the diff;
-  check whether tests would fail if the implementation were broken.
-- Verify candidate findings before reporting them, using a reproducible example,
-  a failing check, or a clear code-path explanation. Report only actionable issues
-  introduced or exposed by this slice; separate unresolved questions from confirmed
-  defects and report each root cause once.
-- For each finding, give severity based on impact and reachability, location,
-  triggering scenario, impact, and evidence. Order findings by severity and
-  distinguish blocking defects from optional improvements.
-- Skip stylistic preferences. Include maintainability concerns only when their
-  concrete impact is explained; do not block on polish or an equally valid design
-  choice.
-- Return a concise findings list, or "No actionable findings", with material review
-  limitations. Identify any checks not run or relevant context not inspected.
+- Challenge correctness, regressions, boundary handling, security, and test adequacy.
+  Inspect relevant callers, contracts, and existing tests beyond the diff; check
+  whether tests fail for broken behavior.
+- Verify findings with a reproducer, failing check, or clear code path. Report
+  actionable issues introduced/exposed by this slice, each root cause once;
+  distinguish questions from confirmed defects.
+- Order findings by severity based on impact/reachability. Include location,
+  trigger, impact, and evidence; distinguish blockers from optional improvements.
+- Exclude style preferences; maintainability findings need concrete impact.
+  Do not block on polish or equally valid designs.
+- Return concise findings or “No actionable findings”, with material limitations,
+  unrun checks, and relevant context not inspected.
 
-Resolve each finding as fixed, rejected with evidence, or awaiting a user decision.
-Verify findings rather than accepting them automatically; do not repeat rejected
-findings without new evidence. Record findings, dispositions, and checked state in
-the feature's validation.md when present; do not paste repeated review logs into
-user replies.
+Verify each finding; mark it fixed, rejected with evidence, or awaiting a user
+decision. Do not repeat rejected findings without new evidence. Record findings,
+dispositions, and checked state in the feature's validation.md when present;
+avoid repeated review logs in replies.
 
-After fixes, repeat the review until the final code state has no unresolved
-blocking findings. Any later code edit requires renewed review. Optional
-improvements do not prevent completion; include them in the user review when
-useful. If a round repeats a disputed finding without new evidence or makes no
-progress toward resolving blockers, stop the loop and request a user decision
-with the evidence and remaining disagreement. Do not claim a clean review while
-blockers remain unresolved.
+Repeat review after fixes until no blocking findings remain; later code edits
+require renewed review. Optional improvements do not block completion. If review
+repeats a disputed finding without new evidence or stalls on blockers, stop and
+request a user decision with evidence and remaining disagreement. Never claim
+clean review with unresolved blockers; clean review does not prove defect-free code.
 
-Review does not authorize new requirements or dependency changes. Record
-unresolved questions or decisions in the relevant requirements/plan and ask the
-user with the available question tool before dependent work. If delegation is
-unavailable, report the blocker and request a decision; do not substitute
-self-review or claim a clean review. A clean review is evidence, not proof of
-defect-free code.
+Review authorizes neither new scope nor dependency changes. Record unresolved
+questions/decisions in requirements/plans and ask with the available question tool
+before dependent work. If delegation is unavailable, report the blocker and request
+a decision; do not substitute self-review or claim clean review.
