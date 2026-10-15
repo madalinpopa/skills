@@ -130,13 +130,12 @@ policy:
   This describes a reviewer role; it does not install agents or tools.
 - Prefer integration coverage for behavior; add small unit tests only for distinct
   implementation gaps, without duplicating scenarios across layers.
-- Roadmaps group features and sub-features with concise task/subtask checklists.
-  Keep detailed behavior, acceptance criteria, dependencies, and execution
-  evidence in feature records; link rather than duplicate. Mark tasks `[x]`
-  only with evidence, leaving unfinished tasks `[ ]`. Completed tasks alone
-  do not imply user acceptance. Feature plans group detailed tasks into related
-  phases of one to five planned commits each, with concrete subtasks and
-  proposed commit messages. Add only phases and tasks supported by agreed work.
+- Roadmaps contain feature/sub-feature headings and task checklists. Feature
+  records also cover fixes, refactoring, tooling, and documentation work.
+  Follow the [feature guide](assets/docs/features/README.md) for ownership and
+  planning: plan.md contains only phase headings and task/subtask checklists,
+  with evidence links and one next action. Keep phases to one to five planned
+  commits. Completion does not imply acceptance or commit permission.
 - Group related spec content under clear sections and use concise lists.
   Link shared facts to their owner. Avoid long paragraphs and prose-heavy tables;
   reserve tables for compact comparisons or mappings.
@@ -156,8 +155,8 @@ request. This skill does not require either.
 Check `.jj` detection and the `use-jj` route when applicable. Check relative
 links, task routes, the CLAUDE import, that commands are real,
 that each topic has one owner, and that unknown specs are empty files. Check
-that plans and roadmaps use checklists, feature phases contain detailed tasks
-and one to five planned commits when agreed, roadmaps contain only feature and
+that plans contain only phase headings and task/subtask checklists with a clear
+next action, phases respect the feature guide, roadmaps contain only feature and
 sub-feature groups with task checklists, completion claims have evidence, spec
 text uses concise sectioned lists without empty headings, and test guidance
 avoids duplicate coverage.

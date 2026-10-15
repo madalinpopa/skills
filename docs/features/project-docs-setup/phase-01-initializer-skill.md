@@ -6,38 +6,22 @@
 
 ## Current checkpoint
 
-- **Status**: awaiting implementation review
-- **Current step**: Added the adversarial code-review gate and minimal response
-  rules to SKILL.md, AGENTS.md, and TDD.md; documentation verification underway.
-- **Approved scope**: User approved the proposed design with "yes, proceed"
-  on 2026-10-14, then approved the test review with "proceed" on 2026-10-14.
-  The subsequent user request adds periodic Go fixes and latest-version checks
-  with approval for external dependencies; these are documentation revisions.
-  The next request adds test readability, simple reusable helpers, and separate
-  success/failure table groups to TDD.md and GOLANG.md.
-  The latest request replaces the generated feature record with a numbered folder
-  containing plan.md, requirements.md, and validation.md. This repository's own
-  FEATURE/PHASE planning files retain its existing AGENTS.md convention.
-  The subsequent request requires all work to use small, reviewable slices.
-  The next request requires oversized features to be split into sub-features.
-  The latest request authorizes review and context optimization without losing
-  instructional intent, performed in small reviewable slices.
-  The next request requires using the available question tool to gather missing
-  information for specs, feature records, and other docs, starting with the minimum.
-  The latest request adds independent adversarial review before user approval,
-  a fix/re-review loop, minimal replies, and recorded pending decisions.
-- **Working tree**: Minimal-question guidance is committed as `bef9480`; live Git
-  status was clean before this follow-up. Current changes touch SKILL.md,
-  assets/AGENTS.md, assets/docs/conventions/TDD.md, and these two planning records;
-  executable files are unchanged.
-- **Last verification**: Offline catalog validator, `git diff --check`, and
-  Markdown route/anchor checks pass. Independent read-only documentation review
-  reports no actionable findings; executable files are unchanged.
-- **Blocker or pending decision**: User review of this guidance.
-- **Next action**: Present the independently reviewed documentation slice,
-  then resume context optimization
-  of convention docs and feature/spec templates in separate slices. Do not commit
-  without a new explicit request.
+- **Status**: awaiting documentation review.
+- **Current step**: Simplified the generated feature guide and aligned SKILL.md
+  and assets/AGENTS.md with checklist-only plans for features and codebase work.
+- **Approved scope**: User request, 2026-10-15: readable, complete feature
+  instructions; logically phased tasks/subtasks; clear progress and resume
+  point; codebase maintenance support; reduced context without losing intent.
+- **Working tree**: Three source documentation files and these two planning
+  records; no helper, test, Go, or external library changes.
+- **Last verification**: Offline authoring validator, relative links/anchors,
+  balanced Markdown fences, and diff whitespace checks passed. Manual review
+  covered feature, refactor, docs-only, partial-work, blocked-review, and commit
+  status cases. Feature guide reduced from 1,110 to 892 words (20%); these are
+  word counts, not measured tokens. Executable checks were not needed.
+- **Pending decision**: User review of this documentation slice.
+- **Next action**: User reviews this documentation slice; commit only on a
+  new explicit request.
 
 ## Scope and required context
 

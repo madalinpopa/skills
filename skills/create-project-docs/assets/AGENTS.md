@@ -29,8 +29,9 @@
   content. If no tool is available, explain and ask option-based questions in chat.
 - ROADMAP.md contains only feature/sub-feature groups and task checklists;
   leave it empty when no work is identified.
-- Requirements own behavior; plans own execution and checkpoints; validation
-  owns evidence and user acceptance. Link shared facts.
+- Requirements own scope, contracts, and approach; plans contain only phased
+  task checklists with one next action; validation owns evidence and acceptance.
+  Use the same records for features and codebase work; link shared facts.
 - Mark completed tasks with evidence; completion does not imply user acceptance.
 
 ## Implementation
