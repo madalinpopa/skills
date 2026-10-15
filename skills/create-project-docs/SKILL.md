@@ -124,10 +124,11 @@ When tailoring, keep these template rules, adapted only to existing project
 policy:
 
 - Omit unknown topics and use guided question rounds for requested spec work.
-- Dependency changes need user approval; always check the latest release.
-- The TDD workflow: failing test, implementation, then a review by a different
-  agent repeated until clean, and one user review that approves the commit.
-  This describes a reviewer role; it does not install agents or tools.
+- Dependency changes need user approval. Check current official docs for external
+  APIs being changed and latest releases for dependencies being proposed.
+- Route behavior changes, test work, and verification to TDD.md; keep its workflow,
+  exceptions, and review gates there rather than repeating them in AGENTS.md.
+  User review does not authorize a commit without an explicit request.
 - Prefer integration coverage for behavior; add small unit tests only for distinct
   implementation gaps, without duplicating scenarios across layers.
 - Roadmaps contain feature/sub-feature headings and task checklists. Feature
@@ -143,8 +144,12 @@ policy:
 - `go fix` guidance in GOLANG.md for Go projects.
 
 Keep AGENTS.md near 300 words, using section headings and short bullet lists
-only, including task routes. Avoid prose paragraphs and tables. Use plain
-Markdown links; do not import every linked document.
+only. Make task routes explicit: say when to read each guide, rather than only
+listing its subject. Keep detailed writing, roadmap, record, and review rules in
+their owning guides. Keep setup-only instructions, such as starting spec files
+empty, in this skill; persistent instructions should require established content
+without placeholders or empty sections. Avoid prose paragraphs and tables. Use
+plain Markdown links; do not import every linked document.
 
 Writing an existing `docs/SPEC.md` belongs to `create-spec` when available; do
 not use it to rewrite this layout. Application scaffolding is a separate

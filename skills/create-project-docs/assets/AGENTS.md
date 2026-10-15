@@ -14,45 +14,40 @@
 
 - When `.jj` exists, use jj-vcs and invoke `use-jj`, even alongside `.git`.
 - If `use-jj` is unavailable, report it before mutations; do not substitute Git.
-- Commit only after user approval; publish only on explicit request.
+- Never commit unless explicitly asked; plan or implementation approval does
+  not authorize a commit. Publish only on explicit request.
 - Never add AI attribution.
 
 ## Specs
 
-- Never invent requirements; fill specs progressively.
-- Start specs empty; add sections only with known content. Omit placeholders.
-- Follow the [spec writing guide](docs/specs/README.md): group related facts
-  under headings and write short lists; avoid long paragraphs and prose-heavy tables.
+- Preserve agreed requirements; add only established content. Omit placeholders
+  and empty sections.
 - For requested spec work, always use the available question tool with concrete
   proposed options based on repository evidence.
 - Ask focused rounds, reuse prior answers, and wait before writing dependent
   content. If no tool is available, explain and ask option-based questions in chat.
-- ROADMAP.md contains only feature/sub-feature groups and task checklists;
-  leave it empty when no work is identified.
-- Requirements own scope, contracts, and approach; plans contain only phased
-  task checklists with one next action; validation owns evidence and acceptance.
-  Use the same records for features and codebase work; link shared facts.
 - Mark completed tasks with evidence; completion does not imply user acceptance.
 
 ## Implementation
 
-- Use STACK.md commands and working directories; report missing ones.
-- Check current official docs and latest released library versions.
+- Check current official docs for external APIs being changed and latest
+  releases for dependencies being proposed.
 - Dependency additions, installations, replacements, and upgrades need approval.
-- Follow [TDD](docs/conventions/TDD.md#workflow): failing test, implementation,
-  independent adversarial review until clean, then user review.
 
 ## Read for the current task
 
-- [MISSION.md](docs/specs/MISSION.md): goals, users, scope.
-- [ROADMAP.md](docs/specs/ROADMAP.md): features, sub-features, tasks.
-- [STACK.md](docs/specs/STACK.md): technologies, versions, commands.
-- [CODE.md](docs/conventions/CODE.md): code, frontend, dependencies.
-- [GOLANG.md](docs/conventions/GOLANG.md): Go work.
-- [TDD.md](docs/conventions/TDD.md): behavior changes, tests, verification.
-- [COMMITS.md](docs/conventions/COMMITS.md): commit proposals and delivery.
-- [Decision guide](docs/decisions/README.md): architecture choices.
-- [Feature guide](docs/features/README.md): planning, work, resume.
+- Before scope decisions, read [MISSION.md](docs/specs/MISSION.md).
+- Before selecting work or updating progress, read [ROADMAP.md](docs/specs/ROADMAP.md).
+- Before running project checks, read [STACK.md](docs/specs/STACK.md) for commands
+  and working directories; report missing ones.
+- Before code or dependency changes, read [CODE.md](docs/conventions/CODE.md).
+- Before editing Go files, read [GOLANG.md](docs/conventions/GOLANG.md).
+- Before behavior changes, test work, or verification, read
+  [TDD.md](docs/conventions/TDD.md) and follow its applicable review gates.
+- Before commit proposals or delivery, read [COMMITS.md](docs/conventions/COMMITS.md).
+- Before spec edits, read the [spec writing guide](docs/specs/README.md).
+- Before recording architecture decisions, read the [decision guide](docs/decisions/README.md).
+- Before planning or resuming work, read the [feature guide](docs/features/README.md).
 - Load historical records only for relevant dependencies.
 
 ## Replies
