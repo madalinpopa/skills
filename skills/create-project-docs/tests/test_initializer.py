@@ -11,10 +11,12 @@ HELPER = Path(__file__).resolve().parents[1] / "scripts/init-project-docs.sh"
 EXPECTED_FILES = {
     "AGENTS.md",
     "CLAUDE.md",
+    "docs/QUESTIONS.md",
     "docs/conventions/CODE.md",
     "docs/conventions/COMMITS.md",
     "docs/conventions/GOLANG.md",
     "docs/conventions/TDD.md",
+    "docs/conventions/QUESTIONS.md",
     "docs/specs/README.md",
     "docs/specs/MISSION.md",
     "docs/specs/ROADMAP.md",
@@ -57,16 +59,18 @@ class ProjectDocumentationSetup(unittest.TestCase):
             for path in self.project.rglob("*")
             if path.is_file()
         }
-        specs = {
+        empty_documents = {
+            "docs/QUESTIONS.md",
             "docs/specs/MISSION.md",
             "docs/specs/ROADMAP.md",
             "docs/specs/STACK.md",
         }
-        for name in specs:
-            with self.subTest(spec=name):
+        for name in empty_documents:
+            with self.subTest(document=name):
+                self.assertTrue((self.project / name).is_file(), name)
                 self.assertEqual((self.project / name).read_bytes(), b"")
         self.assertEqual(files, EXPECTED_FILES)
-        for name in EXPECTED_FILES - specs:
+        for name in EXPECTED_FILES - empty_documents:
             with self.subTest(name=name):
                 self.assertTrue((self.project / name).read_bytes())
         self.assertEqual((self.project / "CLAUDE.md").read_text(), "@AGENTS.md\n")
@@ -79,6 +83,7 @@ class ProjectDocumentationSetup(unittest.TestCase):
             "CLAUDE.md": b"@AGENTS.md\n\nKeep Claude-specific instructions.\n",
             "docs/conventions/CODE.md": b"# Our conventions\nPreserve this file.\n",
             "docs/specs/STACK.md": b"",
+            "docs/QUESTIONS.md": b"- [ ] Q-0001 -- Confirm retention duration.\n",
         }
         for name, contents in existing.items():
             destination = self.project / name
@@ -108,6 +113,8 @@ class ProjectDocumentationSetup(unittest.TestCase):
         cases = {
             "document": ("CLAUDE.md", False, False),
             "dangling document": ("docs/specs/STACK.md", False, True),
+            "question log": ("docs/QUESTIONS.md", False, False),
+            "question guide": ("docs/conventions/QUESTIONS.md", False, False),
             "docs directory": ("docs", True, False),
         }
         for label, (name, directory, dangling) in cases.items():
@@ -143,6 +150,8 @@ class ProjectDocumentationSetup(unittest.TestCase):
     def test_refuses_file_directory_collisions_before_creating_documents(self):
         cases = {
             "document is directory": ("docs/specs/STACK.md", True),
+            "question log is directory": ("docs/QUESTIONS.md", True),
+            "question guide is directory": ("docs/conventions/QUESTIONS.md", True),
             "parent is file": ("docs/features", False),
         }
         for label, (name, directory) in cases.items():

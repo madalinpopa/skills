@@ -4,7 +4,7 @@ Initialize a new project's agent instructions and documentation foundation.
 The primary audience builds Go backends with TypeScript frontends; frontend
 frameworks and product requirements remain project choices.
 
-- **Active phase**: [01: Initializer skill](phase-01-initializer-skill.md)
+- **Active phase**: [02: Central question log](phase-02-central-question-log.md)
 - **Feature acceptance**: Accepted for commit: "do a commit for the current changes", 2026-10-14.
 
 ## Using these documents
@@ -59,11 +59,13 @@ documents describe the target project, not this skill store.
 | Require independent adversarial review of code slices before user review | Resolve actionable findings within approved scope; re-review fixes; preserve test approval and dependency gates | Explicit user request, 2026-10-14; follow-up awaiting review |
 | Keep replies minimal, with a User must be aware section and recorded pending decisions | Short change/check bullets, no repeated details; ask the user to review unresolved questions | Explicit user request, 2026-10-14; follow-up awaiting review |
 | Use phased task-only plans for features and codebase work | Clear progress, one next action, linked evidence, and less duplicated context | Explicit user request, 2026-10-15; awaiting documentation review |
+| Centralize actual open questions in docs/QUESTIONS.md | One visible checklist; document answers in their owning sections before closing questions | Plan approved: "arata bine, continua cu implementarea", 2026-10-15; test review remains required |
 
 ## Phase roadmap
 
 | Phase | Outcome | Depends on | Status | Phase file |
 | --- | --- | --- | --- | --- |
 | 01 | A reusable initializer with templates and preservation checks | None | awaiting implementation review | [Phase 01](phase-01-initializer-skill.md) |
+| 02 | One question log with document-first resolution and concise persistent guidance | Existing initializer | awaiting test review | [Phase 02](phase-02-central-question-log.md) |
 
 Acceptance does not authorize commits or publication.
