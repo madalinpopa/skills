@@ -65,9 +65,8 @@ approval within its stated scope. Documentation/configuration work that gains
 nothing from a failing test skips step 1; configuration that changes behavior
 still needs tests.
 
-Keep tests deterministic and default runs independent of network or shared
-services. Arrange setup, action, and assertions clearly. Report every failed
-or skipped check and its cause; never describe an unrun check as passed.
+Report every failed or skipped check and its cause; never describe an unrun
+check as passed.
 
 ## Adversarial review
 

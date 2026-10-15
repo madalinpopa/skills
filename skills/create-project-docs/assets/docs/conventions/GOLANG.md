@@ -3,27 +3,22 @@
 Apply only to Go work. Read the relevant `go.mod` and toolchain configuration;
 supported versions and module locations belong in [STACK.md](../specs/STACK.md).
 Do not assume the machine's newest Go version is the project's target.
+Apply [shared code conventions](CODE.md) and [TDD.md](TDD.md) alongside the
+Go-specific rules below.
 
-- Keep packages cohesive, APIs small, and control flow explicit.
 - Define interfaces at the consuming boundary when substitution is needed;
   do not wrap concrete types just to introduce an interface.
-- Return errors with useful context; follow local wrapping and handling rules.
-- Pass request context through blocking operations. Make cancellation, cleanup,
-  and ownership of resources explicit.
+- Follow local error wrapping and handling rules.
+- Pass request context through blocking operations.
 - Add concurrency for a concrete need, with bounded work and clear goroutine
   lifetimes. Prefer simpler synchronous code when it meets the requirement.
-- Follow the [readable test guidance](TDD.md#readable-tests). Use small, clearly
-  named table cases sharing setup and assertions, with separate
-  `TestBehavior_success` and `TestBehavior_failed` groups. Prefer simple
-  `map[string]struct` tables when appropriate; keep unrelated cases separate.
-- Reuse clear setup and assertion helpers where useful. Mark Go test helpers
-  with `t.Helper()` so failures point to the calling test; keep the action and
-  expected behavior visible. Avoid complicated stub implementations.
-- Use temporary directories and local fixtures for filesystem tests. Keep default
-  tests independent of network and containers.
+- For table tests, prefer simple `map[string]struct` tables when appropriate;
+  name success and failure groups `TestBehavior_success` and `TestBehavior_failed`.
+- Mark Go test helpers with `t.Helper()` so failures point to the calling test.
+- Use temporary directories and local fixtures for filesystem tests.
 - Use parallel tests only when they do not mutate shared process state or resources.
-- Run the project's format, test, and vet commands. Introduce language features
-  and library APIs only within the supported versions.
+- Include `go vet` in verification. Introduce language features and library APIs
+  only within the supported versions.
 
 When `modern-go-guidelines:use-modern-go` is available, follow its installed
 version-specific guidance for the file/module being changed. If unavailable,
