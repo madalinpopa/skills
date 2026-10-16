@@ -149,6 +149,14 @@ policy:
 - Route behavior changes, test work, and verification to TDD.md; keep its workflow,
   exceptions, and review gates there rather than repeating them in AGENTS.md.
   User review does not authorize a commit without an explicit request.
+- Preserve TDD.md's throwaway prototype workflow for explicit disposable
+  experiments and requests to continue existing prototypes identified by repository
+  evidence. Route to it briefly from AGENTS.md; keep the local-commit exception in
+  COMMITS.md and the formal-record exemption in the feature guide. Prototype work
+  skips TDD, automated test writing, full verification, adversarial review, and
+  intermediate planning/review gates; it uses isolated version control and a minimal
+  demonstration check. Preserve normal permissions for dependencies and external
+  actions. Production implementation returns to the normal workflow.
 - Route behavior changes to the affected feature contract and acceptance criteria.
   Distinguish consuming requirements from authoring specs: only authoring loads
   writing rules and the target document's section. Keep guided spec questions
@@ -177,8 +185,9 @@ listing its subject. Retain narrow searches and task-relevant reference loading
 as context rules; do not duplicate detailed guides in the entrypoint.
 Name the applicable section and trigger: TDD workflow before changes/checks,
 coverage before test design, and feature Resume for existing work. Workflow
-routes must include their required review procedures; selective reading never
-waives an approval or review gate. A link or anchor locates guidance but does
+routes must preserve required reviews and the explicit prototype exception;
+selective reading never waives an applicable approval or review gate.
+A link or anchor locates guidance but does
 not limit a tool's output: retrieve the applicable section and its dependencies.
 Keep detailed writing, roadmap, record, and review rules in
 their owning guides. Keep setup-only instructions, such as starting spec files
@@ -203,7 +212,10 @@ avoids duplicate coverage.
 Check that behavior changes route to actual requirements, spec readers do not
 activate authoring procedures, and resumption selects the active phase and
 latest relevant evidence. Check that section routes retain all applicable
-approval/review requirements; distinguish word counts from token measurements
+approval/review requirements. Check that new and existing throwaway prototypes
+reach the exception, ambiguous prototype filenames do not bypass normal work,
+and production implementation restores the normal workflow.
+Distinguish word counts from token measurements
 or measured model performance.
 Confirm existing files kept their bytes. Copied templates are not agreed requirements,
 and copying docs does not mean any application tests passed.

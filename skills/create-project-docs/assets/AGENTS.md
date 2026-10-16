@@ -6,7 +6,7 @@
 
 - Inspect relevant code, contracts, and diffs; preserve unrelated work and scope.
 - Raise conflicting instructions or requirements before changing a contract.
-- Work in small slices; verify and present each for review before continuing.
+- For production work, use small slices; verify and present each for review.
 - Search narrowly; load applicable sections and expand through relevant dependencies.
 - Preserve agreed requirements; record established facts and evidence, not placeholders.
 
@@ -15,18 +15,22 @@
 - When `.jj` exists, invoke `use-jj`, even alongside `.git`. If unavailable,
   report it before mutations; do not substitute Git.
 - Commit only on explicit request; plan/work approval is insufficient. Never add
-  AI attribution. Publish only on explicit request.
+  AI attribution. The [prototype workflow](docs/conventions/TDD.md#throwaway-prototypes)
+  permits local prototype commits. Publish only on explicit request.
 - Dependency additions, installations, replacements, and upgrades need approval.
 
 ## Read for the current task
 
 - For scope decisions, read [MISSION.md](docs/specs/MISSION.md); for work selection
   or progress updates, read the relevant [ROADMAP.md](docs/specs/ROADMAP.md) group.
-- Before changing behavior, find the affected feature contract and acceptance
+- For new or existing throwaway prototype work, read and use the
+  [prototype workflow](docs/conventions/TDD.md#throwaway-prototypes) instead of
+  production planning, TDD, and review gates.
+- Before changing production behavior, find the affected feature contract and acceptance
   criteria in `requirements.md`; follow relevant shared specs and decisions.
 - Before code, dependency, or trust-boundary changes, read [CODE.md](docs/conventions/CODE.md); before Go edits,
   read [GOLANG.md](docs/conventions/GOLANG.md).
-- Before behavior changes, test work, or verification, read [TDD workflow](docs/conventions/TDD.md#workflow),
+- Before other behavior changes, test work, or verification, read [TDD workflow](docs/conventions/TDD.md#workflow),
   including its required review procedure. Before choosing/writing tests, also read
   [coverage guidance](docs/conventions/TDD.md#coverage-and-readability).
 - Before checks, read commands and directories in [STACK.md](docs/specs/STACK.md).

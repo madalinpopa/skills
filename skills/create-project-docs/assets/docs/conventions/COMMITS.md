@@ -16,11 +16,16 @@
 
 ## Scope and approval
 
-- Keep each commit to one reviewable outcome with necessary tests/docs; respect
-  project rules requiring separate test/implementation commits.
+- For production work, keep each commit to one reviewable outcome with necessary
+  tests/docs; respect project rules requiring separate test/implementation commits.
 - Review the exact diff, exclude unrelated work, and propose a message matching
-  final scope. Follow [TDD.md](TDD.md#workflow) verification/review and use the
+  final scope. Follow the applicable [TDD.md](TDD.md) workflow and use the
   repository's chosen version-control tool.
 - Commit only with approval for that reviewed diff. Plan/work approval is not
   commit approval; later edits require renewed review and approval.
+- Exception: a request to create or continue a throwaway prototype under the
+  [prototype workflow](TDD.md#throwaway-prototypes) authorizes local commits of
+  that experiment on its isolated branch/bookmark without another approval gate.
+  Use a message such as `chore(prototype): explore search ranking`; exclude
+  unrelated work. This permission does not extend to production commits.
 - Push, open/merge pull requests, or publish only on explicit user request.
