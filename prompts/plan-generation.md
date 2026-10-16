@@ -1,0 +1,1 @@
+Read spec.md carefully. Then explore the codebase to understand how the existing system handles [the relevant concern]. Generate a plan.md that describes: the technical approach, the main trade-offs you considered, the files you’ll need to change, and the sequencing for the work. Do not write any implementation code. Return only the plan for review.
