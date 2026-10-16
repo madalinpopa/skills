@@ -149,6 +149,10 @@ policy:
 - Route behavior changes, test work, and verification to TDD.md; keep its workflow,
   exceptions, and review gates there rather than repeating them in AGENTS.md.
   User review does not authorize a commit without an explicit request.
+- Route behavior changes to the affected feature contract and acceptance criteria.
+  Distinguish consuming requirements from authoring specs: only authoring loads
+  writing rules and the target document's section. Keep guided spec questions
+  mandatory as described above; reuse settled answers.
 - Prefer integration coverage for behavior; add small unit tests only for distinct
   implementation gaps, without duplicating scenarios across layers.
 - Roadmaps contain feature/sub-feature headings and task checklists. Feature
@@ -171,6 +175,11 @@ Keep AGENTS.md near 300 words, using section headings and short bullet lists
 only. Make task routes explicit: say when to read each guide, rather than only
 listing its subject. Retain narrow searches and task-relevant reference loading
 as context rules; do not duplicate detailed guides in the entrypoint.
+Name the applicable section and trigger: TDD workflow before changes/checks,
+coverage before test design, and feature Resume for existing work. Workflow
+routes must include their required review procedures; selective reading never
+waives an approval or review gate. A link or anchor locates guidance but does
+not limit a tool's output: retrieve the applicable section and its dependencies.
 Keep detailed writing, roadmap, record, and review rules in
 their owning guides. Keep setup-only instructions, such as starting spec files
 empty, in this skill; persistent instructions should require established content
@@ -191,6 +200,11 @@ next action, phases respect the feature guide, roadmaps contain only feature and
 sub-feature groups with task checklists, completion claims have evidence, spec
 text uses concise sectioned lists without empty headings, and test guidance
 avoids duplicate coverage.
+Check that behavior changes route to actual requirements, spec readers do not
+activate authoring procedures, and resumption selects the active phase and
+latest relevant evidence. Check that section routes retain all applicable
+approval/review requirements; distinguish word counts from token measurements
+or measured model performance.
 Confirm existing files kept their bytes. Copied templates are not agreed requirements,
 and copying docs does not mean any application tests passed.
 

@@ -1,5 +1,9 @@
 # Writing specs
 
+Read the working rules and the section for the document being edited. To
+implement existing behavior, read its feature requirements and relevant shared
+contracts instead; consuming a spec does not require the authoring workflow.
+
 ## Working rules
 
 - Start spec files empty; add a title and sections only with real content.
@@ -11,6 +15,7 @@
 - For requested spec work, use the question tool with concrete proposed options.
 - Ask about the requested scope, reuse earlier answers, and wait for decisions.
 - If no question tool is available, explain and ask option-based questions in chat.
+- Use repository evidence and prior answers; do not ask again for settled decisions.
 - Link shared facts to their owner instead of duplicating them.
 
 ## MISSION.md

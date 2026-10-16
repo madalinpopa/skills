@@ -27,9 +27,9 @@ never generate empty examples during setup.
   [spec writing guide](../specs/README.md).
 - Use descriptive headings and short lists, one point per item. Reserve tables
   for compact comparisons. Link shared facts to their owner.
-- For requested spec work, follow [AGENTS.md](../../AGENTS.md): reuse repository
-  evidence and prior answers, ask focused questions with proposed options, and
-  wait before writing content that depends on answers.
+- For requested spec work, follow the
+  [spec writing rules](../specs/README.md#working-rules), including guided
+  questions and waiting before writing content that depends on answers.
 
 ## requirements.md
 
@@ -106,8 +106,10 @@ Put context in requirements.md and results in validation.md; link from tasks.
 
 ## Resume
 
-- Read plan.md and the active phase's linked requirements and evidence. Compare
-  recorded progress with the working tree before continuing the next action.
-- Load other records only for relevant dependencies. Update plan.md and
-  validation.md at review boundaries and session end; reflect proven progress
+- Read the active phase and next action in plan.md, its linked requirements and
+  acceptance criteria, and the latest applicable validation evidence. Compare
+  recorded progress and checked revisions with the working tree before continuing.
+- Read other sections only for relevant dependencies or unresolved decisions.
+  Resuming existing work does not require the record-creation or splitting rules.
+- Update plan.md and validation.md at review boundaries and session end; reflect proven progress
   in ROADMAP.md without duplicating the detailed plan.

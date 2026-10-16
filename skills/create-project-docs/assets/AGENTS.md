@@ -4,67 +4,43 @@
 
 ## Working rules
 
-- Work in small slices, including docs, configuration, and refactoring.
-- Inspect relevant code and diffs; preserve unrelated work and stay in scope.
-- Raise conflicts between instructions, requirements, and code before changing
-  a contract.
-- Verify each slice and present it for user review before the next.
-- Search narrowly, expanding to relevant contracts and callers as needed.
-- Load only task-relevant guides, skills, and reference sections; avoid whole
-  repository dumps and long logs.
+- Inspect relevant code, contracts, and diffs; preserve unrelated work and scope.
+- Raise conflicting instructions or requirements before changing a contract.
+- Work in small slices; verify and present each for review before continuing.
+- Search narrowly; load applicable sections and expand through relevant dependencies.
+- Preserve agreed requirements; record established facts and evidence, not placeholders.
 
-## Version control
+## Permissions
 
-- When `.jj` exists, use jj-vcs and invoke `use-jj`, even alongside `.git`.
-- If `use-jj` is unavailable, report it before mutations; do not substitute Git.
-- Never commit unless explicitly asked; plan or implementation approval does
-  not authorize a commit. Publish only on explicit request.
-- Never add AI attribution.
-
-## Specs
-
-- Preserve agreed requirements; add only established content. Omit placeholders
-  and empty sections.
-- For requested spec work, always use the available question tool with concrete
-  proposed options based on repository evidence.
-- Ask focused rounds, reuse prior answers, and wait before writing dependent
-  content. If no tool is available, explain and ask option-based questions in chat.
-- Mark completed tasks with evidence; completion does not imply user acceptance.
-
-## Implementation
-
-- Check current official docs for external APIs being changed and latest
-  releases for dependencies being proposed.
+- When `.jj` exists, invoke `use-jj`, even alongside `.git`. If unavailable,
+  report it before mutations; do not substitute Git.
+- Commit only on explicit request; plan/work approval is insufficient. Never add
+  AI attribution. Publish only on explicit request.
 - Dependency additions, installations, replacements, and upgrades need approval.
 
 ## Read for the current task
 
-- Before scope decisions, read [MISSION.md](docs/specs/MISSION.md).
-- Before selecting work or updating progress, read [ROADMAP.md](docs/specs/ROADMAP.md).
-- Before running project checks, read [STACK.md](docs/specs/STACK.md) for commands
-  and working directories; report missing ones.
-- Before code, dependency, or trust-boundary changes, read
-  [CODE.md](docs/conventions/CODE.md).
-- Before editing Go files, read [GOLANG.md](docs/conventions/GOLANG.md).
-- Before behavior changes, test work, or verification, read
-  [TDD.md](docs/conventions/TDD.md) and follow its applicable review gates.
-- Before commit proposals or delivery, read [COMMITS.md](docs/conventions/COMMITS.md).
-- Before spec edits, read the [spec writing guide](docs/specs/README.md).
-- Before recording questions or applying answers, read the
-  [question guide](docs/conventions/QUESTIONS.md); it owns the single log format
-  and document-first closure rules.
-- Before recording architecture decisions, read the [decision guide](docs/decisions/README.md).
-- Before planning or resuming work, read the [feature guide](docs/features/README.md).
-- Load historical records only for relevant dependencies.
+- For scope decisions, read [MISSION.md](docs/specs/MISSION.md); for work selection
+  or progress updates, read the relevant [ROADMAP.md](docs/specs/ROADMAP.md) group.
+- Before changing behavior, find the affected feature contract and acceptance
+  criteria in `requirements.md`; follow relevant shared specs and decisions.
+- Before code, dependency, or trust-boundary changes, read [CODE.md](docs/conventions/CODE.md); before Go edits,
+  read [GOLANG.md](docs/conventions/GOLANG.md).
+- Before behavior changes, test work, or verification, read [TDD workflow](docs/conventions/TDD.md#workflow),
+  including its required review procedure. Before choosing/writing tests, also read
+  [coverage guidance](docs/conventions/TDD.md#coverage-and-readability).
+- Before checks, read commands and directories in [STACK.md](docs/specs/STACK.md).
+  Before proposing commits or delivery, read [COMMITS.md](docs/conventions/COMMITS.md).
+- Before writing specs, read [writing rules](docs/specs/README.md#working-rules)
+  and the target document section; reading requirements alone does not trigger authoring.
+- Before creating/planning records, read [ownership](docs/features/README.md#naming-and-ownership)
+  and applicable writing sections; for resumption, read [Resume](docs/features/README.md#resume).
+- Before recording architectural choices, read the [decision guide](docs/decisions/README.md).
+- When input is needed, follow the [question guide](docs/conventions/QUESTIONS.md)
+  for asking, recording blockers, and applying answers.
 
 ## Replies
 
-- Use short bullets for changes and verification; avoid repetition.
-- Whenever user input is needed, use the available ask-question tool when it
-  supports the question; otherwise ask in chat. Reuse known answers.
-- Record actual questions and blockers needing user input in `docs/QUESTIONS.md`
-  as they arise; state the input needed and affected work. Omit generic questions.
-- End with **Next Step**: one concrete action based on current progress, such as
-  answering a blocking question, reviewing changes, or working on a feature.
-  Link the relevant question or task; a proposal does not authorize new work.
-- Report material failures and limits alongside the relevant result.
+- Report changes, evidence, failures, and limits in short bullets; completion is not acceptance.
+- End with one concrete **Next Step**, linking the relevant task/question;
+  proposals authorize no additional work.
