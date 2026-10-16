@@ -9,11 +9,15 @@
 - **Status**: awaiting implementation review
 - **Approved scope**: User approved the proposed extraction, CLI setup/update,
   narrow instruction refresh, and validation on 2026-10-16: “approve”.
-- **Working tree**: Three new catalog skills; create-project-docs entrypoint,
-  references, and routing assets changed. Existing prompt additions preserved.
-- **Test gate**: Documentation-only instructions; no helper or CLI behavior changed.
-  Failing wording tests would not provide useful evidence.
-- **Next action**: Review the extraction and validation results; no commit authorized.
+  Follow-up split approved with “looks good”: core workflow in AGENTS.md,
+  test specifics in TDD.md, detailed review procedure in a separate guide.
+- **Working tree**: Extraction is in parent history. Current follow-up separates
+  the generated workflow, test guidance, and review guide; updates copy inventory
+  and callers. No unrelated edits present at the start of this follow-up.
+- **Test gate**: Inventory test failed for missing REVIEW.md. User approved
+  implementation with “approve” after reviewing that failure.
+- **Next action**: Review the completed workflow split and verification results.
+  No commit authorized.
 
 ## Scope and acceptance
 
@@ -75,3 +79,33 @@ Proposed commit: `feat(skills): extract task workflows from project docs`.
 ## Developer acceptance
 
 Pending implementation review. Approval of the plan did not authorize a commit.
+
+## Follow-up: Always-loaded workflow and separate review guide
+
+- **Approved scope**: User requested an AGENTS.md trim, then approved keeping
+  the core workflow always loaded, test specifics in TDD.md, and detailed
+  review in a separate guide (“looks good”). Explicit test approval: “approve”.
+- **Changes**: AGENTS.md owns small slices, approved scope, evidence discipline,
+  independent review, user review, and acceptance/commit distinctions. TDD.md
+  retains test selection, failing-test workflow, verification, and exceptions.
+  REVIEW.md retains the detailed reviewer instructions and findings lifecycle.
+- **Packaging and routes**: Added REVIEW.md to the initializer copy list and
+  expected inventory. Updated feature, commit, Go, prototype, and setup guidance
+  to point to each topic's owner. jj and prototype exceptions remain explicit.
+- **Expected failure**: Before implementation,
+  `python3 -B -m unittest discover -s skills/create-project-docs/tests -p test_initializer.py -k creates_documentation -v`
+  failed at the generated file-set assertion: docs/conventions/REVIEW.md missing.
+- **Verification**: `python3 -B -m unittest discover -s skills/create-project-docs/tests -v`
+  passes all seven tests, including file creation and byte-preserving reruns.
+  Source validator passes with cached offline uv/PyYAML. A fresh generated
+  project resolves 34 relative links/anchors across seven affected documents.
+  Diff whitespace checks pass. No Go changes; Go checks omitted.
+- **Context**: AGENTS.md is approximately 345 words with the always-loaded core
+  workflow restored. Detailed review remains conditional; no token or model
+  performance claims. Earlier 213-word trim was superseded by this scope correction.
+- **Review limits**: Inspected the source diff, generated routes, and preserved
+  procedure content. No independent agent execution evaluation performed.
+- **Status**: awaiting implementation review. Nothing committed.
+- **Test commit proposal**: `test(create-project-docs): require generated review guide`.
+- **Implementation commit proposal**: `docs(create-project-docs): separate workflow testing and review guidance`.
+- **Next action**: User reviews the completed split and verification evidence.

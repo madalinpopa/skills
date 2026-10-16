@@ -19,7 +19,7 @@
 - For production work, keep each commit to one reviewable outcome with necessary
   tests/docs; respect project rules requiring separate test/implementation commits.
 - For production commits, review the exact diff, exclude unrelated work, and propose a message matching
-  final scope. Follow the applicable [TDD.md](TDD.md) workflow and use the
+  final scope. Follow the [AGENTS.md](../../AGENTS.md#workflow) workflow and use the
   repository's chosen version-control tool.
 - For production commits, commit only with approval for that reviewed diff. Plan/work approval is not
   commit approval; later edits require renewed review and approval.

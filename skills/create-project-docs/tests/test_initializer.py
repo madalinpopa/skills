@@ -16,6 +16,7 @@ EXPECTED_FILES = {
     "docs/conventions/COMMITS.md",
     "docs/conventions/GOLANG.md",
     "docs/conventions/TDD.md",
+    "docs/conventions/REVIEW.md",
     "docs/conventions/PROTOTYPE.md",
     "docs/conventions/QUESTIONS.md",
     "docs/specs/README.md",

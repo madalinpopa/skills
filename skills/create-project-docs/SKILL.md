@@ -54,11 +54,12 @@ Tailor created documents using established facts. For existing documents, apply
 
 ## Document ownership
 
-- `AGENTS.md`: project identity, essential permissions, and task-based routes.
+- `AGENTS.md`: project identity, essential permissions, core slice workflow, and task routes.
   Keep it near 300 words. Preserve narrow searches and selective context loading.
 - `CLAUDE.md`: `@AGENTS.md`; retain Claude-specific additions and no reverse import.
-- `docs/conventions/`: shared code/security, commits, Go, TDD/reviews, prototypes,
-  and question-log guidance. Retain applicable review gates and prototype exceptions.
+- `docs/conventions/`: shared code/security, commits, Go, test-specific TDD,
+  detailed review procedures in REVIEW.md, prototypes, and question-log guidance.
+  Keep the controlling workflow in AGENTS.md; retain review gates and prototype exceptions.
 - `docs/specs/`: mission, stack, and roadmap. Use the
   [writing guide](assets/docs/specs/README.md) only for the document being authored.
 - `docs/features/`: numbered records; the

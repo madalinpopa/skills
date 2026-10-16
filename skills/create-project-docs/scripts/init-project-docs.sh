@@ -29,7 +29,7 @@ files=(
   AGENTS.md CLAUDE.md
   docs/QUESTIONS.md docs/conventions/QUESTIONS.md
   docs/conventions/CODE.md docs/conventions/COMMITS.md
-  docs/conventions/GOLANG.md docs/conventions/TDD.md
+  docs/conventions/GOLANG.md docs/conventions/TDD.md docs/conventions/REVIEW.md
   docs/conventions/PROTOTYPE.md
   docs/specs/README.md docs/specs/MISSION.md
   docs/specs/ROADMAP.md docs/specs/STACK.md

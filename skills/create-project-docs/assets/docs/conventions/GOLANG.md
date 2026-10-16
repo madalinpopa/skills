@@ -65,7 +65,7 @@ not the machine's newest Go. Record versions and module roots in
 
 ## Tests and verification
 
-Coverage and review follow [TDD.md](TDD.md).
+Coverage follows [TDD.md](TDD.md); review follows [REVIEW.md](REVIEW.md).
 
 - Prefer small `map[string]struct` tables when suitable; use slices for ordered
   cases. Name groups `TestBehavior_success` and `TestBehavior_failed`.

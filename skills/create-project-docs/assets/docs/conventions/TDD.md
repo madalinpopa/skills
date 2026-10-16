@@ -25,61 +25,18 @@ private structure, or coverage.
 
 ## Workflow
 
-Work one slice at a time; the user reviews once at its end.
+Follow the overall slice and review workflow in
+[AGENTS.md](../../AGENTS.md#workflow).
 
-1. Write/run the smallest useful failing test. Confirm missing behavior causes
-   failure, not setup/environment; retain the command and output.
-2. Implement the smallest clear change within approved scope; refactor only where
-   useful while preserving tests and agreed behavior.
-3. Run focused tests, then project format, lint, full-test, and build checks in
-   [STACK.md](../specs/STACK.md). Run integration checks when the changed boundary needs them.
-4. Delegate [adversarial review](#adversarial-review) to a different agent; wait
-   before continuing or requesting user review.
-5. Resolve findings below; after fixes, rerun affected checks and repeat step 4.
-6. Once clean, stop for user review with changes, failing-test evidence, check
-   results, findings/fixes, remaining concerns, and a proposed commit message.
-   Commit only with approval for that commit.
+1. Before implementation, write/run the smallest useful failing test. Confirm
+   missing behavior causes failure, not setup or environment; retain the command
+   and relevant output.
+2. Implement the smallest clear change that passes the tests; refactor only
+   within approved scope while preserving agreed behavior.
+3. Run focused tests, then applicable format, lint, full-test, and build checks
+   from [STACK.md](../specs/STACK.md). Run integration checks when the changed
+   boundary needs them. Record tested state and relevant failure evidence.
 
-Plan approval neither skips review nor authorizes commits; reuse explicit approval
-within scope. Skip step 1 for documentation/configuration that gains nothing from
-failing tests; behavior-changing configuration still needs tests. Report every
-failed/skipped check and its cause; never claim an unrun check passed.
-
-## Adversarial review
-
-Default to one independent, read-only reviewer via the available subagent tool.
-Provide the diff, approved scope, requirements, test evidence, and necessary code
-context; omit implementer conclusions.
-
-Reviewer instructions:
-
-- Challenge correctness, regressions, boundary handling, security, and test adequacy.
-  Inspect relevant callers, contracts, and existing tests beyond the diff; check
-  whether tests fail for broken behavior.
-- Verify findings with a reproducer, failing check, or clear code path. Report
-  actionable issues introduced/exposed by this slice, each root cause once;
-  distinguish questions from confirmed defects.
-- Order findings by severity based on impact/reachability. Include location,
-  trigger, impact, and evidence; distinguish blockers from optional improvements.
-- Exclude style preferences; maintainability findings need concrete impact.
-  Do not block on polish or equally valid designs.
-- Return concise findings or “No actionable findings”, with material limitations,
-  unrun checks, and relevant context not inspected.
-
-Verify each finding; mark it fixed, rejected with evidence, or awaiting a user
-decision. Do not repeat rejected findings without new evidence. Record findings,
-dispositions, and checked state beside the affected task in tasks.md when present;
-avoid repeated review logs in replies.
-
-Repeat review after fixes until no blocking findings remain; later code edits
-require renewed review. Optional improvements do not block completion. If review
-repeats a disputed finding without new evidence or stalls on blockers, stop and
-request a user decision with evidence and remaining disagreement. Never claim
-clean review with unresolved blockers; clean review does not prove defect-free code.
-
-Review authorizes neither new scope nor dependency changes. Record unresolved
-questions in [the question log](../QUESTIONS.md), following the
-[question guide](QUESTIONS.md), and link them from affected requirements/plans.
-Ask with the available question tool
-before dependent work. If delegation is unavailable, report the blocker and request
-a decision; do not substitute self-review or claim clean review.
+Skip failing tests for documentation/configuration that gains nothing from them;
+behavior-changing configuration still needs tests. Report failed/skipped checks
+and their causes; never claim an unrun check passed.
