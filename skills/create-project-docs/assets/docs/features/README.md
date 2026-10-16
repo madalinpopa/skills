@@ -4,10 +4,8 @@ Use this structure for product features, fixes, refactoring, migrations, tooling
 and documentation work. Create records only for real work that needs a plan;
 never generate empty examples during setup.
 
-Throwaway prototypes, including updates to existing experiments, follow the
-[prototype workflow](../conventions/TDD.md#throwaway-prototypes) without these
-formal records or roadmap completion claims. If the user requests production
-implementation, establish requirements and a normal plan using the lessons learned.
+For throwaway prototype work, use [PROTOTYPE.md](../conventions/PROTOTYPE.md)
+instead of these records.
 
 ## Naming and ownership
 

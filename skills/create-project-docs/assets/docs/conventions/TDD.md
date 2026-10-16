@@ -4,35 +4,6 @@ For production work, test every visible behavior change, including fixes.
 Assert what users/callers rely on, not field assignments, library behavior,
 private structure, or coverage.
 
-## Throwaway prototypes
-
-Use this workflow when the user explicitly requests a disposable prototype to
-explore or learn about an idea, feature, design, or architecture. Also use it
-when the user asks to update or continue files that repository evidence identifies
-as an existing throwaway prototype, such as its README, dedicated directory, or
-branch/bookmark context. A filename alone is insufficient; clarify uncertain
-intent before bypassing the normal workflow.
-
-- Implement the smallest useful experiment quickly. Skip TDD, automated test
-  writing, the normal verification suite, adversarial review, and formal feature
-  records. Do not require intermediate plan or review gates for this workflow.
-- Preserve unrelated work. Use a separate `prototype/<name>` Git branch, or a
-  separate jj change with a `prototype/<name>` bookmark; follow the project's
-  version-control tooling. Reuse suitable existing prototype isolation when
-  continuing work; isolate prototype files first if they are mixed with production.
-- A request covered by this workflow authorizes local prototype commits under
-  [COMMITS.md](COMMITS.md#scope-and-approval). Review the diff to include only the
-  experiment; keep its bookmark pointing to the latest prototype commit.
-- Run only the build or manual smoke check needed to demonstrate the idea.
-  Report the check, what works, limitations, lessons learned, and branch/bookmark
-  and commit references. Do not claim production readiness or passing tests.
-- Keep dependency and external-action permissions. Push, publish, merge, and
-  deletion still require explicit user requests. Discard prototype code when
-  requested, preserving unrelated work.
-- Treat production implementation as fresh work under the normal workflow,
-  including requirements, tests, and review. Prototype results are evidence for
-  decisions, not agreed requirements or completed production features.
-
 ## Coverage and readability
 
 - Prefer the smallest integration boundary proving behavior, with real local
@@ -54,7 +25,6 @@ intent before bypassing the normal workflow.
 
 ## Workflow
 
-For throwaway prototype work, use [its workflow](#throwaway-prototypes) instead.
 Work one slice at a time; the user reviews once at its end.
 
 1. Write/run the smallest useful failing test. Confirm missing behavior causes

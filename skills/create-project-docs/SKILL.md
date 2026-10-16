@@ -59,6 +59,7 @@ after the user approves that exact edit. Keep Claude-only additions.
 | [COMMITS.md](assets/docs/conventions/COMMITS.md) | Commit messages and when a commit is allowed |
 | [GOLANG.md](assets/docs/conventions/GOLANG.md) | Go conventions, toolchain, and `go fix` |
 | [TDD.md](assets/docs/conventions/TDD.md) | Test-first workflow, review loop, and verification |
+| [PROTOTYPE.md](assets/docs/conventions/PROTOTYPE.md) | Disposable experiments; read only for prototype work |
 | [Question guide](assets/docs/conventions/QUESTIONS.md) | Simple questions grouped by purpose, answers, and closure in docs/QUESTIONS.md |
 | [Spec writing guide](assets/docs/specs/README.md) | Section guidance and concise writing rules |
 | [MISSION.md](assets/docs/specs/MISSION.md) | Problem, users, outcome, and non-goals |
@@ -72,7 +73,8 @@ For a Go web application, this may emphasize maintainable Go backends, secure
 trust boundaries, and consistent UI/API/persistence behavior. Do not impose Go
 or full-stack work on other projects. Keep only the short emphasis and task
 routes in AGENTS.md; shared security and frontend rules belong in CODE.md,
-Go mechanics in GOLANG.md, and tests/review gates in TDD.md. STACK.md records
+Go mechanics in GOLANG.md, tests/review gates in TDD.md, and disposable
+experiments in PROTOTYPE.md. STACK.md records
 selected technologies, not engineering instructions. Add a separate security
 guide or skill only when substantial project-specific procedures justify it;
 link it with an explicit read trigger rather than loading it for every task.
@@ -146,17 +148,12 @@ policy:
 - Omit unknown topics and use guided question rounds for requested spec work.
 - Dependency changes need user approval. Check current official docs for external
   APIs being changed and latest releases for dependencies being proposed.
-- Route behavior changes, test work, and verification to TDD.md; keep its workflow,
+- Route regular behavior changes, test work, and verification to TDD.md; keep its workflow,
   exceptions, and review gates there rather than repeating them in AGENTS.md.
   User review does not authorize a commit without an explicit request.
-- Preserve TDD.md's throwaway prototype workflow for explicit disposable
-  experiments and requests to continue existing prototypes identified by repository
-  evidence. Route to it briefly from AGENTS.md; keep the local-commit exception in
-  COMMITS.md and the formal-record exemption in the feature guide. Prototype work
-  skips TDD, automated test writing, full verification, adversarial review, and
-  intermediate planning/review gates; it uses isolated version control and a minimal
-  demonstration check. Preserve normal permissions for dependencies and external
-  actions. Production implementation returns to the normal workflow.
+- Keep disposable-experiment rules in PROTOTYPE.md. Route new and existing
+  prototype work there from AGENTS.md; use short links from COMMITS.md and the
+  feature guide. Do not load it for regular work or repeat its rules in TDD.md.
 - Route behavior changes to the affected feature contract and acceptance criteria.
   Distinguish consuming requirements from authoring specs: only authoring loads
   writing rules and the target document's section. Keep guided spec questions
@@ -187,8 +184,7 @@ Name the applicable section and trigger: TDD workflow before changes/checks,
 coverage before test design, and feature Resume for existing work. Workflow
 routes must preserve required reviews and the explicit prototype exception;
 selective reading never waives an applicable approval or review gate.
-A link or anchor locates guidance but does
-not limit a tool's output: retrieve the applicable section and its dependencies.
+A link or anchor locates guidance but does not limit a tool's output: retrieve the applicable section and its dependencies.
 Keep detailed writing, roadmap, record, and review rules in
 their owning guides. Keep setup-only instructions, such as starting spec files
 empty, in this skill; persistent instructions should require established content
@@ -215,8 +211,7 @@ latest relevant evidence. Check that section routes retain all applicable
 approval/review requirements. Check that new and existing throwaway prototypes
 reach the exception, ambiguous prototype filenames do not bypass normal work,
 and production implementation restores the normal workflow.
-Distinguish word counts from token measurements
-or measured model performance.
+Distinguish word counts from token measurements or measured model performance.
 Confirm existing files kept their bytes. Copied templates are not agreed requirements,
 and copying docs does not mean any application tests passed.
 
