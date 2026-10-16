@@ -15,8 +15,7 @@ planned documentation work. For disposable experiments, follow
 - For checklist creation, execution, or resumption, use `use-tasks-checklists`;
   `tasks.md` owns progress, evidence, and the next action. On resume, start with
   the active phase and nearby task evidence, then relevant spec/plan sections.
-- Follow the project workflow and review gates in [AGENTS.md](../../AGENTS.md#workflow).
-  Completion does not imply acceptance, commit permission, or additional scope.
+- Completion does not imply acceptance, commit permission, or additional scope.
 - Keep actual unresolved questions in [the question log](../QUESTIONS.md),
   following [its guide](../conventions/QUESTIONS.md).
 

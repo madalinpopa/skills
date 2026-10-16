@@ -1,7 +1,5 @@
 # Adversarial review
 
-Follow the slice workflow in [AGENTS.md](../../AGENTS.md#workflow).
-
 Default to one independent, read-only reviewer via the available subagent tool.
 Provide the diff, approved scope, requirements, test evidence, and necessary code
 context; omit implementer conclusions.

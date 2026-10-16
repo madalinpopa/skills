@@ -15,8 +15,7 @@
 - Start empty; add the actual number, title, and sections only with known content.
 - Follow the [spec writing guide](../specs/README.md): group related facts and
   write concise lists, without placeholders or empty outlines.
-- Use the question tool with proposed options for requested spec work, following
-  [AGENTS.md](../../AGENTS.md).
+- Use the question tool with proposed options for requested spec work.
 - Status and date: record the actual state and date of the decision.
 - Decision reference: cite user approval or the source of the agreed choice.
 - Related work: link relevant stack choices, feature records, or roadmap tasks.

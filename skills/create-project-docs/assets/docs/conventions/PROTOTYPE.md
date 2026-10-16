@@ -29,5 +29,5 @@ enough. Clarify uncertain intent before applying this workflow.
   explicit user requests. Discard prototype code when requested, preserving
   unrelated work.
 - For production implementation, return to requirements, planning, and the
-  [production workflow](../../AGENTS.md#workflow). Prototype results inform decisions; they do not
+  production workflow. Prototype results inform decisions; they do not
   establish agreed requirements or completed roadmap work.

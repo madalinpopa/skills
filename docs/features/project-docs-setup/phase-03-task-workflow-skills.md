@@ -11,12 +11,12 @@
   narrow instruction refresh, and validation on 2026-10-16: “approve”.
   Follow-up split approved with “looks good”: core workflow in AGENTS.md,
   test specifics in TDD.md, detailed review procedure in a separate guide.
-- **Working tree**: Extraction is in parent history. Current follow-up separates
-  the generated workflow, test guidance, and review guide; updates copy inventory
-  and callers. No unrelated edits present at the start of this follow-up.
+- **Working tree**: Workflow split is in parent b928b6d3. Current follow-up
+  removes AGENTS.md backlinks from generated guides and updates the TDD anchor.
+  Working tree was clean at the start of this follow-up.
 - **Test gate**: Inventory test failed for missing REVIEW.md. User approved
   implementation with “approve” after reviewing that failure.
-- **Next action**: Review the completed workflow split and verification results.
+- **Next action**: Review the backlink removal and verification results.
   No commit authorized.
 
 ## Scope and acceptance
@@ -109,3 +109,18 @@ Pending implementation review. Approval of the plan did not authorize a commit.
 - **Test commit proposal**: `test(create-project-docs): require generated review guide`.
 - **Implementation commit proposal**: `docs(create-project-docs): separate workflow testing and review guidance`.
 - **Next action**: User reviews the completed split and verification evidence.
+
+## Follow-up: Remove AGENTS.md backlinks
+
+- **Approved scope**: User requested removal because AGENTS.md is always loaded.
+- **Changes**: Removed backlinks from TDD, review, commit, prototype, feature,
+  and decision guides. Renamed the TDD section to Test workflow and updated its
+  incoming anchor. Kept the required CLAUDE.md import and outward task routes.
+- **Verification**: create-project-docs source validator passes with offline
+  uv/PyYAML; 29 relative links/anchors resolve across seven affected assets;
+  diff whitespace checks pass. Asset search finds only the CLAUDE.md import
+  referencing AGENTS.md. No helper or file inventory changes; initializer and
+  Go tests not rerun for this documentation-only edit.
+- **Status**: awaiting implementation review; no commit authorized.
+- **Commit proposal**: `docs(create-project-docs): remove redundant agent instruction backlinks`.
+- **Next action**: Review the guide edits.

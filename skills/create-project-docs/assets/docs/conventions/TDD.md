@@ -23,10 +23,7 @@ private structure, or coverage.
   and explicit inputs/results. Separate success/failure groups; avoid flag-driven
   assertion branches or unrelated cases in one table.
 
-## Workflow
-
-Follow the overall slice and review workflow in
-[AGENTS.md](../../AGENTS.md#workflow).
+## Test workflow
 
 1. Before implementation, write/run the smallest useful failing test. Confirm
    missing behavior causes failure, not setup or environment; retain the command

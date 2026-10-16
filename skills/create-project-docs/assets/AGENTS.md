@@ -16,7 +16,7 @@
   Stay within approved scope; preserve requirements and shared decisions. Record
   established facts and evidence, without placeholders.
 - Write necessary failing tests before implementation; follow
-  [TDD.md](docs/conventions/TDD.md#workflow) for test rules and exceptions.
+  [TDD.md](docs/conventions/TDD.md#test-workflow) for test rules and exceptions.
 - Implement the smallest clear change and run applicable project checks.
 - Before user review, delegate independent review following
   [REVIEW.md](docs/conventions/REVIEW.md) and wait for results. Resolve findings, rerun affected checks,
