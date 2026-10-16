@@ -4,8 +4,9 @@ Initialize a new project's agent instructions and documentation foundation.
 The primary audience builds Go backends with TypeScript frontends; frontend
 frameworks and product requirements remain project choices.
 
-- **Active phase**: [02: Central question log](phase-02-central-question-log.md)
-- **Feature acceptance**: Accepted for commit: "do a commit for the current changes", 2026-10-14.
+- **Active phase**: [03: Task workflow skills](phase-03-task-workflow-skills.md)
+- **Feature acceptance**: Earlier work accepted for commit on 2026-10-14;
+  phase 03 awaits implementation review and has no commit authorization.
 
 ## Using these documents
 
@@ -69,5 +70,6 @@ documents describe the target project, not this skill store.
 | --- | --- | --- | --- | --- |
 | 01 | A reusable initializer with templates and preservation checks | None | awaiting implementation review | [Phase 01](phase-01-initializer-skill.md) |
 | 02 | One question log with document-first resolution and concise persistent guidance | Existing initializer | awaiting implementation review | [Phase 02](phase-02-central-question-log.md) |
+| 03 | Extract task skills and refresh reusable project instructions safely | Existing documentation assets | awaiting implementation review | [Phase 03](phase-03-task-workflow-skills.md) |
 
 Acceptance does not authorize commits or publication.

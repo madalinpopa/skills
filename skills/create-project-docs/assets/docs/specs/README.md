@@ -57,6 +57,8 @@ contracts instead; consuming a spec does not require the authoring workflow.
 
 ## Feature and decision records
 
-- Follow the [feature guide](../features/README.md) for specs, technical plans, and execution tasks.
+- Use `use-task-spec` for feature requirements, `use-task-plan` for technical
+  plans, and `use-tasks-checklists` for execution tasks; preserve
+  [record ownership](../features/README.md#ownership-and-routes).
 - Follow the [decision guide](../decisions/README.md) for significant agreed choices.
 - Add sections progressively using these same concise writing rules.

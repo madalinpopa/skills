@@ -34,10 +34,11 @@
   [coverage guidance](docs/conventions/TDD.md#coverage-and-readability).
 - Before checks, read commands and directories in [STACK.md](docs/specs/STACK.md).
   Before proposing commits or delivery, read [COMMITS.md](docs/conventions/COMMITS.md).
-- Before writing specs, read [writing rules](docs/specs/README.md#working-rules)
-  and the target document section; reading requirements alone does not trigger authoring.
-- Before creating/planning records, read [ownership](docs/features/README.md#naming-and-ownership)
-  and applicable writing sections; for resumption, read [Resume](docs/features/README.md#resume).
+- Before writing mission, roadmap, or stack docs, read the relevant section of
+  [the writing guide](docs/specs/README.md); consuming requirements does not trigger authoring.
+- For feature requirements authoring, use `use-task-spec`; for technical plans,
+  use `use-task-plan`; for task checklists, execution, or resumption, use
+  `use-tasks-checklists`. Follow [record ownership](docs/features/README.md#ownership-and-routes).
 - Before recording architectural choices, read the [decision guide](docs/decisions/README.md).
 - When input is needed, follow the [question guide](docs/conventions/QUESTIONS.md)
   for asking, recording blockers, and applying answers.
