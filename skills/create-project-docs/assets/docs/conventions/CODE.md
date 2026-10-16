@@ -27,6 +27,19 @@ Shared rules; language conventions extend them. Tests follow [TDD.md](TDD.md).
   propagate. Make resource ownership, transfers, and cleanup clear on success,
   failure, and cancellation.
 
+## Security and application boundaries
+
+- Identify affected trust boundaries and enforce authorization for the action
+  and resource on the server; client-side checks only support the user experience.
+- Use parameterized queries and context-appropriate output encoding. Use
+  established authentication and cryptographic libraries rather than custom schemes.
+- Keep secrets and sensitive data out of source, logs, and error responses.
+  Return useful public errors without exposing internal details.
+- Bound untrusted input, work, and resource consumption. Consider relevant abuse
+  cases, including cross-user access and resource exhaustion, when changing a boundary.
+- Trace affected contracts across UI, API, and persistence. Preserve data
+  integrity and account for transaction boundaries and compatibility.
+
 ## Comments and formatting
 
 - Explain non-obvious constraints, reasons, and tradeoffs; let code explain mechanics.

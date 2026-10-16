@@ -53,9 +53,9 @@ after the user approves that exact edit. Keep Claude-only additions.
 
 | File | Owns |
 | --- | --- |
-| [AGENTS.md](assets/AGENTS.md) | Project identity, working rules, and task-based routes |
+| [AGENTS.md](assets/AGENTS.md) | Project identity, engineering emphasis, context discipline, and task-based routes |
 | [CLAUDE.md](assets/CLAUDE.md) | One `@AGENTS.md` import; no reverse import |
-| [CODE.md](assets/docs/conventions/CODE.md) | Shared code rules and dependency approval; TypeScript/frontend rules when used |
+| [CODE.md](assets/docs/conventions/CODE.md) | Shared design and security rules, dependency approval, and applicable frontend rules |
 | [COMMITS.md](assets/docs/conventions/COMMITS.md) | Commit messages and when a commit is allowed |
 | [GOLANG.md](assets/docs/conventions/GOLANG.md) | Go conventions, toolchain, and `go fix` |
 | [TDD.md](assets/docs/conventions/TDD.md) | Test-first workflow, review loop, and verification |
@@ -66,6 +66,16 @@ after the user approves that exact edit. Keep Claude-only additions.
 | [STACK.md](assets/docs/specs/STACK.md) | Technologies, supported versions, and project commands |
 | [Decision guide](assets/docs/decisions/README.md) | Numbered decision records and section-writing guidance |
 | [Feature guide](assets/docs/features/README.md) | Numbered feature folders and record-writing guidance |
+
+Tailor engineering emphasis to the user's priorities and repository evidence.
+For a Go web application, this may emphasize maintainable Go backends, secure
+trust boundaries, and consistent UI/API/persistence behavior. Do not impose Go
+or full-stack work on other projects. Keep only the short emphasis and task
+routes in AGENTS.md; shared security and frontend rules belong in CODE.md,
+Go mechanics in GOLANG.md, and tests/review gates in TDD.md. STACK.md records
+selected technologies, not engineering instructions. Add a separate security
+guide or skill only when substantial project-specific procedures justify it;
+link it with an explicit read trigger rather than loading it for every task.
 
 Setup is done when:
 
@@ -159,7 +169,9 @@ policy:
 
 Keep AGENTS.md near 300 words, using section headings and short bullet lists
 only. Make task routes explicit: say when to read each guide, rather than only
-listing its subject. Keep detailed writing, roadmap, record, and review rules in
+listing its subject. Retain narrow searches and task-relevant reference loading
+as context rules; do not duplicate detailed guides in the entrypoint.
+Keep detailed writing, roadmap, record, and review rules in
 their owning guides. Keep setup-only instructions, such as starting spec files
 empty, in this skill; persistent instructions should require established content
 without placeholders or empty sections. Avoid prose paragraphs and tables. Use

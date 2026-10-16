@@ -9,6 +9,9 @@
 - Raise conflicts between instructions, requirements, and code before changing
   a contract.
 - Verify each slice and present it for user review before the next.
+- Search narrowly, expanding to relevant contracts and callers as needed.
+- Load only task-relevant guides, skills, and reference sections; avoid whole
+  repository dumps and long logs.
 
 ## Version control
 
@@ -40,7 +43,8 @@
 - Before selecting work or updating progress, read [ROADMAP.md](docs/specs/ROADMAP.md).
 - Before running project checks, read [STACK.md](docs/specs/STACK.md) for commands
   and working directories; report missing ones.
-- Before code or dependency changes, read [CODE.md](docs/conventions/CODE.md).
+- Before code, dependency, or trust-boundary changes, read
+  [CODE.md](docs/conventions/CODE.md).
 - Before editing Go files, read [GOLANG.md](docs/conventions/GOLANG.md).
 - Before behavior changes, test work, or verification, read
   [TDD.md](docs/conventions/TDD.md) and follow its applicable review gates.
