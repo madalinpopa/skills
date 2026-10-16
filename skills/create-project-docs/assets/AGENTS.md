@@ -26,7 +26,7 @@
 - Outside prototypes, for scope read [MISSION.md](docs/specs/MISSION.md); for work
   selection or progress read the relevant [ROADMAP.md](docs/specs/ROADMAP.md) group.
 - Before changing production behavior, find the affected feature contract and acceptance
-  criteria in `requirements.md`; follow relevant shared specs and decisions.
+  criteria in `spec.md`; follow relevant shared specs and decisions.
 - Before code, dependency, or trust-boundary changes, read [CODE.md](docs/conventions/CODE.md); before Go edits,
   read [GOLANG.md](docs/conventions/GOLANG.md).
 - Outside prototypes, before behavior changes, test work, or verification, read [TDD workflow](docs/conventions/TDD.md#workflow),

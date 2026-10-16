@@ -96,7 +96,7 @@ Setup is done when:
   Feature and decision guides also describe sections instead of empty templates.
 - Assign each real feature the next unused four-digit number, `NNNN`, as its
   only ID across ROADMAP.md and feature records. Check both for used numbers;
-  never reuse or renumber IDs. Detailed behavior belongs in requirements.md.
+  never reuse or renumber IDs. Detailed behavior belongs in spec.md.
 - ROADMAP.md contains only feature headings, nested sub-feature headings, and
   task/subtask checklists, with concise links to plans or evidence when useful.
   Do not add status tables, narrative, acceptance criteria, dependency notes,
@@ -163,9 +163,10 @@ policy:
 - Roadmaps contain feature/sub-feature headings and task checklists. Feature
   records also cover fixes, refactoring, tooling, and documentation work.
   Follow the [feature guide](assets/docs/features/README.md) for ownership and
-  planning: plan.md contains only phase headings and task/subtask checklists,
-  with evidence links and one next action. Keep phases to one to five planned
-  commits. Completion does not imply acceptance or commit permission.
+  planning: spec.md owns outcomes and acceptance, plan.md owns approach and
+  sequencing, and tasks.md owns phased checklists with observable done conditions,
+  concise evidence, and one next action. Completion does not imply acceptance
+  or commit permission.
 - Group related spec content under clear sections and use concise lists.
   Link shared facts to their owner. Avoid long paragraphs and prose-heavy tables;
   reserve tables for compact comparisons or mappings.
@@ -200,8 +201,9 @@ request. This skill does not require either.
 Check `.jj` detection and the `use-jj` route when applicable. Check relative
 links, task routes, the CLAUDE import, that commands are real,
 that each topic has one owner, and that unknown specs are empty files. Check
-that plans contain only phase headings and task/subtask checklists with a clear
-next action, phases respect the feature guide, roadmaps contain only feature and
+that feature records use spec.md, plan.md, and tasks.md with distinct ownership;
+tasks have observable done conditions, concise evidence, and a clear next action;
+roadmaps contain only feature and
 sub-feature groups with task checklists, completion claims have evidence, spec
 text uses concise sectioned lists without empty headings, and test guidance
 avoids duplicate coverage.

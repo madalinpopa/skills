@@ -1,118 +1,105 @@
 # Feature and codebase work records
 
-Use this structure for product features, fixes, refactoring, migrations, tooling,
-and documentation work. Create records only for real work that needs a plan;
-never generate empty examples during setup.
-
-For throwaway prototype work, use [PROTOTYPE.md](../conventions/PROTOTYPE.md)
-instead of these records.
+Use these records for features, fixes, refactoring, migrations, tooling, and
+documentation work that needs a plan. Create only real, agreed work; never seed
+example features. For throwaway prototypes, use
+[PROTOTYPE.md](../conventions/PROTOTYPE.md) instead.
 
 ## Naming and ownership
 
-- Create `NNNN-<slug>/` with `requirements.md`, `plan.md`, and `validation.md`.
+- Create `NNNN-<slug>/` with `spec.md`, `plan.md`, and `tasks.md`.
 - Choose the next unused four-digit ID across [ROADMAP.md](../specs/ROADMAP.md)
-  and feature folders. Use that ID everywhere; preserve existing IDs and names.
-  Roadmap entries may precede their folders.
-- `requirements.md` owns the agreed outcome, scope, constraints, approach,
-  dependencies, decisions, and acceptance criteria.
-- `plan.md` owns ordered tasks, progress, and the exact resume point.
-- `validation.md` owns verification evidence, review results, actual commit
-  references, and user acceptance.
-- ROADMAP.md owns delivery order through feature/sub-feature headings and task
-  checklists. Link to detailed records; omit narrative, status fields, and
-  duplicated requirements or evidence.
-- Keep these three records; do not add competing FEATURE.md or phase files.
+  and feature folders. Preserve existing IDs and names; roadmap entries may
+  precede their folders.
+- `spec.md` owns the outcome, context, constraints, acceptance criteria, and
+  non-goals. `plan.md` owns the technical approach and delivery order.
+  `tasks.md` owns execution, progress, evidence, and the resume point.
+- ROADMAP.md owns delivery order across features through headings and task
+  checklists. Link to these records rather than duplicating their details.
+- Keep these three records; do not add competing feature, phase, or validation files.
 
 ## Writing rules
 
-- Add only established facts and agreed work. Omit empty headings, speculative
-  phases, filler, and generic questions. Follow the
-  [spec writing guide](../specs/README.md).
-- Use descriptive headings and short lists, one point per item. Reserve tables
-  for compact comparisons. Link shared facts to their owner.
+- Record established facts and agreed scope. Omit empty sections, speculative
+  phases, and filler. Do not require criterion/task IDs.
+- Use descriptive headings and concise lists; short explanatory paragraphs are
+  useful for goals and approaches. Link shared facts to their owner.
 - For requested spec work, follow the
   [spec writing rules](../specs/README.md#working-rules), including guided
-  questions and waiting before writing content that depends on answers.
+  questions and waiting for answers that affect the content.
+- Keep unresolved questions in [the question log](../QUESTIONS.md), following
+  the [question guide](../conventions/QUESTIONS.md); link the affected section.
 
-## requirements.md
+## spec.md
 
-Add only sections with content:
+Use `# SPEC: <name>` and these sections when they have content:
 
-- Outcome and scope: problem, affected users or maintainers, included work,
-  non-goals, constraints, and the user's actual agreement.
-- Contract: relevant inputs, preconditions, results, side effects, state,
-  failures, and recovery. Cover repeated, conflicting, or partial execution only
-  when relevant; do not invent retry or rollback requirements.
-- Approach and dependencies: affected boundaries, agreed design choices,
-  prerequisites, and links to shared specs or decisions.
-- Acceptance criteria: concrete, verifiable scenarios with stable `R-001` IDs.
-  For codebase work, state what must improve and what behavior must be preserved.
-- Open questions: link relevant groups in [the question log](../QUESTIONS.md);
-  follow the [question guide](../conventions/QUESTIONS.md), without local lists.
+- **Goal:** the problem, affected users or maintainers, and intended outcome.
+- **Context:** relevant existing behavior, boundaries, and shared decisions.
+- **Constraints:** compatibility, invariants, permissions, and other agreed limits.
+- **Acceptance Criteria:** checklists of observable outcomes, including relevant
+  failure and recovery behavior. Cover repeated, conflicting, or partial cases
+  only when relevant. Include a verification method when needed to make a
+  criterion precise; do not prescribe a test layer for every criterion.
+- **Non-Goals:** deliberate exclusions, not undecided scope.
+
+Keep implementation choices in plan.md. Check a criterion only when evidence
+in tasks.md proves it; completion does not imply user acceptance.
 
 ## plan.md
 
-Use only a document title, ordered phase headings, and task/subtask checklists.
-No prose sections, tables, separate status summaries, or checkpoint diary.
-Put context in requirements.md and results in validation.md; link from tasks.
+Use `# PLAN: <name>` and these sections when they have content:
 
-- Name each phase for one clear outcome. Order phases and tasks by dependency.
-  Keep phases small: one to five planned commits; split larger phases without
-  adding filler commits.
-- Make each top-level task a reviewable outcome. Add concrete action subtasks
-  only where they clarify execution; avoid repeating generic workflow steps.
-- Include affected paths or boundaries and acceptance links where useful.
-  Record prerequisite work as a task or link a blocking dependency inline.
-- Detail the active phase enough to act without replanning. Keep identified
-  later phases brief and expand them before starting; never invent future work.
-- Include necessary tests, implementation or edits, verification, and review
-  as concrete subtasks, following [TDD.md](../conventions/TDD.md). For docs or
-  behavior-preserving work, choose checks that prove the outcome rather than
-  manufacturing a failing test.
-- Put each proposed commit message in a subtask and respect project policy on
-  separate test/implementation commits. Distinguish a proposal from an actual
-  commit with a reference in validation.md; checked work does not imply a commit.
-- Mark completed actions `[x]` with a concise evidence link. Check a parent only
-  when all required subtasks and reviews are complete. A phase is complete when
-  all its required tasks are checked.
-- Keep unfinished actions `[ ]`. Append a short note only when needed:
-  `in progress`, `blocked: <reason>`, `awaiting review`, or `deferred: <reason>`.
-  Partial work stays unchecked; split off completed subtasks when useful.
-- Mark exactly one actionable unchecked task or subtask `next`. If progress
-  requires a decision or review, mark that action next and name what is needed.
-  This is the resume point; do not repeat it in a separate checkpoint.
-- At review boundaries and session end, update checks, task notes, evidence
-  links, and the next action. Completion does not imply feature acceptance or
-  permission to commit or publish.
+- **Approach:** how the implementation satisfies the spec; include affected
+  boundaries and dependencies.
+- **Trade-Offs:** meaningful alternatives, the chosen option, and its reason.
+- **Files Affected:** known paths or boundaries and their intended changes.
+- **Sequencing:** ordered implementation dependencies and delivery steps.
 
-## validation.md
+Keep progress and executable checklists in tasks.md. Sequencing does not override
+[TDD.md](../conventions/TDD.md#workflow): write necessary failing tests before
+implementation, even when a later step covers broader integration verification.
 
-- Link evidence to acceptance criteria or plan tasks. Record the scenario,
-  command or inspection, result, checked revision or working-tree state, and
-  material limits. Include expected failure evidence when TDD applies.
-- Distinguish change failures, environment problems, skipped checks, and checks
-  not run. Passing commands alone do not prove every criterion.
-- Record review decisions, actual commit references when commits exist, and
-  the user's acceptance with its reference, accepted scope, and remaining work.
-  Never infer acceptance from passing checks or completed tasks.
+## tasks.md
+
+Use `# TASKS: <name>`, phase headings named for outcomes, and task checklists.
+
+- Give each task a concrete action and **Done when:** an observable completion
+  condition. Link the relevant spec criterion or plan section rather than copying it.
+- Order tasks by dependencies in plan.md. Keep phases small and reviewable;
+  detail the active phase and leave identified later phases brief.
+- Include necessary tests, implementation, verification, and review following
+  TDD.md. Do not manufacture failing tests for documentation-only work.
+- Keep concise evidence beside the task: command or inspection, result, checked
+  revision or working-tree state, and material limits. Include expected failures
+  when TDD applies; distinguish failures, skipped checks, and checks not run.
+  Link long artifacts instead of embedding logs.
+- Record review findings and dispositions, decisions, proposed commit messages,
+  and actual commit references beside the affected task. Proposals are not commits.
+- Mark `[x]` only when the completion condition and required reviews have evidence.
+  Leave partial work `[ ]`; add `in progress`, `blocked: <reason>`,
+  `awaiting review`, or `deferred: <reason>` only when useful.
+- While work remains, mark one actionable unchecked task or subtask `next`.
+  If blocked on a decision or review, make that the next action.
+- Record explicit user acceptance with its reference, accepted scope, and remaining
+  work. Neither passing checks nor completed tasks imply acceptance or permission
+  to commit, publish, or continue beyond approved scope.
 
 ## Split large work
 
-- Split work that cannot be implemented and reviewed in small slices into
-  independently verifiable sub-features. Present the split for user review.
-- Give each its own ID and sibling folder with the same three files. Link parent
-  and children both ways; keep shared constraints in the parent.
-- Show delivery order through ROADMAP.md grouping and task order; keep detailed
-  dependencies in requirements.md and link them from blocked tasks.
-- Implement one sub-feature at a time. Accept the parent only after child work
-  and shared acceptance criteria have evidence and user acceptance.
+- Propose independently verifiable sub-features when work cannot be reviewed in
+  small slices. Give each its own ID and sibling folder with the same three files.
+- Link parent and children both ways. Keep shared constraints in the parent's
+  spec.md and detailed dependencies in plan.md; link blockers from tasks.md.
+- Accept the parent only after child work and shared criteria have evidence and
+  user acceptance.
 
 ## Resume
 
-- Read the active phase and next action in plan.md, its linked requirements and
-  acceptance criteria, and the latest applicable validation evidence. Compare
-  recorded progress and checked revisions with the working tree before continuing.
-- Read other sections only for relevant dependencies or unresolved decisions.
-  Resuming existing work does not require the record-creation or splitting rules.
-- Update plan.md and validation.md at review boundaries and session end; reflect proven progress
-  in ROADMAP.md without duplicating the detailed plan.
+- Read the active phase, next task, and nearby evidence in tasks.md first. Then
+  read only the relevant spec criteria, plan sections, and dependencies.
+- Compare recorded progress and checked state with the working tree before acting.
+  Resuming does not require reloading record-creation or splitting guidance.
+- At review boundaries and session end, update task checks, evidence, blockers,
+  and the next action. Update spec.md or plan.md only when agreed scope or approach
+  changes; reflect proven progress in ROADMAP.md without duplicating the task list.

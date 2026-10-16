@@ -1,14 +1,15 @@
 # Writing specs
 
 Read the working rules and the section for the document being edited. To
-implement existing behavior, read its feature requirements and relevant shared
+implement existing behavior, read its feature spec.md and relevant shared
 contracts instead; consuming a spec does not require the authoring workflow.
 
 ## Working rules
 
 - Start spec files empty; add a title and sections only with real content.
-- Group related facts under descriptive headings; use short bullet lists.
-- Keep one point per bullet. Avoid long paragraphs and prose-heavy tables.
+- Group related facts under descriptive headings; prefer short bullet lists.
+- Keep one point per bullet; short paragraphs can explain feature goals and
+  approaches. Avoid long paragraphs and prose-heavy tables.
 - Use tables only for compact comparisons or mappings.
 - Record established facts and user decisions; never invent scope to fill space.
 - Omit unknown topics, empty headings, placeholders, and generic questions.
@@ -27,7 +28,8 @@ contracts instead; consuming a spec does not require the authoring workflow.
   constraints. Do not turn undecided work into a non-goal.
 - Open questions: link relevant entries in [the question log](../QUESTIONS.md);
   follow the [question guide](../conventions/QUESTIONS.md), without local lists.
-- Keep detailed feature behavior in feature requirements; tasks belong in ROADMAP.md.
+- Keep detailed behavior in feature spec.md and execution in tasks.md; ROADMAP.md
+  tracks delivery across features.
 
 ## ROADMAP.md
 
@@ -55,6 +57,6 @@ contracts instead; consuming a spec does not require the authoring workflow.
 
 ## Feature and decision records
 
-- Follow the [feature guide](../features/README.md) for behavior, plans, and evidence.
+- Follow the [feature guide](../features/README.md) for specs, technical plans, and execution tasks.
 - Follow the [decision guide](../decisions/README.md) for significant agreed choices.
 - Add sections progressively using these same concise writing rules.

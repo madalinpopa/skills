@@ -22,7 +22,7 @@
 ## Data retention
 
 - [ ] How long should deleted account data be retained?
-- [x] Can users export their data? — [Documented answer](features/0003-accounts/requirements.md).
+- [x] Can users export their data? — [Documented answer](features/0003-accounts/spec.md).
 ```
 
 ## During work

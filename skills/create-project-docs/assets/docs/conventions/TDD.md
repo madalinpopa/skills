@@ -68,7 +68,7 @@ Reviewer instructions:
 
 Verify each finding; mark it fixed, rejected with evidence, or awaiting a user
 decision. Do not repeat rejected findings without new evidence. Record findings,
-dispositions, and checked state in the feature's validation.md when present;
+dispositions, and checked state beside the affected task in tasks.md when present;
 avoid repeated review logs in replies.
 
 Repeat review after fixes until no blocking findings remain; later code edits

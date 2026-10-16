@@ -11,7 +11,7 @@
   dependencies; `ci` changes CI. Use `chore` only when no clearer type fits.
 - Mark breaking changes with `!` or a `BREAKING CHANGE:` footer; explain impact
   and migration. Add a body for useful rationale/tradeoffs. Keep command logs and
-  review transcripts in validation records when present.
+  review evidence beside the affected task in tasks.md when present.
 - Never add AI attribution; preserve genuine human attribution.
 
 ## Scope and approval
