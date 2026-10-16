@@ -1,0 +1,1 @@
+Read plan.md and generate a tasks.md. Break the work into tasks where each task: (1) corresponds to a specific, named change, (2) has an explicit done check that can be verified without reading the full plan, and (3) is ordered so that no task depends on one listed after it.
