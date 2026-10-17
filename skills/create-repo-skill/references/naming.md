@@ -12,32 +12,22 @@ For Claude compatibility, avoid names containing `claude` or `anthropic` and
 the reserved name `synced`. These are conventions for new skills; renaming an
 existing skill is a separate change because installed names are its identity.
 
-This is a practical vocabulary for this library, not a required set of skills
-or a ranking of usage. Start with `create`, `use`, and `review`; use the other
-prefixes when a distinct, reusable workflow needs them.
+Pick the prefix from what the skill leaves behind:
 
-| Prefix | Primary outcome | Examples |
-| --- | --- | --- |
-| `create-` | Produce a new artifact | `create-pr`, `create-issue`, `create-spec` |
-| `use-` | Apply tool-specific working conventions | `use-jj`, `use-gh` |
-| `review-` | Assess existing work and report findings | `review-code`, `review-tests` |
-| `plan-` | Define scope, decisions, and implementation steps | `plan-feature`, `plan-migration` |
-| `investigate-` | Gather evidence and identify causes | `investigate-ci`, `investigate-performance` |
-| `fix-` | Correct a demonstrated defect | `fix-ci`, `fix-flaky-tests` |
-| `refactor-` | Improve structure while preserving behavior | `refactor-go-package` |
-| `test-` | Exercise behavior and report verification results | `test-api`, `test-ui` |
-| `document-` | Explain or maintain documentation for existing behavior | `document-api`, `document-architecture` |
-| `configure-` | Set up or adjust a tool or environment | `configure-lint`, `configure-ci` |
-| `migrate-` | Move between versions, formats, or systems | `migrate-config`, `migrate-database` |
-| `release-` | Prepare or carry out a release workflow | `release-cli`, `release-package` |
-| `workflow-` | Coordinate other skills toward a larger outcome | `workflow-deliver-feature`, `workflow-prepare-release` |
+| Prefix | Category | Leaves behind | Examples |
+| --- | --- | --- | --- |
+| `use-` | Tool or rules: how to run a CLI, or the conventions of a language, library, or format | Commands run, or work that follows the rules | `use-jj`, `use-gh`, `use-go` |
+| `create-` | Creation: a new file or structure, including project setup | New files | `create-spec`, `create-project-docs` |
+| `edit-` | Editing: change something that already exists | The same thing, changed | `edit-text` |
+| `review-` | Review: check work and report findings, never change it | A report | `review-code` |
+| `workflow-` | Process: steps, approval stops, and other skills called in order | A larger result, done in stages | `workflow-mentor-issue` |
 
-Choose one prefix for the primary outcome. Use `workflow-<outcome>` when the
-skill coordinates other skills; keep its component skills independently useful.
-`create-tests` writes tests; `test-api` runs a verification workflow;
-`review-tests` assesses test quality. `use-gh` supplies GitHub CLI conventions;
-`create-pr` owns the pull-request outcome. A name never grants permission to
-commit, publish, deploy, or perform other external actions.
+Use the shortest clear noun as the subject, in singular. Do not repeat what
+the prefix says: `use-go`, not `use-go-conventions`. Add a new prefix only
+when at least two skills need it. If a skill fits two categories, split it.
+`use-gh` supplies GitHub CLI conventions; `create-pr` owns the pull-request
+outcome. A name never grants permission to commit, publish, deploy, or perform
+other external actions.
 
 Categories sort by name in a flat catalog. Create `skills/create-pr/`, not
 `skills/create/pr/`: the CLI discovers only immediate skill directories.
@@ -47,7 +37,7 @@ Use tags for other dimensions such as `go`, `github`, or `testing`.
 
 Use `workflow-<outcome>` for a skill that invokes other skills to complete a
 larger task. For example, `workflow-deliver-feature` could coordinate
-`plan-feature`, `create-tests`, `review-code`, and `create-pr` once those skills
+`create-plan`, `create-tests`, `review-code`, and `create-pr` once those skills
 exist and are available. These are illustrative names, not installed dependencies.
 
 Keep the workflow focused on coordination:
