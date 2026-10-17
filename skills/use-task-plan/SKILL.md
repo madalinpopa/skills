@@ -19,7 +19,6 @@ with established content:
 - **Approach:** how the change satisfies the spec, affected boundaries, dependencies.
 - **Trade-Offs:** meaningful alternatives, chosen option, and reason.
 - **Files Affected:** known paths or boundaries and intended changes.
-- **Sequencing:** ordered implementation dependencies and delivery steps.
 
 Link shared requirements rather than duplicating them. Keep progress and
 executable checklists in `tasks.md`; use `use-tasks-checklists` to create them.

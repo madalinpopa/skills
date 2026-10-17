@@ -30,6 +30,11 @@ edits, another actor, or a command changes it. Expand the graph only as needed.
   commit hashes when distinguishing historical or divergent versions.
 - Rewrites rebase descendants and can leave stored conflicts. Bookmarks follow
   rewrites of their commit, but do not advance to newly created children.
+- Write messages in the
+  [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
+  format, such as `feat(cli): add sync flag`, unless project rules set another
+  format. Never add AI attribution, such as `Co-Authored-By` trailers or
+  generated-by lines; preserve genuine human attribution.
 - Preserve unrelated edits. Select explicit revisions/files; confirm the target
   before restore, abandon, or broad rewrites. Follow project commit rules and
   existing user authorization. Remote work must be within the requested scope;
