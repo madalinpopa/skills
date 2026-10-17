@@ -22,7 +22,8 @@ answers. If `.jj` exists, use `use-jj` for version-control work, including when
 
 On the first invocation in a project, use `use-skills-cli` to sync the store and
 install `use-task-spec`, `use-task-plan`, and `use-tasks-checklists` for the
-current agent in project scope. On subsequent invocations, sync and compare
+current agent in project scope; add `use-go-conventions` when the project uses
+Go. On subsequent invocations, sync and compare
 installed versions with the store, updating outdated skills through the CLI.
 Use configured targets and lock files; do not assume the default install path.
 If `use-skills-cli` is not discoverable, follow
@@ -30,8 +31,8 @@ If `use-skills-cli` is not discoverable, follow
 skill edits, or copy unpublished checkout content into install targets. Report
 missing/unpublished skills or conflicts and stop dependent setup.
 
-Installing the skills does not require loading all three. Read only the one
-needed for the requested work. This setup request authorizes these workflow
+Installing the skills does not require loading them. Read only the one needed
+for the requested work. This setup request authorizes these workflow
 skill installations; application dependency changes follow project policy.
 
 ## Initialize missing documents
@@ -57,7 +58,8 @@ Tailor created documents using established facts. For existing documents, apply
 - `AGENTS.md`: project identity, essential permissions, core slice workflow, and task routes.
   Keep it near 300 words. Preserve narrow searches and selective context loading.
 - `CLAUDE.md`: `@AGENTS.md`; retain Claude-specific additions and no reverse import.
-- `docs/conventions/`: shared code/security, commits, Go, test-specific TDD,
+- `docs/conventions/`: shared code/security, commits, Go project rules (general
+  Go rules live in `use-go-conventions`), test-specific TDD,
   detailed review procedures in REVIEW.md, prototypes, and question-log guidance.
   Keep the controlling workflow in AGENTS.md; retain review gates and prototype exceptions.
 - `docs/specs/`: mission, stack, and roadmap. Use the

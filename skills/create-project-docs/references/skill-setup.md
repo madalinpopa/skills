@@ -10,7 +10,8 @@ project root, never from this skill's directory.
    project targets and `skills ls --local`; defaults are `.agents/skills/` and
    `.claude/skills/`. A skill's `.skill-lock.json` identifies its installation.
 3. Run `skills sync`, then `skills ls`. Confirm `use-task-spec`, `use-task-plan`,
-   and `use-tasks-checklists` are published and available. Sync never updates
+   and `use-tasks-checklists`, plus `use-go-conventions` for Go projects, are
+   published and available. Sync never updates
    installed files. Stop on dirty/divergent store errors; never reset the store.
 4. For each required skill, run `skills install <name> --agent <agent>` when its
    lock is absent, otherwise `skills update <name> --agent <agent>` to compare
