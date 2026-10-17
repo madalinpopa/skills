@@ -1,9 +1,8 @@
 # Workflows
 
 Read only the requested recipe. Examples are alternatives where indicated,
-not a checklist to run in full. Replace placeholders with inspected revisions;
-retain existing authorization and verify the affected graph after each logical
-change. Use `-m` for descriptions and `-u` to retain a squash destination message.
+not a checklist to run in full. Replace placeholders with inspected revisions
+and verify the affected graph after each logical change.
 
 ## Contents
 
@@ -56,7 +55,7 @@ Work in a fresh empty `@` above the change you are building, then fold parts
 down. This keeps the described commit clean while you experiment.
 
 ```sh
-jj new -m "wip"                         # scratch change on top
+jj new                                  # empty scratch change on top
 # edit
 jj squash -u                            # everything into the parent
 # Or select paths / a destination:
@@ -65,7 +64,7 @@ jj squash -u --into <x>                  # into a specific ancestor
 ```
 
 `-u/--use-destination-message` keeps the destination's description and discards
-source descriptions. Use `-m "combined message"` when both messages matter;
+source descriptions. Use `-m "type(scope): summary"` when both messages matter;
 plain squash can open an editor when both sides have descriptions.
 
 ## Edit workflow: change an existing commit
@@ -131,7 +130,7 @@ three or more pieces.
 
 ```sh
 jj squash -u --from <b> --into <a>      # merge b into a, keep a's message
-jj squash --from <b> --into <a> -m "combined message"
+jj squash --from <b> --into <a> -m "type(scope): summary"
 jj rebase -r <c> -B <b>                 # move c before b
 jj rebase -r <c> -A <a>                 # move c right after a
 jj parallelize <a>::<c>                 # make a chain into siblings
@@ -168,6 +167,9 @@ jj edit <wip>                           # resume amending it
 jj new <wip>                            # build on it with a new change
 ```
 
+`wip:` is a local marker, and push does not block it. Rewrite the description
+in Conventional Commits form before sharing the change.
+
 ## Discard work
 
 ```sh
@@ -192,7 +194,7 @@ jj revert -r <x> -o @                   # the undo change on top of @
 ## Merge
 
 ```sh
-jj new main feature -m "merge feature into main"
+jj new main feature -m "chore: merge feature into main"
 jj log -r 'conflicts()'
 ```
 
@@ -229,8 +231,8 @@ The command is run at each candidate; exit code 0 marks good. Use
 ```sh
 jj log -r 'trunk()..@' -T builtin_log_compact
 jj log -r '(trunk()..@) & empty()'      # empty changes to abandon
-jj log -r '(trunk()..@) & description(exact:"")'   # missing messages
-jj describe <x> -m "..."                # fix messages
+jj log -r '(trunk()..@) & ~description(regex:"^[a-z]+(\\([^)]+\\))?!?: ")'   # not Conventional Commits, or empty
+jj describe <x> -m "type(scope): summary"   # fix messages
 jj squash -u --from <fixup> --into <target>
 jj simplify-parents -r 'trunk()..@'     # drop redundant merge edges
 jj fix -s 'trunk()..@'                  # run configured formatters, if any

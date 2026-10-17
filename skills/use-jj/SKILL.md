@@ -1,7 +1,7 @@
 ---
 name: use-jj
 description: Uses Jujutsu (jj) for repository history, changes, bookmarks, remotes, and recovery. Apply when .jj exists or the user requests jj, including Git-worded tasks in jj repositories. Not for plain Git repositories without .jj.
-compatibility: Requires the jj CLI on PATH. Colocated repositories also use Git.
+compatibility: Requires the jj CLI on PATH; checked against jj 0.46. Colocated repositories also use Git.
 status: published
 tags: [jj, jujutsu, vcs, git]
 ---
@@ -33,8 +33,9 @@ edits, another actor, or a command changes it. Expand the graph only as needed.
 - Write messages in the
   [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
   format, such as `feat(cli): add sync flag`, unless project rules set another
-  format. Never add AI attribution, such as `Co-Authored-By` trailers or
-  generated-by lines; preserve genuine human attribution.
+  format. Before a push, reword pushed messages that do not follow it and
+  report the change. Never add AI attribution, such as `Co-Authored-By`
+  trailers or generated-by lines; preserve genuine human attribution.
 - Preserve unrelated edits. Select explicit revisions/files; confirm the target
   before restore, abandon, or broad rewrites. Follow project commit rules and
   existing user authorization. Remote work must be within the requested scope;
@@ -48,11 +49,12 @@ edits, another actor, or a command changes it. Expand the graph only as needed.
 | Task | Starting command |
 | --- | --- |
 | Inspect changes | `jj diff --stat`, then the relevant paths |
-| Describe / finish | `jj describe -m "message"` / `jj commit -m "message"` |
-| Start from a known base | `jj new <base> -m "message"` |
-| Split by path | `jj split -m "message" <paths>` |
+| Describe / finish | `jj describe -m "type(scope): summary"` / `jj commit -m "..."` |
+| Start from a known base | `jj new <base> -m "type(scope): summary"` |
+| Fold edits into an earlier change | `jj squash --into <rev> <paths>` |
+| Split by path (`-m` names the listed paths) | `jj split -r <rev> -m "type(scope): summary" <paths>` |
 | Move a stack | `jj rebase -s <change> -o <base>` |
-| Point at the finished change | `jj bookmark set <name> -r @-` |
+| Point a bookmark at the tip | `jj bookmark set <name> -r @` (work in `@`) or `-r @-` (after `jj commit`) |
 
 For unfamiliar flags, use `jj <command> -h`; expand to `--help` when needed.
 Installed help takes precedence over examples. Read only the relevant section
@@ -75,10 +77,12 @@ results before dependent steps.
 ## Verify and report
 
 After a logical change, check status and the affected graph/diff once. Resolve
-or report conflicts. For recovery, inspect `jj op log` before selecting an
-operation; preserve later work. Local undo does not undo a remote push.
+or report conflicts. To recover one change, start with `jj evolog -r <change>`;
+for wider state, inspect `jj op log` before selecting an operation. Preserve
+later work. Local undo does not undo a remote push.
 Preserve `.jj`; do not delete or re-clone the workspace to recover.
 
 Summarize the outcome, relevant change IDs/bookmarks, and remaining conflicts
-or unpublished work. Include a recovery operation ID after history rewrites.
+or unpublished work. After history rewrites, include the operation ID from
+before the rewrite as the recovery point.
 Keep full graphs, patches, and successful logs out of routine reports.

@@ -105,9 +105,10 @@ Defaults: without flags, push sends tracked bookmarks in
 `origin`. Pushing a new bookmark starts tracking it. A push never moves
 bookmarks; move them first.
 
-Require authorization for the push within the task; reuse approval already
-given. Preview the same explicit bookmark and remote with `--dry-run`, inspect
-the result, then push that scope. Avoid broad flags unless the requested scope
+Preview the same explicit bookmark and remote with `--dry-run`, inspect the
+result, then push that scope. With `git.sign-on-push` set, push signs the
+commits first, so the pushed hashes differ from the preview. A push does not
+open a pull request; do that on the hosting service, or report it as not done. Avoid broad flags unless the requested scope
 includes every affected reference; report unexpected changes before proceeding.
 
 ## Pull-request flows
@@ -118,6 +119,7 @@ One change per PR:
 jj new main -m "fix(config): default agents"
 # edit
 jj bookmark create fix-default-agents -r @
+jj git push -b fix-default-agents --dry-run
 jj git push -b fix-default-agents
 # after review feedback
 # edit @ again, then:
